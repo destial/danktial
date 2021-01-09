@@ -1,0 +1,30 @@
+const Discord = require('discord.js');
+const Server = require('../items/Server');
+const isStaff = require('../utils/isStaff');
+
+module.exports = {
+    name: 'ticketpanel',
+    aliases: ['tp'],
+    usage: '[ title ]',
+    description: 'Creates a ticket panel',
+    /**
+     * @param {Discord.Client} client 
+     * @param {Server} server 
+     * @param {string} command 
+     * @param {string[]} args 
+     * @param {Discord.Message} message
+     */
+    async run(client, server, command, args, message) {
+        if (isStaff(message.member)) {
+            if (!args.length) {
+                const embed = new Discord.MessageEmbed();
+                embed.setAuthor(`Usage is:`);
+                embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
+                await message.channel.send(embed);
+                return;
+            }
+            await server.getTicketManager().addTicketPanel(client, message.channel, args.join(' '));
+            await message.delete({ timeout: 1000 });
+        }
+    }
+};
