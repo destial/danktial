@@ -47,7 +47,7 @@ module.exports = {
                 try {
                     channel = await channel.fetch();
                 } catch (err) {
-                    console.log("[ERROR] Something wrong while fetching uncached channels!", err);
+                    console.log('[ERROR] Something wrong while fetching uncached channels!', err);
                 }
             }
             if (!channel.guild) return;
@@ -57,7 +57,7 @@ module.exports = {
                     await server.getCountManager().getCount('channel').edit({
                         name: `Channel Count: ${server.guild.channels.cache.size}`
                     });
-                    await server.log(`Created a channel!`, `${channel}`);
+                    await server.log('Created a channel!', `${channel}`);
                 }
             }
         });
@@ -69,7 +69,7 @@ module.exports = {
                     await server.getCountManager().getCount('role').edit({
                         name: `Role Count: ${server.guild.roles.cache.size}`
                     });
-                    await server.log(`Created a role!`, `${role}`);
+                    await server.log('Created a role!', `${role}`);
                 }
             }
         });
@@ -81,7 +81,7 @@ module.exports = {
                     await server.getCountManager().getCount('role').edit({
                         name: `Role Count: ${server.guild.roles.cache.size}`
                     });
-                    await server.log(`Deleted a role!`, `${role}`);
+                    await server.log('Deleted a role!', `${role}`);
                 }
             }
         });
@@ -93,7 +93,7 @@ module.exports = {
                     await server.getCountManager().getCount('member').edit({
                         name: `Member Count: ${server.guild.roles.cache.size}`
                     });
-                    await server.log(`Member joined!`, `${member}`);
+                    await server.log('Member joined!', `${member}`);
                 }
             }
         });
@@ -105,7 +105,7 @@ module.exports = {
                     await server.getCountManager().getCount('member').edit({
                         name: `Member Count: ${server.guild.roles.cache.size}`
                     });
-                    await server.log(`Member left!`, `${member}`);
+                    await server.log('Member left!', `${member}`);
                 }
             }
         });

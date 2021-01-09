@@ -11,9 +11,74 @@ class Database {
             database.run('CREATE TABLE IF NOT EXISTS ticketpanel (id VARCHAR(32) PRIMARY KEY, channel VARCHAR(32))');
             database.run('CREATE TABLE IF NOT EXISTS attendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32))');
             database.run('CREATE TABLE IF NOT EXISTS count (id VARCHAR(32) PRIMARY KEY, name VARCHAR(16))');
+
+            database.run('CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(32) PRIMARY KEY, guild VARCHAR(32), number VARCHAR(3), reserved INT, team VARCHAR(32), tier VARCHAR(32))');
+            database.run('CREATE TABLE IF NOT EXISTS advancedattendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32), tier VARCHAR(32))');
+            database.run('CREATE TABLE IF NOT EXISTS tiers (guild VARCHAR(32) PRIMARY KEY, name VARCHAR(32))');
+            database.run('CREATE TABLE IF NOT EXISTS teams (guild VARCHAR(32) PRIMARY KEY, name VARCHAR(32), tier VARCHAR(32))');
         });
         return database;
     }
+
+    /**
+     * `DELETE FROM teams WHERE (guild=(?) AND name=(?) AND tier=(?))`
+     */
+    static get teamDeleteQuery() { return "DELETE FROM teams WHERE (guild=(?) AND name=(?) AND tier=(?))"; }
+
+    /**
+     * `REPLACE INTO teams (guild,name,tier) VALUES (?,?,?)`
+     */
+    static get teamSaveQuery() { return "REPLACE INTO teams (guild,name,tier) VALUES (?,?,?)"; }
+
+    /**
+     * `SELECT * FROM teams`
+     */
+    static get teamQuery() { return "SELECT * FROM teams"; }
+
+    /**
+     * `DELETE FROM advancedattendance WHERE (guild=(?) AND name=(?))`
+     */
+    static get tierDeleteQuery() { return "DELETE FROM tiers WHERE (guild=(?) AND name=(?))"; }
+
+    /**
+     * `DELETE FROM advancedattendance WHERE id=(?)`
+     */
+    static get advancedAttendanceDeleteQuery() { return "DELETE FROM advancedattendance WHERE (id=(?))"; }
+
+    /**
+     * `DELETE FROM drivers WHERE (id=(?) AND guild=(?) AND tier=(?))`
+     */
+    static get driversDeleteQuery() { return "DELETE FROM drivers WHERE (id=(?) AND guild=(?) AND tier=(?))"; }
+
+    /**
+     * `REPLACE INTO tiers (guild,name) VALUES (?,?)`
+     */
+    static get tierSaveQuery() { return "REPLACE INTO tiers (guild,name) VALUES (?,?)"; }
+
+    /**
+     * `REPLACE INTO advancedattendance (id,date,channel,tier) VALUES (?,?,?,?)`
+     */
+    static get advancedAttendanceSaveQuery() { return "REPLACE INTO advancedattendance (id,date,channel,tier) VALUES (?,?,?,?)"; }
+
+    /**
+     * `REPLACE INTO drivers (id,guild,number,reserved,team,tier) VALUES (?,?,?,?,?,?)`
+     */
+    static get driverSaveQuery() { return "REPLACE INTO drivers (id,guild,number,reserved,team,tier) VALUES (?,?,?,?,?,?)"; }
+
+    /**
+     * `SELECT * FROM advancedattendance`
+     */
+    static get advancedAttendanceQuery() { return "SELECT * FROM advancedattendance"; }
+
+    /**
+     * `SELECT * FROM tiers`
+     */
+    static get tierQuery() { return "SELECT * FROM tiers"; }
+
+    /**
+     * `SELECT * FROM drivers`
+     */
+    static get driverQuery() { return "SELECT * FROM drivers"; }
 
     /**
      * `SELECT * FROM servers`

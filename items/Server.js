@@ -4,6 +4,8 @@ const AttendanceManager = require("../managers/AttendanceManager");
 const CountManager = require("../managers/CountManager");
 const Database = require("../database/Database");
 const ServerManager = require("../managers/ServerManager");
+const Tier = require('./Tier');
+const TierManager = require('../managers/TierManager');
 
 class Server {
     /**
@@ -40,6 +42,12 @@ class Server {
          * @private
          */
         this.countManager = new CountManager(this);
+
+        /**
+         * @constant
+         * @private
+         */
+        this.tierManager = new TierManager(client, this);
     }
 
     /**
@@ -72,17 +80,21 @@ class Server {
      * 
      * @param {string} title 
      * @param {string} description 
+     * @param {Discord.EmbedFieldData[]} fields
      */
-    async log(title, description) {
+    async log(title, description, fields) {
         if (this.modlog) {
             try {
                 const embed = new Discord.MessageEmbed()
                     .setAuthor(`[LOG] ${title}`)
                     .setColor('ORANGE')
                     .setFooter(new Date().toString());
-                if (description) 
+                if (description) {
                     embed.setDescription(description);
-
+                }
+                if (fields) {
+                    embed.addFields(fields);
+                }
                 await this.modlog.send(embed);
             } catch (err) {
                 console.log(err);
@@ -113,6 +125,7 @@ class Server {
     getTicketManager() { return this.ticketManager; }
     getAttendanceManager() { return this.attendanceManager; }
     getCountManager() { return this.countManager; }
+    getTierManager() { return this.tierManager; }
 }
 
 module.exports = Server;

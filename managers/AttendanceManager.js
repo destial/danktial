@@ -1,9 +1,11 @@
 const Discord = require('discord.js');
 const Database = require('../database/Database');
 const Attendance = require('../items/Attendance');
+const AdvancedAttendance = require('../items/AdvancedAttendance');
 const Server = require('../items/Server');
 const formatDate = require('../utils/formatDate');
 const formatFormalTime = require('../utils/formatFormatTime');
+const Tier = require('../items/Tier');
 
 class AttendanceManager {
     /**
@@ -12,10 +14,16 @@ class AttendanceManager {
      */
     constructor(client, server) {
         /**
-         * @type {Discord.Collection<string, Attendance>()}
+         * @type {Discord.Collection<string, Attendance>}
          * @private
          */
         this.events = new Discord.Collection();
+
+        /**
+         * @type {Discord.Collection<string, AdvancedAttendance>}
+         * @private
+         */
+        this.advancedEvents = new Discord.Collection();
         this.server = server;
         this.client = client;
     }
@@ -24,6 +32,144 @@ class AttendanceManager {
     static get reject() { return "❌"; }
     static get tentative() { return "❔"; }
     static get delete() { return "🗑️"; }
+
+    /**
+     * @param {Discord.Client} client
+     * @param {Discord.GuildMember} member 
+     * @param {Server} server
+     * @param {Discord.TextChannel} channel 
+     * @returns {Promise<AdvancedAttendance>} 
+     */
+    async newAdvancedAttendance(client, server, member, channel) {
+        const embed = new Discord.MessageEmbed();
+        if (server.getTierManager().tiers.size === 0) {
+            return new Promise(async (resolve, reject) => {
+                embed.setAuthor(`You do not have any tiers! Please create a tier using ${server.prefix}addtier`);
+                await channel.send(embed);
+                resolve(undefined);
+            });
+        }
+        return new Promise(async (resolve, reject) => {
+            let counter = 0;
+            const questions = [
+                "What is the title of this event?",
+                "What is the description of the event?",
+                "What is the date of this event? Format should be: DD/MM/YYYY 20:30",
+                "What is the timezone of the event? Reply with (AEDT / AEST / SGT)",
+                "What is the tier of this event? Reply with the following:"
+            ];
+            const tierNames = [];
+            server.getTierManager().tiers.forEach(tier => {
+                tierNames.push("`" + tier.name + "`");
+            });
+            /**
+             * @type {string}
+             */
+            var answers = [];
+            const dateformat = "DD/MM/YYYY 20:30";
+
+            embed.setAuthor(questions[counter++]);
+            const dm = await member.user.send(embed);
+            const filter = m => m.author.id === member.id;
+            const collector = dm.channel.createMessageCollector(filter, {
+                max: questions.length,
+                time: 60000
+            });
+
+            collector.on('collect', async (message, col) => {
+                if (counter < questions.length) {
+                    embed.setAuthor(questions[counter++]);
+                    if (counter === (questions.length-1)) {
+                        embed.setDescription(tierNames.join('\n'));
+                    } 
+                    await member.user.send(embed);
+                }
+            });
+
+            collector.on('end', async (collected) => {
+                collected.forEach((collect) => {
+                    answers.push(collect.content);
+                });
+                const title = answers[0];
+                const description = answers[1];
+                const date = answers[2];
+                const timezone = answers[3];
+                const tier = answers[4];
+                const t = server.getTierManager().getTier(tier.toLowerCase());
+                if (!title || !description || !date || !timezone) {
+                    embed.setAuthor("Ran out of time!");
+                    await member.user.send(embed);
+                    resolve(undefined);
+                } else if (date.length !== dateformat.length) {
+                    embed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30)");
+                    embed.setDescription(`E.g: 01/01/2021 10:45 or 20/04/2021 09:30`);
+                    await member.user.send(embed);
+                    resolve(undefined);
+                } else if (!tier) {
+                    embed.setAuthor("Tier is invalid! Did not match any tier of:");
+                    embed.setDescription(tierNames.join('\n'));
+                    await member.user.send(embed);
+                    resolve(undefined);
+                } else {
+                    const attendanceembed = new Discord.MessageEmbed();
+                    formatDate(`${date} ${timezone.toUpperCase()}`).then((dateObject) => {
+                        const dateNow = new Date();
+                        if (dateObject.getTime() < dateNow.getTime()) {
+                            const difference = dateNow.getTime()-dateObject.getTime();
+                            embed.setAuthor("Invalid date! Date cannot be in the past!");
+                            embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
+                            member.user.send(embed);
+                            resolve();
+                        } else {
+                            const dateString = `${dateObject.toDateString()} ${formatFormalTime(dateObject, timezone.toUpperCase())}`;
+                            attendanceembed.setTitle(title);
+                            attendanceembed.setDescription(description);
+                            attendanceembed.addFields(
+                                { name: "Date & Time", value: dateString, inline: false }
+                            );
+                            t.teams.forEach(team => {
+                                const driverNames = [];
+                                team.drivers.array().forEach(d => {
+                                    driverNames.push(`🔴 ${d.toFullName()}`);
+                                });
+                                attendanceembed.addField(team.name, driverNames.join('\n'));
+                            });
+                            const reserveNames = [];
+                            t.reserves.forEach(reserve => {
+                                reserveNames.push(`🔴 ${reserve.toFullName()}`);
+                            });
+                            attendanceembed.addField('Reserves', reserveNames.join('\n'));
+                            attendanceembed.setFooter('Local Time');
+                            attendanceembed.setTimestamp(dateObject);
+                            attendanceembed.setColor('RANDOM');
+                            channel.send(attendanceembed).then(async (m) => {
+                                await m.react(AttendanceManager.accept);
+                                await m.react(AttendanceManager.reject);
+                                await m.react(AttendanceManager.tentative);
+                                await m.react(AttendanceManager.delete);
+                                embed.setAuthor(`Successfully created event ${title}`);
+                                await member.user.send(embed);
+                                const attendance = new AdvancedAttendance(client, m, server, t, dateObject, this);
+                                this.advancedEvents.set(attendance.id, attendance);
+                                try {
+                                    await Database.run(Database.advancedAttendanceSaveQuery, [m.id, String(dateObject.getTime()), channel.id, t.name]);
+                                    resolve(attendance);
+                                } catch (err) {
+                                    console.log(err);
+                                    resolve(attendance);
+                                }
+                            });
+                        }
+                    }).catch(async (dateo) => {
+                        embed.setAuthor("Date is invalid! Please try again!");
+                        await member.user.send(embed);
+                        console.log(dateo);
+                        resolve(undefined);
+                    });
+                }
+            });
+        });
+    }
 
     /**
      * 

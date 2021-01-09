@@ -38,7 +38,7 @@ class Ticket {
         await this.channel.send(new Discord.MessageEmbed()
             .setAuthor(`Added ${member.user.tag} to this ticket!`)
             .setColor('GREEN'));
-        this.ticketManager.server.log(`Added ${member.user.tag} to ticket ${this.channel.name}`);
+        await this.ticketManager.server.log(`Added ${member.user.tag} to ticket ${this.channel.name}`);
     }
 
     /**
