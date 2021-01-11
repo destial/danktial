@@ -19,7 +19,7 @@ module.exports = {
                     client.commands.set(alias.toLowerCase(), command);
                 });
             }
-            console.log(`[COMMAND] Registered ${command.name}`);
+            if (client.shard.ids[0] === 0) console.log(`[COMMAND] Registered ${command.name}`);
         }
         client.on('message', async (message) => {
             if (!message.author) return;
