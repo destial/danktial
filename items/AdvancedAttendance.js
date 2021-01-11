@@ -69,52 +69,45 @@ class AdvancedAttendance {
         this.unknown = new Discord.Collection();
 
         this.embed.fields.forEach(field => {
-            if (field.value.startsWith(AdvancedAttendance.rejectEmoji)) {
-                const name = field.value.replace(`${AdvancedAttendance.rejectEmoji} `, '');
-                const id = name.substring(2, name.length-1);
-                const member = this.server.guild.members.cache.get(id);
-                if (member) {
-                    const driver = this.tier.getDriver(member.id);
-                    if (driver) {
-                        this.rejected.set(driver.id, driver);
+            if (field.value.includes('\n')) {
+                const splits = field.value.split('\n');
+                splits.forEach(value => {
+                    if (value.startsWith(AdvancedAttendance.rejectEmoji)) {
+                        const raw = value.replace(`${AdvancedAttendance.rejectEmoji} `, '');
+                        const id = raw.replace('<@', '').replace('!', '').replace('>', '');
+                        const driver = this.tier.getDriver(id);
+                        if (driver) {
+                            this.rejected.set(driver.id, driver);
+                        }
                     }
-                }
-            }
 
-            if (field.value.startsWith(AdvancedAttendance.acceptEmoji)) {
-                const name = field.value.replace(`${AdvancedAttendance.acceptEmoji} `, '');
-                const id = name.substring(2, name.length-1);
-                const member = this.server.guild.members.cache.get(id);
-                if (member) {
-                    const driver = this.tier.getDriver(member.id);
-                    if (driver) {
-                        this.accepted.set(driver.id, driver);
+                    if (value.startsWith(AdvancedAttendance.acceptEmoji)) {
+                        const raw = value.replace(`${AdvancedAttendance.acceptEmoji} `, '');
+                        const id = raw.replace('<@', '').replace('!', '').replace('>', '');
+                        const driver = this.tier.getDriver(id);
+                        if (driver) {
+                            this.accepted.set(driver.id, driver);
+                        }
                     }
-                }
-            }
 
-            if (field.value.startsWith(AdvancedAttendance.maybeEmoji)) {
-                const name = field.value.replace(`'${AdvancedAttendance.maybeEmoji} `, '');
-                const id = name.substring(2, name.length-1);
-                const member = this.server.guild.members.cache.get(id);
-                if (member) {
-                    const driver = this.tier.getDriver(member.id);
-                    if (driver) {
-                        this.tentative.set(driver.id, driver);
+                    if (value.startsWith(AdvancedAttendance.maybeEmoji)) {
+                        const raw = value.replace(`${AdvancedAttendance.maybeEmoji} `, '');
+                        const id = raw.replace('<@', '').replace('!', '').replace('>', '');
+                        const driver = this.tier.getDriver(id);
+                        if (driver) {
+                            this.tentative.set(driver.id, driver);
+                        }
                     }
-                }
-            }
 
-            if (field.value.startsWith(AdvancedAttendance.unknownEmoji)) {
-                const name = field.value.replace(`'${AdvancedAttendance.unknownEmoji} `, '');
-                const id = name.substring(2, name.length-1);
-                const member = this.server.guild.members.cache.get(id);
-                if (member) {
-                    const driver = this.tier.getDriver(member.id);
-                    if (driver) {
-                        this.unknown.set(driver.id, driver);
+                    if (value.startsWith(AdvancedAttendance.unknownEmoji)) {
+                        const raw = value.replace(`${AdvancedAttendance.unknownEmoji} `, '');
+                        const id = raw.replace('<@', '').replace('!', '').replace('>', '');
+                        const driver = this.tier.getDriver(id);
+                        if (driver) {
+                            this.unknown.set(driver.id, driver);
+                        }
                     }
-                }
+                });
             }
         });
     }
@@ -131,7 +124,7 @@ class AdvancedAttendance {
      */
     async accept(driver) {
         const field = this.embed.fields.find(field => field.value.includes(driver.id));
-        const value = field.value;
+        const value = field.value.replace('!', '');
         const index = value.indexOf(driver.id)-2;
         const firstHalf = value.substring(0, index-3);
         const secondHalf = value.substring(index-1);
@@ -156,7 +149,7 @@ class AdvancedAttendance {
      */
     async reject(driver) {
         const field = this.embed.fields.find(field => field.value.includes(driver.id));
-        const value = field.value;
+        const value = field.value.replace('!', '');
         const index = value.indexOf(driver.id)-2;
         const firstHalf = value.substring(0, index-3);
         const secondHalf = value.substring(index-1);
@@ -181,7 +174,7 @@ class AdvancedAttendance {
      */
     async maybe(driver) {
         const field = this.embed.fields.find(field => field.value.includes(driver.id));
-        const value = field.value;
+        const value = field.value.replace('!', '');
         const index = value.indexOf(driver.id)-2;
         const firstHalf = value.substring(0, index-3);
         const secondHalf = value.substring(index-1);
@@ -224,6 +217,10 @@ class AdvancedAttendance {
             console.log(`[ADATTENDANCE] Reset attendance ${this.embed.title}`);
             this.message.edit(this.embed);
         });
+    }
+
+    async fix() {
+        return;
     }
 
     async update() {

@@ -40,7 +40,13 @@ module.exports = {
                         });
                         embed.addField(team.name, driverNames.join('\n'), false);
                     });
-                    tier.reserves.forEach(reserv)
+                    if (tier.reserves.size !== 0) {
+                        const reserveNames = [];
+                        tier.reserves.forEach(reserve => {
+                            reserveNames.push(`<@${reserve.id}>`);
+                        });
+                        embed.addField('Reserves', reserveNames, false);
+                    }
                     await message.channel.send(embed);
                 } else {
                     embed.setAuthor('Tier does not exist!');

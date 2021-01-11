@@ -36,6 +36,11 @@ class Database {
     static get driverUpdateQuery() { return "UPDATE drivers SET reserved=(?), team=(?), tier=(?) WHERE (id=(?) AND guild=(?) AND number=(?))"; }
 
     /**
+     * `UPDATE drivers SET number=(?) WHERE (id=(?) AND guild=(?))`
+     */
+    static get driverUpdateNumberQuery() { return "UPDATE drivers SET number=(?) WHERE (id=(?) AND guild=(?))"; }
+
+    /**
      * `UPDATE tiers SET name=(?) WHERE (guild=(?) AND name=(?))`
      */
     static get tierUpdateQuery() { return "UPDATE tiers SET name=(?) WHERE (guild=(?) AND name=(?))"; }

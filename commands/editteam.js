@@ -88,7 +88,7 @@ module.exports = {
                                     team.name = mCol.first().content;
                                     await team.update();
                                     var driverList1 = "";
-                                    
+
                                     embed.setAuthor(`Edited team ${team.name} under tier ${tier.name} with drivers:`);
                                     team.drivers.forEach(async driver => {
                                         driverList1 += (`- ${driver.member}\n`);
@@ -105,8 +105,12 @@ module.exports = {
                                 driverCollector.on('collect', m => {
                                     driverCollector.stop();
                                 });
-                                driverCollector.on('end', async dCol => {
+                                driverCollector.once('end', async dCol => {
                                     const mentions = dCol.first().mentions.members;
+                                    team.drivers.forEach(driver => {
+                                        driver.setTeam(undefined);
+                                    });
+                                    team.drivers.clear();
                                     mentions.forEach(async mention => {
                                         var driver = tier.drivers.get(mention.id);
                                         if (!driver) {

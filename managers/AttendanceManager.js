@@ -6,6 +6,7 @@ const Server = require('../items/Server');
 const formatDate = require('../utils/formatDate');
 const formatFormalTime = require('../utils/formatFormatTime');
 const Tier = require('../items/Tier');
+const formatTrack = require('../utils/formatTrack');
 
 class AttendanceManager {
     /**
@@ -125,6 +126,11 @@ class AttendanceManager {
                             const dateString = `${dateObject.toDateString()} ${formatFormalTime(dateObject, timezone.toUpperCase())}`;
                             attendanceembed.setTitle(title);
                             attendanceembed.setDescription(description);
+                            if (formatTrack(title)) {
+                                attendanceembed.setThumbnail(formatTrack(title));
+                            } else if (formatTrack(description)) {
+                                attendanceembed.setThumbnail(formatTrack(description));
+                            }
                             attendanceembed.addFields(
                                 { name: "Date & Time", value: dateString, inline: false }
                             );
@@ -241,6 +247,11 @@ class AttendanceManager {
                                 const dateString = `${dateObject.toDateString()} ${formatFormalTime(dateObject, timezone.toUpperCase())}`;
                                 attendanceembed.setTitle(title);
                                 attendanceembed.setDescription(description);
+                                if (formatTrack(title)) {
+                                    attendanceembed.setThumbnail(formatTrack(title));
+                                } else if (formatTrack(description)) {
+                                    attendanceembed.setThumbnail(formatTrack(description));
+                                }
                                 attendanceembed.addFields(
                                     { name: "Date & Time", value: dateString, inline: false },
                                     { name: `${AttendanceManager.accept} Accepted (0)`, value: ">>> -", inline: true },

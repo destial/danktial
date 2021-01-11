@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'resetattendance',
     usage: '[ id ]',
-    description: 'Creates a new advancedattendance',
+    description: 'Resets a advancedattendance to all drivers having an unknown mark',
     /**
      * @param {Discord.Client} client 
      * @param {Server} server 
@@ -29,6 +29,7 @@ module.exports = {
                 message.channel.send(embed);
             } else {
                 embed.setAuthor('Attendance does not exist! Perhaps using the wrong message id?');
+                embed.setDescription('If you are in developer mode, right click the attendance and copy the id to get the message id');
                 message.channel.send(embed);
             }
         }

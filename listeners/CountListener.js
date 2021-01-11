@@ -1,6 +1,5 @@
 const ServerManager = require('../managers/ServerManager');
 const Discord = require('discord.js');
-const TicketManager = require('../managers/TicketManager');
 
 module.exports = {
     /**
@@ -24,9 +23,11 @@ module.exports = {
                     if (channel.id === server.getCountManager().getCount('channel').id) {
                         await server.getCountManager().deleteCount('channel');
                         console.log(`[COUNT] Deleted channelcount channel ${channel.id}`);
+
                     } else if (channel.id === server.getCountManager().getCount('member').id) {
                         await server.getCountManager().deleteCount('member');
                         console.log(`[COUNT] Deleted membercount channel ${channel.id}`);
+
                     } else if (channel.id === server.getCountManager().getCount('role').id) {
                         await server.getCountManager().deleteCount('role');
                         console.log(`[COUNT] Deleted rolecount channel ${channel.id}`);
@@ -36,7 +37,7 @@ module.exports = {
                         await server.getCountManager().getCount('channel').edit({
                             name: `Channel Count: ${server.guild.channels.cache.size}`
                         });
-                        await server.log(`Created a channel!`, `${channel}`);
+                        await server.log(`Created a channel!`, `${channel} - ${channel.name}`);
                     }
                 }
             }
@@ -57,7 +58,7 @@ module.exports = {
                     await server.getCountManager().getCount('channel').edit({
                         name: `Channel Count: ${server.guild.channels.cache.size}`
                     });
-                    await server.log('Created a channel!', `${channel}`);
+                    await server.log('Created a channel!', `${channel} - ${channel.name}`);
                 }
             }
         });
@@ -69,7 +70,7 @@ module.exports = {
                     await server.getCountManager().getCount('role').edit({
                         name: `Role Count: ${server.guild.roles.cache.size}`
                     });
-                    await server.log('Created a role!', `${role}`);
+                    await server.log('Created a role!', `${role} - ${role.name}`);
                 }
             }
         });
@@ -81,7 +82,7 @@ module.exports = {
                     await server.getCountManager().getCount('role').edit({
                         name: `Role Count: ${server.guild.roles.cache.size}`
                     });
-                    await server.log('Deleted a role!', `${role}`);
+                    await server.log('Deleted a role!', `${role.name}`);
                 }
             }
         });
@@ -91,9 +92,9 @@ module.exports = {
             if (server) {
                 if (server.getCountManager().getCount('member')) {
                     await server.getCountManager().getCount('member').edit({
-                        name: `Member Count: ${server.guild.roles.cache.size}`
+                        name: `Member Count: ${server.guild.memberCount}`
                     });
-                    await server.log('Member joined!', `${member}`);
+                    await server.log('Member joined!', `${member} - ${member.user.tag}`);
                 }
             }
         });
@@ -103,9 +104,9 @@ module.exports = {
             if (server) {
                 if (server.getCountManager().getCount('member')) {
                     await server.getCountManager().getCount('member').edit({
-                        name: `Member Count: ${server.guild.roles.cache.size}`
+                        name: `Member Count: ${server.guild.memberCount}`
                     });
-                    await server.log('Member left!', `${member}`);
+                    await server.log('Member left!', `${member} - ${member.user.tag}`);
                 }
             }
         });
