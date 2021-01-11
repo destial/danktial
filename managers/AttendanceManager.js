@@ -73,7 +73,7 @@ class AttendanceManager {
             const filter = m => m.author.id === member.id;
             const collector = dm.channel.createMessageCollector(filter, {
                 max: questions.length,
-                time: 60000
+                time: 5*60000
             });
 
             collector.on('collect', async (message, col) => {
@@ -95,9 +95,8 @@ class AttendanceManager {
                 const date = answers[2];
                 const timezone = answers[3];
                 const tier = answers[4];
-                const t = server.getTierManager().getTier(tier.toLowerCase());
                 const replyEmbed = new Discord.MessageEmbed();
-                if (!title || !description || !date || !timezone) {
+                if (!title || !description || !date || !timezone || !tier) {
                     replyEmbed.setAuthor("Ran out of time!");
                     await member.user.send(replyEmbed);
                     resolve(undefined);
@@ -106,12 +105,13 @@ class AttendanceManager {
                     replyEmbed.setDescription(`E.g: 01/01/2021 10:45 or 20/04/2021 09:30`);
                     await member.user.send(embed);
                     resolve(undefined);
-                } else if (!tier) {
+                } else if (!server.getTierManager().getTier(tier.toLowerCase())) {
                     replyEmbed.setAuthor("Tier is invalid! Did not match any tier of:");
                     replyEmbed.setDescription(tierNames.join('\n'));
                     await member.user.send(replyEmbed);
                     resolve(undefined);
                 } else {
+                    const t = server.getTierManager().getTier(tier.toLowerCase());
                     const attendanceembed = new Discord.MessageEmbed();
                     formatDate(`${date} ${timezone.toUpperCase()}`).then((dateObject) => {
                         const dateNow = new Date();
@@ -131,14 +131,14 @@ class AttendanceManager {
                             t.teams.forEach(team => {
                                 const driverNames = [];
                                 team.drivers.array().forEach(d => {
-                                    driverNames.push(`${AdvancedAttendance.rejectEmoji} ${d.name}`);
+                                    driverNames.push(`${AttendanceManager.tentative} ${d.member}`);
                                 });
                                 attendanceembed.addField(team.name, driverNames.join('\n'), false);
                             });
                             const reserveNames = [];
                             if (t.reserves.size !== 0) {
                                 t.reserves.forEach(reserve => {
-                                    reserveNames.push(`${AdvancedAttendance.rejectEmoji} ${reserve.name}`);
+                                    reserveNames.push(`${AttendanceManager.tentative} ${reserve.member}`);
                                 });
                                 attendanceembed.addField('Reserves', reserveNames.join('\n'), false);
                             }
@@ -150,6 +150,7 @@ class AttendanceManager {
                                 await m.react(AttendanceManager.reject);
                                 await m.react(AttendanceManager.tentative);
                                 await m.react(AttendanceManager.delete);
+                                await m.react(AdvancedAttendance.editEmoji);
                                 replyEmbed.setAuthor(`Successfully created event ${title}`);
                                 await member.user.send(replyEmbed);
                                 const attendance = new AdvancedAttendance(client, m, server, t, dateObject, this);
@@ -201,7 +202,7 @@ class AttendanceManager {
                 const filter = m => m.author.id === member.id;
                 const collector = dm.channel.createMessageCollector(filter, {
                     max: questions.length,
-                    time: 60000
+                    time: 5*60000
                 });
                 collector.on('collect', async (message, col) => {
                     if (counter < questions.length) {
@@ -288,7 +289,7 @@ class AttendanceManager {
         const embed = new Discord.MessageEmbed();
         const allevents = []; const alleventsid = [];
         let counter = 0;
-        attendancemanager.events.forEach((event) => {
+        this.events.forEach((event) => {
             allevents.push(`${counter++}: ${event.title}`);
             alleventsid.push(event.id);
         });
@@ -406,6 +407,125 @@ class AttendanceManager {
 
     /**
      * 
+     * @param {Discord.GuildMember} member
+     */
+    async editAdvancedAttendance(member) {
+        const embed = new Discord.MessageEmbed();
+        const allevents = []; const alleventsid = [];
+        let counter = 0;
+        this.advancedEvents.forEach((event) => {
+            allevents.push(`${counter++}: ${event.embed.title} (${event.tier.name})`);
+            alleventsid.push(event.id);
+        });
+        if (!allevents.length) {
+            embed.setAuthor("No events are upcoming at the moment!");
+            member.user.send(embed);
+            return;
+        }
+        embed.setAuthor("Select the event to edit:");
+        embed.addFields(
+            {name: 'Events', value: allevents.join('\n'), inline: true}
+        );
+        member.user.send(embed).then(async (dm) => {
+            counter = 0;
+            const dictionary = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🇦", "🇧","🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯"];
+            allevents.forEach(async (e) => {
+                await dm.react(dictionary[counter++]);
+            });
+            let filter = r => r.message.id === dm.id;
+            var collector = dm.createReactionCollector(filter, { time: 60000 });
+            var editevent = "";
+            collector.on('collect', async (reaction, user) => {
+                if (!user.bot) {
+                    editevent = reaction.emoji.name;
+                    collector.stop();
+                }
+            });
+            collector.on('end', async (collection1) => {
+                const index = dictionary.indexOf(editevent);
+                const attendanceevent = this.fetchAdvanced(alleventsid[index]);
+                member.user.send(attendanceevent.embed).then((em) => {
+                    const embed2 = new Discord.MessageEmbed();
+                    embed2.setAuthor("Select the options to edit: (🇹 for title) (🇩 for description) (📆 for date)");
+                    member.user.send(embed2).then(async (m) => {
+                        await m.react("🇹");
+                        await m.react("🇩");
+                        await m.react("📆");
+                        var emojiname = "";
+                        let rfilter = r => r.message.id === m.id;
+                        var rcollector = m.createReactionCollector(rfilter, {time: 60000, maxEmojis: 4});
+                        rcollector.on('collect', async (reaction, user) => {
+                            if (!user.bot) {
+                                emojiname = reaction.emoji.name;
+                                rcollector.stop();
+                            }
+                        });
+                        rcollector.on('end', async (collection2) => {
+                            if (emojiname === "🇹") {
+                                embed2.setAuthor("Enter the new title:");
+                            } else if (emojiname === "🇩") {
+                                embed2.setAuthor("Enter the new description:");
+                            } else if (emojiname === "📆") {
+                                embed2.setAuthor("Enter the new date: (Format is DD/MM/YYYY 20:30 AEDT)");
+                            }
+                            member.user.send(embed2).then((m3) => {
+                                let mfilter = m => m.author.id === member.id;
+                                let mcollector = m3.channel.createMessageCollector(mfilter, {time: 60000});
+                                mcollector.on('collect', async (message) => {
+                                    /**
+                                     * @type {string}
+                                     */
+                                    let edit = message.content;
+                                    if (emojiname === "🇹") {
+                                        attendanceevent.embed.setTitle(edit);
+                                        mcollector.stop();
+                                    } else if (emojiname === "🇩") {
+                                        attendanceevent.embed.setDescription(edit);
+                                        mcollector.stop();
+                                    } else if (emojiname === "📆") {
+                                        const dateNow = new Date();
+                                        formatDate(edit).then((date) => {
+                                            if (date.getTime() < dateNow.getTime()) {
+                                                const difference = dateNow.getTime() - date.getTime();
+                                                embed.setAuthor("Invalid date! Date cannot be in the past!");
+                                                embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
+                                                member.user.send(embed);
+                                            } else {
+                                                const dateString = `${date.toDateString()} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
+                                                attendanceevent.updateDate(date, dateString);
+                                                mcollector.stop();
+                                            }
+                                        }).catch((err) => {
+                                            embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY 20:30 AEDT)");
+                                            member.user.send(embed2);
+                                        });
+                                    }
+                                });
+                                mcollector.on('end', async (mcollected) => {
+                                    member.guild.channels.cache.forEach((ch) => {
+                                        if (ch.isText() && ch.type === "text") {
+                                            attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
+                                                try {
+                                                    await attendanceevent.update();
+                                                    embed2.setAuthor("Successfully edited event!");
+                                                    member.user.send(embed2);
+                                                } catch (err) {
+                                                    console.log(err);
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    /**
+     * 
      * @param {Discord.Message} message 
      * @param {Date} date
      */
@@ -424,7 +544,7 @@ class AttendanceManager {
     async loadAdvancedAttendance(message, tier, date) {
         const attendance = new AdvancedAttendance(this.client, message, this.server, tier, date, this);
         this.advancedEvents.set(attendance.id, attendance);
-        await attendance.reset();
+        //await attendance.reset();
         console.log(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} of id: ${attendance.id}`);
     }
 

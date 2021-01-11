@@ -71,6 +71,21 @@ module.exports = {
                 }
             }
         });
-    }
 
+        client.on('guildMemberUpdate', async (oldMember, newMember) => {
+            if (oldMember.partial) {
+                try {
+                    oldMember = await oldMember.fetch();
+                } catch(err) {
+                    console.log(err);
+                }
+            }
+            if (oldMember.user.username !== newMember.user.username) {
+                const server = await servers.fetch(newMember.guild.id);
+                if (server) {
+                    
+                }
+            }
+        });
+    }
 };
