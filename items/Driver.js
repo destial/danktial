@@ -31,6 +31,16 @@ class Driver {
         console.log(`[DRIVER] Saved driver ${this.name} from ${this.guild.name}`);
     }
 
+    async update() {
+        await Database.run(Database.driverUpdateQuery, [0, (this.team ? this.team.name : ""), this.tier.name, this.id, this.guild.id, this.number]);
+        console.log(`[DRIVER] Updated driver ${this.name} from ${this.guild.name}`);
+    }
+
+    async delete() {
+        await Database.run(Database.driversDeleteQuery, [this.id, this.guild.id, this.tier.name]);
+        console.log(`[DRIVER] Deleted driver ${this.name} from ${this.guild.name}`);
+    }
+
     /**
      * 
      * @param {Team} team 

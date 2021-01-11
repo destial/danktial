@@ -55,33 +55,49 @@ module.exports = {
                 if (!tier) {
                     embed.setAuthor('Invalid tier name! Did not match any tier. Please try again!');
                     await message.channel.send(embed);
-                    return;
-                }
-                const mentions = reply.mentions.members;
-                const team = new Team(client, server, name, tier);
-                var create = false;
-                mentions.forEach(async mention => {
-                    const driver = tier.drivers.get(mention.id);
-                    if (!driver) {
-                        embed.setAuthor(`${mention.user.tag} does not exist in tier ${tier.name}`);
+                } else {
+                    const existingTeam = tier.getTeam(name.toLowerCase());
+                    if (existingTeam) {
+                        embed.setAuthor('Team name already exists in that tier! Please use a different name!');
                         await message.channel.send(embed);
                     } else {
-                        driver.setTeam(team);
-                        team.setDriver(driver);
-                        create = true;
+                        const mentions = reply.mentions.members;
+                        const team = new Team(client, server, name, tier);
+                        const mentionP = new Promise((resolve, reject) => {
+                            mentions.forEach(async (mention,index) => {
+                                var driver = tier.drivers.get(mention.id);
+                                if (!driver) {
+                                    driver = tier.reserves.get(mention.id);
+                                }
+                                if (!driver) {
+                                    driver = new Driver(client, mention, server, team, 0, tier);
+                                    await driver.save();
+                                    team.setDriver(driver);
+                                    tier.addDriver(driver);
+                                } else {
+                                    driver.setTeam(team);
+                                    await driver.update();
+                                    team.setDriver(driver);
+                                }
+                                if (index === mentions.last().id) resolve();
+                            });
+                        });
+                        mentionP.then(() => {
+                            embed.setAuthor(`Created team ${name} under tier ${tier.name} with drivers:`);
+                            var driverList = "";
+                            const promise = new Promise((resolve, reject) => {
+                                team.drivers.forEach(async (driver, index) => {
+                                    driverList += (`- ${driver.member}\n`);
+                                    if (index === team.drivers.last().id) resolve();
+                                });
+                            });
+                            promise.then(async () => {
+                                embed.setDescription(driverList);
+                                await team.save();
+                                await message.channel.send(embed);
+                            });
+                        });
                     }
-                });
-                if (create) {
-                    embed.setAuthor(`Created team ${name} under tier ${tier.name} with drivers:`);
-                    var driverList = "";
-                    team.drivers.forEach(async driver => {
-                        driverList += (`- ${driver.member}\n`);
-                        await Database.run(Database.driverSaveQuery, [driver.id, server.id, 0, 0, team.name, tier.name]);
-                        console.log(`[DRIVER] Updated driver ${driver.name} with team ${team.name} in tier ${tier.name} in ${server.guild.name}`);
-                    });
-                    await Database.run(Database.teamSaveQuery, [server.id, team.name, tier.name]);
-                    embed.setDescription(driverList);
-                    await message.channel.send(embed);
                 }
             });
         }

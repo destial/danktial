@@ -12,10 +12,10 @@ class Database {
             database.run('CREATE TABLE IF NOT EXISTS attendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32))');
             database.run('CREATE TABLE IF NOT EXISTS count (id VARCHAR(32) PRIMARY KEY, name VARCHAR(16))');
 
-            database.run('CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(32) PRIMARY KEY, guild VARCHAR(32), number VARCHAR(3), reserved INT, team VARCHAR(32), tier VARCHAR(32))');
+            database.run('CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(32), guild VARCHAR(32), number VARCHAR(3), reserved INT, team VARCHAR(32), tier VARCHAR(32))');
             database.run('CREATE TABLE IF NOT EXISTS advancedattendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32), tier VARCHAR(32))');
-            database.run('CREATE TABLE IF NOT EXISTS tiers (guild VARCHAR(32) PRIMARY KEY, name VARCHAR(32))');
-            database.run('CREATE TABLE IF NOT EXISTS teams (guild VARCHAR(32) PRIMARY KEY, name VARCHAR(32), tier VARCHAR(32))');
+            database.run('CREATE TABLE IF NOT EXISTS tiers (guild VARCHAR(32), name VARCHAR(32))');
+            database.run('CREATE TABLE IF NOT EXISTS teams (guild VARCHAR(32), name VARCHAR(32), tier VARCHAR(32))');
         });
         return database;
     }
@@ -26,9 +26,24 @@ class Database {
     static get teamDeleteQuery() { return "DELETE FROM teams WHERE (guild=(?) AND name=(?) AND tier=(?))"; }
 
     /**
-     * `REPLACE INTO teams (guild,name,tier) VALUES (?,?,?)`
+     * `UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND tier=(?))`
      */
-    static get teamSaveQuery() { return "REPLACE INTO teams (guild,name,tier) VALUES (?,?,?)"; }
+    static get teamUpdateQuery() { return "UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND tier=(?))"; }
+
+    /**
+     * `UPDATE drivers SET reserved=(?), team=(?), tier=(?) WHERE (id=(?) AND guild=(?) AND number=(?))`
+     */
+    static get driverUpdateQuery() { return "UPDATE drivers SET reserved=(?), team=(?), tier=(?) WHERE (id=(?) AND guild=(?) AND number=(?))"; }
+
+    /**
+     * `UPDATE tiers SET name=(?) WHERE (guild=(?) AND name=(?))`
+     */
+    static get tierUpdateQuery() { return "UPDATE tiers SET name=(?) WHERE (guild=(?) AND name=(?))"; }
+
+    /**
+     * `INSERT INTO teams (guild,name,tier) VALUES (?,?,?)`
+     */
+    static get teamSaveQuery() { return "INSERT INTO teams (guild,name,tier) VALUES (?,?,?)"; }
 
     /**
      * `SELECT * FROM teams`
@@ -51,9 +66,9 @@ class Database {
     static get driversDeleteQuery() { return "DELETE FROM drivers WHERE (id=(?) AND guild=(?) AND tier=(?))"; }
 
     /**
-     * `REPLACE INTO tiers (guild,name) VALUES (?,?)`
+     * `INSERT INTO tiers (guild,name) VALUES (?,?)`
      */
-    static get tierSaveQuery() { return "REPLACE INTO tiers (guild,name) VALUES (?,?)"; }
+    static get tierSaveQuery() { return "INSERT INTO tiers (guild,name) VALUES (?,?)"; }
 
     /**
      * `REPLACE INTO advancedattendance (id,date,channel,tier) VALUES (?,?,?,?)`
@@ -61,9 +76,9 @@ class Database {
     static get advancedAttendanceSaveQuery() { return "REPLACE INTO advancedattendance (id,date,channel,tier) VALUES (?,?,?,?)"; }
 
     /**
-     * `REPLACE INTO drivers (id,guild,number,reserved,team,tier) VALUES (?,?,?,?,?,?)`
+     * `INSERT INTO drivers (id,guild,number,reserved,team,tier) VALUES (?,?,?,?,?,?)`
      */
-    static get driverSaveQuery() { return "REPLACE INTO drivers (id,guild,number,reserved,team,tier) VALUES (?,?,?,?,?,?)"; }
+    static get driverSaveQuery() { return "INSERT INTO drivers (id,guild,number,reserved,team,tier) VALUES (?,?,?,?,?,?)"; }
 
     /**
      * `SELECT * FROM advancedattendance`
@@ -166,7 +181,7 @@ class Database {
             Database.db().run(query, ...args, err => {
                 if (err) {
                     Database.db().close();
-                    reject(false);
+                    reject(err);
                 } else {
                     Database.db().close();
                     resolve(true);
@@ -188,7 +203,7 @@ class Database {
                     resolve(rows);
                 } else {
                     Database.db().close();
-                    reject([]);
+                    reject(err);
                 }
             });
         });

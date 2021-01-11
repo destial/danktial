@@ -106,6 +106,11 @@ class Server {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
         console.log(`[SERVER] Saved server ${this.id}`);
     }
+
+    async delete() {
+        await Database.run(Database.serverDeleteQuery, [this.id]);
+        console.log(`[SERVER] Deleted server ${this.id}`);
+    }
     /**
      * @param {Discord.Guild} guild 
      * @param {Discord.TextChannel} modlog

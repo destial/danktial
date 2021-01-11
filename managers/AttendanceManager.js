@@ -79,7 +79,7 @@ class AttendanceManager {
             collector.on('collect', async (message, col) => {
                 if (counter < questions.length) {
                     embed.setAuthor(questions[counter++]);
-                    if (counter === (questions.length-1)) {
+                    if (counter === questions.length) {
                         embed.setDescription(tierNames.join('\n'));
                     } 
                     await member.user.send(embed);
@@ -96,19 +96,20 @@ class AttendanceManager {
                 const timezone = answers[3];
                 const tier = answers[4];
                 const t = server.getTierManager().getTier(tier.toLowerCase());
+                const replyEmbed = new Discord.MessageEmbed();
                 if (!title || !description || !date || !timezone) {
-                    embed.setAuthor("Ran out of time!");
-                    await member.user.send(embed);
+                    replyEmbed.setAuthor("Ran out of time!");
+                    await member.user.send(replyEmbed);
                     resolve(undefined);
                 } else if (date.length !== dateformat.length) {
-                    embed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30)");
-                    embed.setDescription(`E.g: 01/01/2021 10:45 or 20/04/2021 09:30`);
+                    replyEmbed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30)");
+                    replyEmbed.setDescription(`E.g: 01/01/2021 10:45 or 20/04/2021 09:30`);
                     await member.user.send(embed);
                     resolve(undefined);
                 } else if (!tier) {
-                    embed.setAuthor("Tier is invalid! Did not match any tier of:");
-                    embed.setDescription(tierNames.join('\n'));
-                    await member.user.send(embed);
+                    replyEmbed.setAuthor("Tier is invalid! Did not match any tier of:");
+                    replyEmbed.setDescription(tierNames.join('\n'));
+                    await member.user.send(replyEmbed);
                     resolve(undefined);
                 } else {
                     const attendanceembed = new Discord.MessageEmbed();
@@ -116,9 +117,9 @@ class AttendanceManager {
                         const dateNow = new Date();
                         if (dateObject.getTime() < dateNow.getTime()) {
                             const difference = dateNow.getTime()-dateObject.getTime();
-                            embed.setAuthor("Invalid date! Date cannot be in the past!");
-                            embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
-                            member.user.send(embed);
+                            replyEmbed.setAuthor("Invalid date! Date cannot be in the past!");
+                            replyEmbed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
+                            member.user.send(replyEmbed);
                             resolve();
                         } else {
                             const dateString = `${dateObject.toDateString()} ${formatFormalTime(dateObject, timezone.toUpperCase())}`;
@@ -130,16 +131,18 @@ class AttendanceManager {
                             t.teams.forEach(team => {
                                 const driverNames = [];
                                 team.drivers.array().forEach(d => {
-                                    driverNames.push(`🔴 ${d.toFullName()}`);
+                                    driverNames.push(`${AdvancedAttendance.rejectEmoji} ${d.name}`);
                                 });
-                                attendanceembed.addField(team.name, driverNames.join('\n'));
+                                attendanceembed.addField(team.name, driverNames.join('\n'), false);
                             });
                             const reserveNames = [];
-                            t.reserves.forEach(reserve => {
-                                reserveNames.push(`🔴 ${reserve.toFullName()}`);
-                            });
-                            attendanceembed.addField('Reserves', reserveNames.join('\n'));
-                            attendanceembed.setFooter('Local Time');
+                            if (t.reserves.size !== 0) {
+                                t.reserves.forEach(reserve => {
+                                    reserveNames.push(`${AdvancedAttendance.rejectEmoji} ${reserve.name}`);
+                                });
+                                attendanceembed.addField('Reserves', reserveNames.join('\n'), false);
+                            }
+                            attendanceembed.setFooter(t.name);
                             attendanceembed.setTimestamp(dateObject);
                             attendanceembed.setColor('RANDOM');
                             channel.send(attendanceembed).then(async (m) => {
@@ -147,12 +150,12 @@ class AttendanceManager {
                                 await m.react(AttendanceManager.reject);
                                 await m.react(AttendanceManager.tentative);
                                 await m.react(AttendanceManager.delete);
-                                embed.setAuthor(`Successfully created event ${title}`);
-                                await member.user.send(embed);
+                                replyEmbed.setAuthor(`Successfully created event ${title}`);
+                                await member.user.send(replyEmbed);
                                 const attendance = new AdvancedAttendance(client, m, server, t, dateObject, this);
                                 this.advancedEvents.set(attendance.id, attendance);
                                 try {
-                                    await Database.run(Database.advancedAttendanceSaveQuery, [m.id, String(dateObject.getTime()), channel.id, t.name]);
+                                    await attendance.save();
                                     resolve(attendance);
                                 } catch (err) {
                                     console.log(err);
@@ -161,8 +164,8 @@ class AttendanceManager {
                             });
                         }
                     }).catch(async (dateo) => {
-                        embed.setAuthor("Date is invalid! Please try again!");
-                        await member.user.send(embed);
+                        replyEmbed.setAuthor(`There was an error while making an attendance! Perhaps there are no drivers in this tier?`);
+                        await member.user.send(replyEmbed);
                         console.log(dateo);
                         resolve(undefined);
                     });
@@ -257,7 +260,7 @@ class AttendanceManager {
                                     this.events.set(attendance.id, attendance);
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
-                                        console.log(`[UPDATE] Added attendance ${attendance.title} of id ${attendance.id}`);
+                                        console.log(`[UPDATE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                                         resolve(attendance);
                                     } catch (err) {
                                         console.log(err);
@@ -265,10 +268,10 @@ class AttendanceManager {
                                     }
                                 });
                             }
-                        }).catch((dateo) => {
-                            embed.setAuthor("Date is invalid! Please try again!");
+                        }).catch((err) => {
+                            embed.setAuthor(`There was an error while making an attendance!`);
                             member.user.send(embed);
-                            console.log(dateo);
+                            console.log(err);
                             resolve(undefined);
                         });
                     }
@@ -409,7 +412,20 @@ class AttendanceManager {
     loadAttendance(message, date) {
         const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild);
         this.events.set(attendance.id, attendance);
-        console.log(`[LOAD] Loaded attendance ${attendance.title} of id: ${attendance.id}`);
+        console.log(`[ATTENDANCE] Loaded attendance ${attendance.title} of id: ${attendance.id}`);
+    }
+
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {Tier} tier
+     * @param {Date} date
+     */
+    async loadAdvancedAttendance(message, tier, date) {
+        const attendance = new AdvancedAttendance(this.client, message, this.server, tier, date, this);
+        this.advancedEvents.set(attendance.id, attendance);
+        await attendance.reset();
+        console.log(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} of id: ${attendance.id}`);
     }
 
     /**
@@ -453,6 +469,45 @@ class AttendanceManager {
 
     /**
      * 
+     * @param {Discord.MessageReaction} reaction
+     * @param {Discord.User} user
+     */
+    async awaitDeleteAdvancedAttendance(reaction, user) {
+        reaction.message.guild.members.fetch(user.id).then((member) => {
+            const embed = new Discord.MessageEmbed();
+            const attendance = this.fetchAdvanced(reaction.message.id);
+            if (attendance) {
+                embed.setAuthor(`Are you sure you want to delete ${attendance.embed.title}?`);
+                member.user.send(embed).then(async (mes) => {
+                    await mes.react(AttendanceManager.accept);
+                    await mes.react(AttendanceManager.reject);
+                    let filter = r => r.message.id === mes.id;
+                    const collector = mes.createReactionCollector(filter, { time: 60000 });
+                    var yesdelete = false;
+                    collector.on('collect', async (r, u) => {
+                        if (r.emoji.name === AttendanceManager.accept) {
+                            yesdelete = true;
+                        }
+                        collector.stop();
+                    });
+                    collector.on('end', async (collected) => {
+                        if (yesdelete) {
+                            embed.setAuthor(`Deleted ${attendance.embed.title}!`);
+                            member.user.send(embed).then(async () => {
+                                await this.deleteAdvancedAttendance(reaction.message);
+                            });
+                        } else {
+                            embed.setAuthor(`Did not delete ${attendance.title}!`);
+                            await member.user.send(embed);
+                        }
+                    });
+                });
+            }
+        });
+    }
+
+    /**
+     * 
      * @param {Discord.Message} message 
      */
     async deleteAttendance(message) {
@@ -477,14 +532,49 @@ class AttendanceManager {
 
     /**
      * 
+     * @param {Discord.Message} message 
+     */
+    async deleteAdvancedAttendance(message) {
+        const attendanceevent = this.fetchAdvanced(message.id);
+        if (attendanceevent) {
+            try {
+                this.advancedEvents.delete(attendanceevent.id);
+                if (!message.deleted) {
+                    await message.delete({ timeout: 1000 });
+                }
+                await Database.run(Database.advancedAttendanceDeleteQuery, [attendanceevent.id]);
+                console.log(`[UPDATE] Deleted attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
+                if (this.server.modlog) {
+                    this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    }
+
+    /**
+     * 
      * @param {string} id 
     */
     fetch(id) {
         return this.events.find((e) => e.id === id);
     }
 
+    /**
+     * 
+     * @param {string} id 
+     */
+    fetchAdvanced(id) {
+        return this.advancedEvents.get(id);
+    }
+
     getEvents() {
         return this.events;
+    }
+
+    getAdvancedEvents() {
+        return this.advancedEvents;
     }
 }
 

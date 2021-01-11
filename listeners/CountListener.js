@@ -63,7 +63,7 @@ module.exports = {
         });
 
         client.on('roleCreate', async (role) => {
-            const server = await servers.fetch(channel.guild.id);
+            const server = await servers.fetch(role.guild.id);
             if (server) {
                 if (server.getCountManager().getCount('role')) {
                     await server.getCountManager().getCount('role').edit({
@@ -75,7 +75,7 @@ module.exports = {
         });
 
         client.on('roleDelete', async (role) => {
-            const server = await servers.fetch(channel.guild.id);
+            const server = await servers.fetch(role.guild.id);
             if (server) {
                 if (server.getCountManager().getCount('role')) {
                     await server.getCountManager().getCount('role').edit({
@@ -87,7 +87,7 @@ module.exports = {
         });
 
         client.on('guildMemberAdd', async (member) => {
-            const server = await servers.fetch(channel.guild.id);
+            const server = await servers.fetch(member.guild.id);
             if (server) {
                 if (server.getCountManager().getCount('member')) {
                     await server.getCountManager().getCount('member').edit({
@@ -99,7 +99,7 @@ module.exports = {
         });
 
         client.on('guildMemberRemove', async (member) => {
-            const server = await servers.fetch(channel.guild.id);
+            const server = await servers.fetch(member.guild.id);
             if (server) {
                 if (server.getCountManager().getCount('member')) {
                     await server.getCountManager().getCount('member').edit({

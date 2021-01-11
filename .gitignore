@@ -106,3 +106,6 @@ dist
 # Database
 *.db
 bot.db
+
+# RPL Files
+RPLListener.js

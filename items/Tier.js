@@ -39,12 +39,32 @@ class Tier {
 
     /**
      * 
+     * @param {string} newname 
+     */
+    async update(newname) {
+        await Database.run(Database.tierUpdateQuery, [newname, this.server.id, this.name]);
+        this.name = newname;
+        console.log(`[TIER] Updated tier ${this.name} from ${this.server.guild.name}`);
+    }
+
+    async delete() {
+        await Database.run(Database.tierDeleteQuery, [this.server.id, this.name]);
+        console.log(`[TIER] Deleted tier ${this.name} from ${this.server.guild.name}`);
+    }
+
+    /**
+     * 
      * @param {Driver} driver 
      */
     addDriver(driver) {
         if (!this.drivers.get(driver.id)) {
             this.drivers.set(driver.id, driver);
-            driver.save();
+        }
+    }
+
+    loadDriver(driver) {
+        if (!this.drivers.get(driver.id)) {
+            this.drivers.set(driver.id, driver);
         }
     }
 
@@ -81,6 +101,7 @@ class Tier {
     addTeam(team) {
         if (!this.teams.get(team.name.toLowerCase())) {
             this.teams.set(team.name.toLowerCase(), team);
+            console.log(`[TEAM] Added team ${team.name} to ${this.name}`);
         }
     }
 
@@ -90,6 +111,29 @@ class Tier {
      */
     removeTeam(name) {
         this.teams.delete(name.toLowerCase());
+    }
+
+    /**
+     * @param {string} name
+     */
+    getTeam(name) {
+        return this.teams.get(name.toLowerCase());
+    }
+
+    /**
+     * 
+     * @param {string} id 
+     */
+    getDriver(id) {
+        return this.drivers.get(id);
+    }
+
+    /**
+     * 
+     * @param {string} id 
+     */
+    getReserve(id) {
+        return this.reserves.get(id);
     }
 }
 

@@ -52,7 +52,10 @@ class Ticket {
                     const a = await this.base.react(AttendanceManager.accept);
                     const b = await this.base.react(AttendanceManager.reject);
                     reaction.users.remove(member.user);
-                    let filter = r => r.message.id === this.base.id;
+                    let filter = (r, u) => (u.id === member.id && 
+                                            r.message.id === this.base.id && 
+                                            (r.emoji.name === AttendanceManager.accept || r.emoji.name === AttendanceManager.reject));
+
                     const collector = this.base.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
                     collector.on('collect', async (r, u) => {
@@ -91,7 +94,10 @@ class Ticket {
                 try {
                     const a = await this.base.react(AttendanceManager.accept);
                     const b = await this.base.react(AttendanceManager.reject);
-                    let filter = r => r.message.id === this.base.id;
+                    let filter = (r, u) => (u.id === member.id && 
+                                            r.message.id === this.base.id && 
+                                            (r.emoji.name === AttendanceManager.accept || r.emoji.name === AttendanceManager.reject));
+
                     const collector = this.base.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
                     collector.on('collect', async (r, u) => {

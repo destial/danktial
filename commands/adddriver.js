@@ -7,10 +7,10 @@ const Tier = require('../items/Tier');
 const isStaff = require('../utils/isStaff');
 
 module.exports = {
-    name: 'addtier',
-    aliases: ['newtier'],
-    usage: '[ name ]',
-    description: 'Creates a new tier',
+    name: 'adddriver',
+    aliases: ['add-drivers', 'driveradd'],
+    usage: '[ tier-name ]',
+    description: 'Adds a driver to an existing tier',
     /**
      * @param {Discord.Client} client 
      * @param {Server} server 
@@ -24,12 +24,22 @@ module.exports = {
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             const name = args.join(' ');
-            const tier = new Tier(client, server, name);
-            embed.setAuthor('Tag/Mention all the drivers who are in this tier, not including reserves');
+            const tier = server.getTierManager().getTier(name.toLowerCase());
+            if (!tier) {
+                embed.setAuthor('Tier does not exist! Here are the list of existing tiers:');
+                var tierList = '';
+                server.getTierManager().tiers.forEach(tier => {
+                    tierList += `- ${tier.name}\n`;
+                });
+                embed.setDescription(tierList);
+                message.channel.send(embed);
+                return;
+            }
+            embed.setAuthor('Tag/Mention all the drivers to be added including reserves');
             await message.channel.send(embed);
             const filter = m => m.author.id === message.author.id;
             const collector = message.channel.createMessageCollector(filter, {
@@ -42,17 +52,15 @@ module.exports = {
                     const reserve = new Reserve(client, mention, server, 0, tier);
                     tier.addReserve(reserve);
                 });
-                server.getTierManager().addTier(tier);
 
-                embed.setAuthor(`Created tier ${name} with drivers:`);
+                embed.setAuthor(`Updated tier ${tier.name} with drivers:`);
                 var driverList = "";
                 tier.reserves.forEach(reserve => {
                     driverList += (`- ${reserve.member}\n`);
                     reserve.save();
                 });
                 embed.setDescription(driverList);
-                await message.channel.send(embed);
-                await Database.run(Database.tierSaveQuery, [server.id, name]);
+                message.channel.send(embed);
             });
         }
     }
