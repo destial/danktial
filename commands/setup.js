@@ -106,9 +106,8 @@ module.exports = {
                                                     'Alpha Romeo Sauber F1', 'Williams Racing'];
                                                 console.log(tierAmount);
                                                 for (var i = 1; i <= tierAmount; i++) {
-                                                    const tierPromise = new Promise(async (resolve2, reject) => {
+                                                    const tierPromise = new Promise((resolve2, reject) => {
                                                         const tier = new Tier(client, server, tierName.replace('{number}', String(i)).replace('{letter}', letters[i]));
-                                                        console.log(tier.name);
                                                         const teamPromise = new Promise((resolve3, reject) => {
                                                             teamNames.forEach(async (name, index) => {
                                                                 const team = new Team(client, server, name, tier);
@@ -131,11 +130,10 @@ module.exports = {
 
                                             promise.then(() => {
                                                 const embed4 = new Discord.MessageEmbed()
-                                                    .setTitle(`You have successfully created ${server.getTierManager().tiers.size} tiers!`);
-                                                message.channel.send(embed4).then(() => {
-                                                    embed4.setTitle(`To add drivers to each team, use the ${server.prefix}setdriver command!`);
-                                                    message.channel.send(embed4);
-                                                });
+                                                    .setTitle(`You have successfully created ${tierAmount} tiers!`)
+                                                    .setDescription(`To continue setup for drivers per team per tier, please use the ${server.prex}setdriver command!`);
+
+                                                message.channel.send(embed4);
                                             });
 
                                         } else {
@@ -154,7 +152,7 @@ module.exports = {
                         });
                     } else if (reaction.emoji.name === '🇨') {
                         const embed6 = new Discord.MessageEmbed();
-                        embed6.setTitle('~ Work in progress ~');
+                        embed6.setTitle('~~~ Work in progress ~~~');
                         embed6.setDescription('Feature will be available soon!');
                         message.channel.send(embed6);
                     }

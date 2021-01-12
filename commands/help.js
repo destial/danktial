@@ -39,6 +39,12 @@ module.exports = {
             if (command) {
                 embed.setAuthor('Usage for this command is:');
                 embed.setDescription(`${server.prefix}${command.name} ${command.usage}`);
+                if (command.aliases && command.aliases.length) {
+                    embed.addField('Aliases', command.aliases.join(', '), false);
+                }
+                if (command.example) {
+                    embed.addField('Example', `${server.prefix}${command.name} ${command.example}`, false);
+                }
                 await message.channel.send(embed);
             }
         }

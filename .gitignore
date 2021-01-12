@@ -109,3 +109,4 @@ bot.db
 
 # RPL Files
 RPLListener.js
+restart.js

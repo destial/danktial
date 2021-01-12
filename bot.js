@@ -263,6 +263,10 @@ client.once('ready', async () => {
                         });
                     });
                 });
+
+                Manager.servers.forEach(server => {
+                    server.log(`This bot has been restarted! Sorry for the troubles!`);
+                });
             });
         });
 
