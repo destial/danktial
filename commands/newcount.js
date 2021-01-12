@@ -3,7 +3,7 @@ const Server = require('../items/Server');
 
 module.exports = {
     name: 'newcount',
-    aliases: ['count'],
+    aliases: ['count', 'setcount'],
     usage: '[ member | channel | role | all ]',
     description: 'Creates count channels',
     /**

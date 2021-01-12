@@ -57,9 +57,9 @@ module.exports = {
                     if (tier) {
                         const team = tier.getTeam(teamName.toLowerCase());
                         if (driverNumber) {
+                            const driver = tier.getDriver(id);
+                            const reserve = tier.getReserve(id);
                             if (team) {
-                                const driver = tier.getDriver(id);
-                                const reserve = tier.getReserve(id);
                                 if (driver) {
                                     if (driver.number !== String(driverNumber)) {
                                         driver.updateNumber(String(driverNumber));
@@ -89,6 +89,30 @@ module.exports = {
                                     await newDriver.save();
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
+                                message.channel.send(embed);
+                            } else if (teamName.toLowerCase().includes('reserve')) {
+                                if (driver) {
+                                    const toReserve = driver.toReserve();
+                                    if (toReserve.number !== String(driverNumber)) {
+                                        toReserve.updateNumber(String(driverNumber));
+                                    }
+                                    toReserve.setNumber(driverNumber);
+                                    toReserve.setTier(tier);
+                                    tier.addReserve(toReserve);
+                                    await toReserve.updateReserve();
+                                } else if (reserve) {
+                                    if (reserve.number !== String(driverNumber)) {
+                                        reserve.updateNumber(String(driverNumber));
+                                    }
+                                    reserve.setNumber(String(driverNumber));
+                                    reserve.setTier(tier);
+                                    await reserve.updateReserve();
+                                } else {
+                                    const newReserve = new Reserve(client, member, server, driverNumber, tier);
+                                    tier.addReserve(newReserve);
+                                    await newReserve.save();
+                                }
+                                embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 message.channel.send(embed);
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);

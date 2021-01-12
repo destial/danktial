@@ -25,13 +25,48 @@ class Reserve extends Driver {
     }
 
     async save() {
-        await Database.run(Database.driverSaveQuery, [this.id, this.guild.id, this.number, 1, (this.team ? this.team.name : ""), this.tier.name]);
+        await Database.run(Database.driverSaveQuery, [this.id, this.guild.id, this.number, 1, "", this.tier.name]);
         console.log(`[DRIVER] Saved reserve ${this.name} from ${this.guild.name}`);
     }
 
     async updateReserve() {
         await Database.run(Database.driverUpdateQuery, [1, "", this.id, this.guild.id, this.number, this.tier.name]);
         console.log(`[DRIVER] Updated reserve ${this.name} from ${this.guild.name}`);
+    }
+
+    /**
+     * 
+     * @param {string} number 
+     */
+    async updateNumber(number) {
+        await Database.run(Database.driverUpdateNumberQuery, [number, this.id, this.server.id]);
+        this.setNumber(number);
+        console.log(`[DRIVER] Updated reserve number ${this.name} from ${this.guild.name}`);
+    }
+
+    async delete() {
+        await Database.run(Database.driversDeleteQuery, [this.id, this.guild.id, this.tier.name]);
+        console.log(`[DRIVER] Deleted reserve ${this.name} from ${this.guild.name}`);
+    }
+
+    /**
+     * 
+     * @param {string} number 
+     */
+    setNumber(number) {
+        this.number = number;
+    }
+
+    /**
+     * 
+     * @param {Tier} tier 
+     */
+    setTier(tier) {
+        this.tier = tier;
+    }
+
+    toFullName() {
+        return `${this.number} - ${this.member}`;
     }
 
     /**

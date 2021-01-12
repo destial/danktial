@@ -115,10 +115,13 @@ client.once('ready', async () => {
                         if (server) {
                             if (row.name === "membercount") {
                                 server.getCountManager().setCount('member', channel);
+                                console.log(`[COUNT] Loaded membercount channel from ${server.id}`);
                             } else if (row.name === "rolecount") {
                                 server.getCountManager().setCount('role', channel);
+                                console.log(`[COUNT] Loaded rolecount channel from ${server.id}`);
                             } else if (row.name === "channelcount") {
                                 server.getCountManager().setCount('channel', channel);
+                                console.log(`[COUNT] Loaded channelcount channel from ${server.id}`);
                             }
                         }
                     } else {

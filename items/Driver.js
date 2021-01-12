@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Database = require('../database/Database');
+const Reserve = require('./Reserve');
 const Server = require('./Server');
 const Team = require('./Team');
 const Tier = require('./Tier');
@@ -77,6 +78,18 @@ class Driver {
 
     toFullName() {
         return `${this.number} - ${this.member}`;
+    }
+
+    /**
+     * @returns {Reserve}
+     */
+    async toReserve() {
+        this.tier.removeDriver(this.id);
+        const newReserve = new Reserve(this.client, this.member, this.server, this.number, this.tier);
+        await newReserve.updateReserve();
+        this.team = undefined;
+        this.tier = undefined;
+        return newReserve;
     }
 }
 
