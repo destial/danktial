@@ -26,7 +26,7 @@ module.exports = {
                 .addFields([
                     { name: 'Open Tickets', value: server.getTicketManager().opentickets.size, inline: true },
                     { name: 'Active Events', value: server.getAttendanceManager().getEvents().size + server.getAttendanceManager().getAdvancedEvents().size, inline: true },
-                    { name: 'Total tiers', value: server.getTierManager().tiers.size, inline: true }
+                    { name: 'Total Tiers', value: server.getTierManager().tiers.size, inline: true }
                 ]);
                 var totalDrivers = 0; var totalReserves = 0; var totalTeams = 0;
                 server.getTierManager().tiers.forEach(tier => {
@@ -35,18 +35,16 @@ module.exports = {
                     totalTeams += tier.teams.size;
                 });
                 embed.addFields([
-                    { name: 'Total drivers', value: totalDrivers, inline: true },
-                    { name: 'Total reserves', value: totalReserves, inline: true },
-                    { name: 'Total teams', value: totalTeams, inline: true }
-                ])
-                var servers = 0;
+                    { name: 'Total Drivers', value: totalDrivers, inline: true },
+                    { name: 'Total Reserves', value: totalReserves, inline: true },
+                    { name: 'Total Teams', value: totalTeams, inline: true }
+                ]);
                 client.shard.fetchClientValues('guilds.cache.size').then(results => {
-                    servers = results.reduce((acc, guildCount) => acc + guildCount, 0);
+                    const servers = results.reduce((acc, guildCount) => acc + guildCount, 0);
+                    embed.setFooter(`Serving ${servers} guilds!`)
+                    .setColor('RED');
+                    message.channel.send(embed);
                 });
-                embed.setFooter(`Serving ${servers} guilds!`)
-                .setColor('RED');
-
-            await message.channel.send(embed);
         }
     }
 };
