@@ -114,13 +114,22 @@ client.once('ready', async () => {
                         const server = await Manager.fetch(channel.guild.id);
                         if (server) {
                             if (row.name === "membercount") {
-                                server.getCountManager().setCount('member', channel);
+                                await server.getCountManager().setCount('member', channel);
+                                channel.edit({
+                                    name: `Member Count: ${server.guild.memberCount}`
+                                });
                                 console.log(`[COUNT] Loaded membercount channel from ${server.id}`);
                             } else if (row.name === "rolecount") {
                                 server.getCountManager().setCount('role', channel);
+                                channel.edit({
+                                    name: `Role Count: ${server.guild.roles.cache.size}`
+                                });
                                 console.log(`[COUNT] Loaded rolecount channel from ${server.id}`);
                             } else if (row.name === "channelcount") {
                                 server.getCountManager().setCount('channel', channel);
+                                channel.edit({
+                                    name: `Channel Count: ${server.guild.channels.cache.size}`
+                                });
                                 console.log(`[COUNT] Loaded channelcount channel from ${server.id}`);
                             }
                         }
