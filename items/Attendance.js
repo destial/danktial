@@ -74,6 +74,7 @@ class Attendance {
                 });
                 this.schedule.cancel();
             });
+            console.log(`[ATTENDANCE] Created schedule for ${this.schedule.name}`);
         }
 
         this.updateList();
@@ -204,6 +205,7 @@ class Attendance {
             });
             this.schedule.cancel();
         });
+        console.log(`[ATTENDANCE] Edited schedule for ${this.schedule.name}`);
         return this.embed.spliceFields(0, 1, {
             name: "Date & Time", value: (dateString), inline: false
         });

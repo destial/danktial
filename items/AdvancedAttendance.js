@@ -29,23 +29,24 @@ class AdvancedAttendance {
 
         const fiveMinBefore = this.date.getTime() - 300000;
         if (fiveMinBefore > new Date().getTime()) {
-            this.schedule = schedule.scheduleJob(this.title, fiveMinBefore, () => {
+            this.schedule = schedule.scheduleJob(this.embed.title, fiveMinBefore, () => {
                 const participants = [""];
                 participants.shift();
                 this.accepted.keyArray().forEach(k => {
                     participants.push(k);
                 });
                 participants.forEach(async (participant) => {
-                    const mem = this.guild.members.cache.find((member) => member.id === participant);
+                    const mem = this.server.guild.members.cache.find((member) => member.id === participant);
                     if (mem) {
                         const embed = new Discord.MessageEmbed();
                         embed.setAuthor(`You have an event scheduled in 5 minutes!`);
-                        embed.setDescription(this.title);
+                        embed.setDescription(this.embed.title);
                         mem.user.send(embed);
                     }
                 });
                 this.schedule.cancel();
             });
+            console.log(`[ADATTENDANCE] Created new schedule for ${this.schedule.name}`);
         }
 
         /**
@@ -224,7 +225,7 @@ class AdvancedAttendance {
     }
 
     async update() {
-        await Database.run(Database.advancedAttendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id, this.tier.name]);
+        await Database.run(Database.advancedAttendanceUpdateQuery, [String(this.date.getTime()), this.id, this.message.channel.id]);
         console.log(`[ADATTENDANCE] Updated attendance ${this.embed.title} from ${this.server.guild.name}`);
     }
 
@@ -238,11 +239,16 @@ class AdvancedAttendance {
         console.log(`[ADATTENDANCE] Saved attendance ${this.embed.title} from ${this.server.guild.name}`);
     }
 
+    /**
+     * 
+     * @param {Date} date 
+     * @param {string} dateString 
+     */
     updateDate(date, dateString) {
         this.date = date;
         this.embed.setTimestamp(date);
         this.schedule.cancel();
-        this.schedule = schedule.scheduleJob(this.title, date.getTime()-300000, () => {
+        this.schedule = schedule.scheduleJob(this.embed.title, date.getTime()-300000, () => {
             /**
              * @type {string[]}
              */
@@ -251,16 +257,17 @@ class AdvancedAttendance {
                 participants.push(k);
             });
             participants.forEach(participant => {
-                const mem = this.guild.members.cache.find((member) => member.id === participant);
+                const mem = this.server.guild.members.cache.find((member) => member.id === participant);
                 if (mem) {
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(`You have an event scheduled in 5 minutes!`);
-                    embed.setDescription(this.title);
+                    embed.setDescription(this.embed.title);
                     mem.user.send(embed);
                 }
             });
             this.schedule.cancel();
         });
+        console.log(`[ADATTENDANCE] Edited schedule for ${this.schedule.name}`);
         this.message.edit(this.embed.spliceFields(0, 1, {
             name: "Date & Time", value: (dateString), inline: false
         }));

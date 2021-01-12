@@ -66,6 +66,11 @@ class Database {
     static get advancedAttendanceDeleteQuery() { return "DELETE FROM advancedattendance WHERE (id=(?))"; }
 
     /**
+     * `UPDATE advancedattendance SET date=(?) WHERE (id=(?) AND channel=(?))`
+     */
+    static get advancedAttendanceUpdateQuery() { return "UPDATE advancedattendance SET date=(?) WHERE (id=(?) AND channel=(?))"; }
+
+    /**
      * `DELETE FROM drivers WHERE (id=(?) AND guild=(?) AND tier=(?))`
      */
     static get driversDeleteQuery() { return "DELETE FROM drivers WHERE (id=(?) AND guild=(?) AND tier=(?))"; }

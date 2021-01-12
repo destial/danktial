@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Database = require('../database/Database');
-const Reserve = require('./Reserve');
+//const Reserve = require('./Reserve');
 const Server = require('./Server');
 const Team = require('./Team');
 const Tier = require('./Tier');
@@ -35,6 +35,11 @@ class Driver {
     async update() {
         await Database.run(Database.driverUpdateQuery, [0, (this.team ? this.team.name : ""), this.id, this.guild.id, this.number, this.tier.name]);
         console.log(`[DRIVER] Updated driver ${this.name} from ${this.guild.name}`);
+    }
+
+    async updateReserve() {
+        await Database.run(Database.driverUpdateQuery, [1, "", this.id, this.guild.id, this.number, this.tier.name]);
+        console.log(`[DRIVER] Updated reserve ${this.name} from ${this.guild.name}`);
     }
 
     /**
@@ -81,15 +86,14 @@ class Driver {
     }
 
     /**
-     * @returns {Reserve}
+     * @returns {Driver}
      */
     async toReserve() {
         this.tier.removeDriver(this.id);
-        const newReserve = new Reserve(this.client, this.member, this.server, this.number, this.tier);
-        await newReserve.updateReserve();
         this.team = undefined;
         this.tier = undefined;
-        return newReserve;
+        await this.updateReserve();
+        return this;
     }
 }
 

@@ -136,7 +136,10 @@ class AttendanceManager {
                             );
                             t.teams.forEach(team => {
                                 const driverNames = [];
-                                team.drivers.array().forEach(d => {
+                                if (team.drivers.size === 0) {
+                                    driverNames.push('-');
+                                }
+                                team.drivers.forEach(d => {
                                     driverNames.push(`${AttendanceManager.tentative} ${d.member}`);
                                 });
                                 attendanceembed.addField(team.name, driverNames.join('\n'), false);
@@ -157,7 +160,7 @@ class AttendanceManager {
                                 await m.react(AttendanceManager.tentative);
                                 await m.react(AttendanceManager.delete);
                                 await m.react(AdvancedAttendance.editEmoji);
-                                replyEmbed.setAuthor(`Successfully created event ${title}`);
+                                replyEmbed.setAuthor(`Successfully created attendance ${title}`);
                                 await member.user.send(replyEmbed);
                                 const attendance = new AdvancedAttendance(client, m, server, t, dateObject, this);
                                 this.advancedEvents.set(attendance.id, attendance);
@@ -433,7 +436,7 @@ class AttendanceManager {
             member.user.send(embed);
             return;
         }
-        embed.setAuthor("Select the event to edit:");
+        embed.setAuthor("Select the attendance to edit:");
         embed.addFields(
             {name: 'Events', value: allevents.join('\n'), inline: true}
         );
@@ -518,7 +521,7 @@ class AttendanceManager {
                                             attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                                 try {
                                                     await attendanceevent.update();
-                                                    embed2.setAuthor("Successfully edited event!");
+                                                    embed2.setAuthor(`Successfully edited attendance!`);
                                                     member.user.send(embed2);
                                                 } catch (err) {
                                                     console.log(err);
@@ -555,7 +558,6 @@ class AttendanceManager {
     async loadAdvancedAttendance(message, tier, date) {
         const attendance = new AdvancedAttendance(this.client, message, this.server, tier, date, this);
         this.advancedEvents.set(attendance.id, attendance);
-        //await attendance.reset();
         console.log(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} of id: ${attendance.id}`);
     }
 
