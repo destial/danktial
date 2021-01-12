@@ -32,8 +32,18 @@ class Driver {
     }
 
     async update() {
-        await Database.run(Database.driverUpdateQuery, [0, (this.team ? this.team.name : ""), this.tier.name, this.id, this.guild.id, this.number]);
+        await Database.run(Database.driverUpdateQuery, [0, (this.team ? this.team.name : ""), this.id, this.guild.id, this.number, this.tier.name]);
         console.log(`[DRIVER] Updated driver ${this.name} from ${this.guild.name}`);
+    }
+
+    /**
+     * 
+     * @param {string} number 
+     */
+    async updateNumber(number) {
+        await Database.run(Database.driverUpdateNumberQuery, [number, this.id, this.server.id]);
+        this.setNumber(number);
+        console.log(`[DRIVER] Updated driver number ${this.name} from ${this.guild.name}`);
     }
 
     async delete() {

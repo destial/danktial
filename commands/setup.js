@@ -21,6 +21,7 @@ module.exports = {
             const embed = new Discord.MessageEmbed();
             if (server.getTierManager().tiers.size !== 0) {
                 embed.setTitle('You already have at least 1 existing tier! This command is only used for setup!');
+                message.channel.send(embed);
                 return;
             }
             embed.setTitle(`This is the start of setup. React with 🇩 to setup a default league, or 🇨 for custom teams.`)
@@ -28,6 +29,8 @@ module.exports = {
             `A default league means each tier will have 10 teams according to the F1 game.
             E.g. Mercedes, Ferrari ... Williams`);
             const reply = await message.channel.send(embed);
+            await reply.react('🇩');
+            await reply.react('🇨');
 
             let filter = (r, u) => (r.message.id === reply.id && u.id === message.member.id && (r.emoji.name === '🇨' || r.emoji.name === '🇩')); 
             const replyCollector = reply.createReactionCollector(filter, {
@@ -61,7 +64,7 @@ module.exports = {
                             if (reply1) {
                                 if (parseInt(reply1.content) && parseInt(reply1.content) !== 0) {
                                     const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-                                    const tierAmount = parseInt(reply.content);
+                                    const tierAmount = parseInt(reply1.content);
                                     embed3.setTitle('What do you want to name each tier as?');
                                     embed3.setDescription('Common names are as follows:\n' +
                                     `Tier {number}, Split {number}, Division {number}, Group {letter}
@@ -71,7 +74,8 @@ module.exports = {
                                     *If you use the letter placeholder, you only have a limit of ${letters.length} tiers`);
                                     await message.channel.send(embed3);
 
-                                    const tierCollector = message.channel.createMessageCollector(cFilter, {
+                                    let ccFilter = (m) => (m.author.id === message.member.id);
+                                    const tierCollector = message.channel.createMessageCollector(ccFilter, {
                                         max: 1, time: 5*60000
                                     });
 
@@ -81,7 +85,6 @@ module.exports = {
 
                                     tierCollector.once('end', async (collected) => {
                                         const reply4 = collected.first();
-
                                         if (reply4) {
                                             const tierName = reply4.content;
                                             if (tierName.includes('{letter}')) {
@@ -91,21 +94,38 @@ module.exports = {
                                                     return;
                                                 }
                                             }
-                                            const promise = new Promise(async (resolve, reject) => {
-                                                for (var i = 0; i < tierAmount; i++) {
-                                                    const tier = new Tier(client, server, tierName.replace('{number}', String(i)).replace('{letter}', letters[i]));
-                                                    const teamNames = 
+                                            if (!tierName.includes('{number}') && !tierName.includes('{letter}')) {
+                                                const embed6 = new Discord.MessageEmbed().setTitle('Please include a {number} or {letter} placeholder in your tier names!');
+                                                message.channel.send(embed6);
+                                                return;
+                                            }
+                                            const promise = new Promise(async (resolve1, reject) => {
+                                                const teamNames = 
                                                     ['Mercedes-AMG Petronas', 'Scuderia Ferrari', 'Redbull Racing', 'Racing Point F1', 
                                                     'Renault F1', 'McLaren F1', 'Haas F1 Team', 'Scuderia Alpha Tauri',
                                                     'Alpha Romeo Sauber F1', 'Williams Racing'];
-                                                    teamNames.forEach((name) => {
-                                                        const team = new Team(client, server, name, tier);
-                                                        team.save();
-                                                        tier.addTeam(team);
+                                                console.log(tierAmount);
+                                                for (var i = 1; i <= tierAmount; i++) {
+                                                    const tierPromise = new Promise(async (resolve2, reject) => {
+                                                        const tier = new Tier(client, server, tierName.replace('{number}', String(i)).replace('{letter}', letters[i]));
+                                                        console.log(tier.name);
+                                                        const teamPromise = new Promise((resolve3, reject) => {
+                                                            teamNames.forEach(async (name, index) => {
+                                                                const team = new Team(client, server, name, tier);
+                                                                await team.save();
+                                                                tier.addTeam(team);
+                                                                if (index === teamNames.length-1) resolve3();
+                                                            });
+                                                        });
+                                                        teamPromise.then(async () => {
+                                                            server.getTierManager().addTier(tier);
+                                                            await tier.save();
+                                                            console.log('new tier');
+                                                            resolve2();
+                                                        });
                                                     });
-                                                    server.getTierManager().addTier(tier);
-                                                    await tier.save();
-                                                    if (i === tierAmount-1) resolve();
+                                                    tierPromise.then(() => {});
+                                                    if (i === tierAmount) resolve1();
                                                 }
                                             });
 

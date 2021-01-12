@@ -35,6 +35,9 @@ module.exports = {
                     embed.setAuthor(`Details of ${tier.name}`);
                     tier.teams.forEach(team => {
                         const driverNames = [];
+                        if (team.drivers.size === 0) {
+                            driverNames.push('-');
+                        }
                         team.drivers.forEach(driver => {
                             driverNames.push(`<@${driver.id}>`);
                         });

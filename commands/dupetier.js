@@ -52,7 +52,7 @@ module.exports = {
                         embed.setAuthor(`Successfully duplicated tier ${newTier.name} from ${existingTier.name}. Here are the teams:`);
                         var teamList = '';
                         newTier.teams.forEach(team => {
-                            teamList += `- ${team.name}`;
+                            teamList += `- ${team.name}\n`;
                         });
                         
                         embed.setDescription(teamList);

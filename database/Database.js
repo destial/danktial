@@ -26,14 +26,14 @@ class Database {
     static get teamDeleteQuery() { return "DELETE FROM teams WHERE (guild=(?) AND name=(?) AND tier=(?))"; }
 
     /**
-     * `UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND tier=(?))`
+     * `UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND name=(?) AND tier=(?))`
      */
-    static get teamUpdateQuery() { return "UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND tier=(?))"; }
+    static get teamUpdateQuery() { return "UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND name=(?) AND tier=(?))"; }
 
     /**
-     * `UPDATE drivers SET reserved=(?), team=(?), tier=(?) WHERE (id=(?) AND guild=(?) AND number=(?))`
+     * `UPDATE drivers SET reserved=(?), team=(?) WHERE (id=(?) AND guild=(?) AND number=(?) AND tier=(?))`
      */
-    static get driverUpdateQuery() { return "UPDATE drivers SET reserved=(?), team=(?), tier=(?) WHERE (id=(?) AND guild=(?) AND number=(?))"; }
+    static get driverUpdateQuery() { return "UPDATE drivers SET reserved=(?), team=(?) WHERE (id=(?) AND guild=(?) AND number=(?) AND tier=(?))"; }
 
     /**
      * `UPDATE drivers SET number=(?) WHERE (id=(?) AND guild=(?))`

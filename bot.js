@@ -12,7 +12,6 @@ const Team = require('./items/Team');
 const Reserve = require('./items/Reserve');
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
-    //shards: 'auto'
 });
 
 client.login(process.env.DISCORD_TOKEN);
@@ -20,7 +19,7 @@ client.login(process.env.DISCORD_TOKEN);
 client.once('ready', async () => {
     const Manager = new ServerManager(client);
     const loadServer = new Promise((resolve, reject) => {
-        client.guilds.cache.forEach(async (guild, index, map) => {
+        client.guilds.cache.forEach((guild, index, map) => {
             Manager.fetch(guild.id).then(server => {
                 if (!server) {
                     const server = new Server(client, guild, undefined, '-', 0, Manager);
