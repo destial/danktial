@@ -90,6 +90,7 @@ module.exports = {
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
                                 message.channel.send(embed);
+                                server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
                             } else if (teamName.toLowerCase().includes('reserve')) {
                                 if (driver) {
                                     const toReserve = driver.toReserve();
@@ -114,6 +115,8 @@ module.exports = {
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 message.channel.send(embed);
+                                server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
+
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);
                                 embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);

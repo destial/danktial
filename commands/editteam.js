@@ -85,6 +85,7 @@ module.exports = {
                                     nameCollector.stop();
                                 });
                                 nameCollector.on('end', async mCol => {
+                                    const oldName = team.name;
                                     team.name = mCol.first().content;
                                     await team.update();
                                     var driverList1 = "";
@@ -96,6 +97,7 @@ module.exports = {
                                     });
                                     embed.setDescription(driverList1);
                                     await message.channel.send(embed);
+                                    server.log(`${message.member.user.tag} has edited the name of team ${oldName} to ${team.name}`);
                                 });
                             } else if (messageReaction.emoji.name === "🏎️") {
                                 team.drivers.clear();
@@ -127,11 +129,12 @@ module.exports = {
                                     });
                                     embed.setAuthor(`Edited team ${name} under tier ${tier.name} with drivers:`);
                                     var driverList = "";
-                                    team.drivers.forEach(async driver => {
+                                    team.drivers.forEach(driver => {
                                         driverList += (`- ${driver.member}\n`);
                                     });
                                     embed.setDescription(driverList);
                                     await message.channel.send(embed);
+                                    server.log(`${message.member.user.tag} has added drivers to team ${team.name}`, driverList);
                                 });
                             }
                         });

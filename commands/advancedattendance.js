@@ -17,7 +17,10 @@ module.exports = {
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
             await message.delete({ timeout: 1000 });
-            await server.getAttendanceManager().newAdvancedAttendance(client, server, message.member, message.channel);
+            const attendance = await server.getAttendanceManager().newAdvancedAttendance(client, server, message.member, message.channel);
+            if (attendance) {
+                server.log(`${message.member.user.tag} has created advancedattendance ${attendance.embed.title}`);
+            }
         }
     }
 };

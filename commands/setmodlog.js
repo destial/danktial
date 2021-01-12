@@ -21,6 +21,7 @@ module.exports = {
             await server.setModLog(channel);
             embed.setAuthor(`Mod-log channel was set to:`);
             embed.setDescription(`${channel}`);
+            server.log(`This is now the mod-log channel for this bot!`);
         } else {
             embed.setAuthor(`Usage is:`);
             embed.setDescription(`${server.prefix}${this.name} ${this.usage}`); 

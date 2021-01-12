@@ -54,9 +54,9 @@ module.exports = {
                         newTier.teams.forEach(team => {
                             teamList += `- ${team.name}\n`;
                         });
-                        
                         embed.setDescription(teamList);
                         message.channel.send(embed);
+                        server.log(`${message.member.user.tag} has duplicated tier duplicated tier ${newTier.name} from ${existingTier.name}`);
                     } else {
                         embed.setAuthor('Ran out of time!');
                         message.channel.send(embed);

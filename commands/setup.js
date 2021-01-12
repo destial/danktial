@@ -108,6 +108,7 @@ module.exports = {
                                                 for (var i = 1; i <= tierAmount; i++) {
                                                     const tierPromise = new Promise((resolve2, reject) => {
                                                         const tier = new Tier(client, server, tierName.replace('{number}', String(i)).replace('{letter}', letters[i]));
+                                                        server.log(`${message.member.user.tag} has created tier ${tier.name}`);
                                                         const teamPromise = new Promise((resolve3, reject) => {
                                                             teamNames.forEach(async (name, index) => {
                                                                 const team = new Team(client, server, name, tier);
@@ -132,7 +133,6 @@ module.exports = {
                                                 const embed4 = new Discord.MessageEmbed()
                                                     .setTitle(`You have successfully created ${tierAmount} tiers!`)
                                                     .setDescription(`To continue setup for drivers per team per tier, please use the ${server.prex}setdriver command!`);
-
                                                 message.channel.send(embed4);
                                             });
 

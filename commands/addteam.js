@@ -83,7 +83,7 @@ module.exports = {
                             });
                         });
                         mentionP.then(() => {
-                            embed.setAuthor(`Created team ${name} under tier ${tier.name} with drivers:`);
+                            embed.setAuthor(`Created team ${team.name} under tier ${tier.name} with drivers:`);
                             var driverList = "";
                             const promise = new Promise((resolve, reject) => {
                                 team.drivers.forEach(async (driver, index) => {
@@ -95,6 +95,7 @@ module.exports = {
                                 embed.setDescription(driverList);
                                 await team.save();
                                 await message.channel.send(embed);
+                                server.log(`${message.member.user.tag} has created team ${team.name} under ${tier.name}`, driverList);
                             });
                         });
                     }

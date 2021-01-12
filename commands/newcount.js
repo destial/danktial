@@ -48,6 +48,7 @@ module.exports = {
                                 parent: category
                             });
                             await server.getCountManager().setCount('member', membercount);
+                            server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
 
                             const channelcount = await server.guild.channels.create(`Channel Count: ${server.guild.channels.cache.size}`, {
                                 type: 'voice',
@@ -60,6 +61,7 @@ module.exports = {
                                 parent: category
                             });
                             await server.getCountManager().setCount('channel', channelcount);
+                            server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
 
                             const rolecount = await server.guild.channels.create(`Role Count: ${server.guild.roles.cache.size}`, {
                                 type: 'voice',
@@ -72,6 +74,7 @@ module.exports = {
                                 parent: category
                             });
                             await server.getCountManager().setCount('role', rolecount);
+                            server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
 
                             const embed = new Discord.MessageEmbed()
                                 .setAuthor('Created All Counts!');
@@ -93,6 +96,7 @@ module.exports = {
                             const embed = new Discord.MessageEmbed()
                                 .setAuthor('Created Member Count!');
                             await message.channel.send(embed);
+                            server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                         }
                     } else if (args[0] === 'role') {
                         if (!server.getCountManager().getCount('role')) {
@@ -110,6 +114,7 @@ module.exports = {
                             const embed = new Discord.MessageEmbed()
                                 .setAuthor('Created Role Count!');
                             await message.channel.send(embed);
+                            server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                         }
                     } else if (args[0] === 'channel') {
                         if (!server.getCountManager().getCount('channel')) {
@@ -127,6 +132,7 @@ module.exports = {
                             const embed = new Discord.MessageEmbed()
                                 .setAuthor('Created Channel Count!');
                             await message.channel.send(embed);
+                            server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                         }
                     }
                     resolve(server.getCountManager());

@@ -48,6 +48,7 @@ module.exports = {
                     await Database.run(Database.tierDeleteQuery, [tier.server.id, tier.name]);
                     server.getTierManager().removeTier(tier);
                     embed.setAuthor(`Deleted tier ${tier.name}`);
+                    server.log(`${message.member.user.tag} has deleted tier ${tier.name}`);
                     await message.channel.send(embed);
                     console.log(`[TIER] Deleted tier ${tier.name} from server ${tier.server.guild.name}`);
                 } catch(err) {

@@ -70,6 +70,7 @@ module.exports = {
                                 }
                                 resolve();
                                 await message.delete({ timeout: 1000 });
+                                server.log(`${message.member.user.tag} has created a poll in ${message.channel}`);
                             });
                         } else if (arguments.length > 10) {
                             const firstPart = [];
@@ -94,6 +95,7 @@ module.exports = {
                                     }
                                     resolve();
                                     await message.delete({ timeout: 1000 });
+                                    server.log(`${message.member.user.tag} has created a poll in ${message.channel}`);
                                 });
                             });
                         }

@@ -27,6 +27,7 @@ module.exports = {
                 await attendance.reset();
                 embed.setAuthor(`Attendance ${attendance.embed.title} has been reset!`);
                 message.channel.send(embed);
+                server.log(`${message.member.user.tag} has reset attendance ${attendance.embed.title}`);
             } else {
                 embed.setAuthor('Attendance does not exist! Perhaps using the wrong message id?');
                 embed.setDescription('If you are in developer mode, right click the attendance and copy the id to get the message id');

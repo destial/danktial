@@ -25,6 +25,7 @@ module.exports = {
             }
             await server.getTicketManager().addTicketPanel(client, message.channel, args.join(' '));
             await message.delete({ timeout: 1000 });
+            server.log(`${message.member.user.tag} has created a ticket panel in ${message.channel}`);
         }
     }
 };

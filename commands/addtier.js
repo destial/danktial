@@ -53,6 +53,7 @@ module.exports = {
                 });
                 embed.setDescription(driverList);
                 await message.channel.send(embed);
+                server.log(`${message.member.user.tag} has added tier ${tier.name}`);
                 await Database.run(Database.tierSaveQuery, [server.id, name]);
             });
         }
