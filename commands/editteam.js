@@ -86,7 +86,13 @@ module.exports = {
                                 });
                                 nameCollector.on('end', async mCol => {
                                     const oldName = team.name;
-                                    team.name = mCol.first().content;
+                                    const updateName = mCol.first().content;
+                                    const existingTeam = tier.getTeam(updateName.toLowerCase());
+                                    if (existingTeam) {
+                                        embed.setAuthor('Team with that name already exists in that tier! Please try a different name!');
+                                        message.channel.send(embed);
+                                        return;
+                                    }
                                     await team.update();
                                     var driverList1 = "";
 

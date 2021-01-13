@@ -43,20 +43,25 @@ module.exports = {
                         const newName = reply.content;
                         const newTier = new Tier(client, server, newName);
                         newTier.save();
-                        existingTier.teams.forEach(team => {
-                            const newTeam = new Team(client, server, team.name, newTier);
-                            newTier.addTeam(newTeam);
-                            newTeam.save();
+                        const promise = new Promise((resolve, reject) => {
+                            existingTier.teams.forEach(team=> {
+                                const newTeam = new Team(client, server, team.name, newTier);
+                                newTier.addTeam(newTeam);
+                                if (team.name === existingTier.teams.last().name) resolve();
+                            });
                         });
+                        promise.then(() => {
+                            newTier.saveTeams();
 
-                        embed.setAuthor(`Successfully duplicated tier ${newTier.name} from ${existingTier.name}. Here are the teams:`);
-                        var teamList = '';
-                        newTier.teams.forEach(team => {
-                            teamList += `- ${team.name}\n`;
+                            embed.setAuthor(`Successfully duplicated tier ${newTier.name} from ${existingTier.name}. Here are the teams:`);
+                            var teamList = '';
+                            newTier.teams.forEach(team => {
+                                teamList += `- ${team.name}\n`;
+                            });
+                            embed.setDescription(teamList);
+                            message.channel.send(embed);
+                            server.log(`${message.member.user.tag} has duplicated tier duplicated tier ${newTier.name} from ${existingTier.name}`);
                         });
-                        embed.setDescription(teamList);
-                        message.channel.send(embed);
-                        server.log(`${message.member.user.tag} has duplicated tier duplicated tier ${newTier.name} from ${existingTier.name}`);
                     } else {
                         embed.setAuthor('Ran out of time!');
                         message.channel.send(embed);

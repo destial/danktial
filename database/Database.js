@@ -1,4 +1,6 @@
 const sql = require('sqlite3');
+const Query = require('./Query');
+const { Collection } = require('discord.js');
 
 class Database {
     static db() {
@@ -205,11 +207,13 @@ class Database {
         return new Promise((resolve, reject) => {
             Database.db().run(query, ...args, err => {
                 if (err) {
-                    Database.db().close();
-                    reject(err);
+                    Database.db().close(er => {
+                        reject(err);
+                    });
                 } else {
-                    Database.db().close();
-                    resolve(true);
+                    Database.db().close(err => {
+                        resolve();
+                    });
                 }
             });
         });
@@ -224,12 +228,61 @@ class Database {
         return new Promise((resolve, reject) => {
             Database.db().all(query, [], (err, rows) => {
                 if (!err) {
-                    Database.db().close();
-                    resolve(rows);
+                    Database.db().close(err => {
+                        resolve(rows);
+                    });
                 } else {
-                    Database.db().close();
-                    reject(err);
+                    Database.db().close(er => {
+                        reject(err);
+                    });
                 }
+            });
+        });
+    }
+
+    /**
+     * 
+     * @param  {Query[]} queries
+     */
+    static multipleRun(queries) {
+        return new Promise((resolve, reject) => {
+            queries.forEach(query => {
+                Database.db().run(query.query, query.args, err => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    }
+                });
+            });
+            Database.db().close(err => {
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * 
+     * @param  {Query[]} queries
+     * @returns {Promise<Collection<Query, any[]>}
+     */
+    static multipleAll(queries) {
+        /**
+         * @type {Collection<Query, any[]>}
+         */
+        const collection = new Collection();
+        return new Promise(async (resolve, reject) => {
+            queries.forEach(query => {
+                Database.db().all(query.query, [], (err, rows) => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    } else {
+                        collection.set(query, rows);
+                    }
+                });
+            });
+            Database.db().close(err => {
+                resolve(collection);
             });
         });
     }

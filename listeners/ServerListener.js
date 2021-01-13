@@ -25,7 +25,8 @@ module.exports = {
 
         client.on('guildDelete', async (guild) => {
             try {
-                await servers.removeServer(guild.id);
+                const server = await servers.fetch(guild.id);
+                await servers.removeServer(server);
                 console.log(`[SERVER] Left server ${guild.id}`);
             } catch (err) {
                 console.log('[ERROR] Something happened while trying to add a server!', err);

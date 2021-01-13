@@ -63,21 +63,24 @@ module.exports = {
                     } else {
                         const mentions = reply.mentions.members;
                         const team = new Team(client, server, name, tier);
+                        tier.addTeam(team);
                         const mentionP = new Promise((resolve, reject) => {
                             mentions.forEach(async (mention,index) => {
-                                var driver = tier.drivers.get(mention.id);
-                                if (!driver) {
-                                    driver = tier.reserves.get(mention.id);
-                                }
-                                if (!driver) {
-                                    driver = new Driver(client, mention, server, team, 0, tier);
-                                    await driver.save();
+                                const driver = tier.drivers.get(mention.id);
+                                const reserve = tier.reserves.get(mention.id);
+                                if (!driver && !reserve) {
+                                    const newDriver = new Driver(client, mention, server, team, 0, tier);
+                                    team.setDriver(newDriver);
+                                    tier.addDriver(newDriver);
+                                    await newDriver.save();
+                                } else if (reserve) {
+                                    const newDriver = reserve.toDriver(team);
                                     team.setDriver(driver);
-                                    tier.addDriver(driver);
+                                    tier.removeReserve(reserve);
+                                    tier.addDriver(newDriver);
+                                    await newDriver.update();
                                 } else {
                                     driver.setTeam(team);
-                                    await driver.update();
-                                    team.setDriver(driver);
                                 }
                                 if (index === mentions.last().id) resolve();
                             });

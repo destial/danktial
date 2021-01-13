@@ -68,9 +68,9 @@ module.exports = {
                                 for (var i = 0; i < arguments.length; i++) {
                                     await message.react(reactions[i]);
                                 }
-                                resolve();
                                 await message.delete({ timeout: 1000 });
                                 server.log(`${message.member.user.tag} has created a poll in ${message.channel}`);
+                                resolve();
                             });
                         } else if (arguments.length > 10) {
                             const firstPart = [];
@@ -93,9 +93,9 @@ module.exports = {
                                     for (var iiii = 0; iiii < secondPart.length; iiii++) {
                                         await mes.react(reactions[iiii]);
                                     }
-                                    resolve();
                                     await message.delete({ timeout: 1000 });
                                     server.log(`${message.member.user.tag} has created a poll in ${message.channel}`);
+                                    resolve();
                                 });
                             });
                         }

@@ -75,6 +75,7 @@ module.exports = {
 
                             const embed = new Discord.MessageEmbed()
                                 .setAuthor('Created All Counts!');
+                            console.log(`[COUNT] Created all count channels for server ${server.guild.name}`);
                             await message.channel.send(embed);
                         }
                     } else if (args[0] === 'member') {

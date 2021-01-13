@@ -40,7 +40,7 @@ client.once('ready', async () => {
                                 if (guild && server) {
                                     const modlog = guild.channels.cache.find(c => c.id === row.log);
                                     server.load(guild, modlog, row.prefix, row.tickets);
-                                    await server.save();
+                                    //await server.save();
                                 } else if (!guild) {
                                     Database.run(Database.serverDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                                 }

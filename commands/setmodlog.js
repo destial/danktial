@@ -22,6 +22,7 @@ module.exports = {
             embed.setAuthor(`Mod-log channel was set to:`);
             embed.setDescription(`${channel}`);
             server.log(`This is now the mod-log channel for this bot!`);
+            console.log(`[MODLOG] Set mod-log for server ${message.guild.name} to ${server.modlog.id}`);
         } else {
             embed.setAuthor(`Usage is:`);
             embed.setDescription(`${server.prefix}${this.name} ${this.usage}`); 

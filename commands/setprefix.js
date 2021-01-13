@@ -22,6 +22,7 @@ module.exports = {
                 embed.setAuthor(`Prefix has been set to: ${server.prefix}`);
                 message.channel.send(embed);
                 server.log('Server command prefix for this bot has been switched to:', "`" + server.prefix + "`");
+                console.log(`[PREFIX] Prefix for guild ${server.guild.name} changed to ${server.prefix}`);
             } else {
                 embed.setAuthor(`Prefix should be at most 3 characters long! E.g ${server.prefix}setprefix - or ${server.prefix}setprefix ///`);
                 await message.channel.send(embed);

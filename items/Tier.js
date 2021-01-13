@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Database = require('../database/Database');
+const Query = require('../database/Query');
 const Driver = require('./Driver');
 const Reserve = require('./Reserve');
 const Server = require('./Server');
@@ -35,6 +36,16 @@ class Tier {
     async save() {
         await Database.run(Database.tierSaveQuery, [this.server.id, this.name]);
         console.log(`[TIER] Saved tier ${this.name} from ${this.server.guild.name}`);
+    }
+
+    async saveTeams() {
+        const queries = [];
+        this.teams.forEach(team => {
+            const args = [team.server.id, team.name, team.tier.name];
+            const query = new Query(Database.teamSaveQuery, args);
+            queries.push(query);
+        });
+        await Database.multipleRun(queries);
     }
 
     /**
@@ -101,7 +112,7 @@ class Tier {
     addTeam(team) {
         if (!this.teams.get(team.name.toLowerCase())) {
             this.teams.set(team.name.toLowerCase(), team);
-            console.log(`[TEAM] Added team ${team.name} to ${this.name}`);
+            console.log(`[TEAM] Added team ${team.name} from ${this.server.guild.name} to ${this.name}`);
         }
     }
 
@@ -124,7 +135,7 @@ class Tier {
      * @param {string} name
      */
     searchTeam(name) {
-        return this.teams.filter(team => team.name.includes(name.toLowerCase()));
+        return this.teams.filter(team => team.name.toLowerCase().includes(name.toLowerCase()));
     }
 
     /**

@@ -97,10 +97,10 @@ module.exports = {
                                 embed5.setAuthor('Team name was found in many instances! Try to use the exact name!');
                                 var teamList = '';
                                 teamCol.forEach(team => {
-                                    teamList += `- ${team.name}`;
+                                    teamList += `- ${team.name}\n`;
                                 });
                                 embed5.setDescription(teamList);
-                                message.send(embed5);
+                                message.channel.send(embed5);
                             } else if (teamName.toLowerCase().includes('reserve')) {
                                 if (driver) {
                                     const toReserve = driver.toReserve();

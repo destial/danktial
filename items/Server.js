@@ -104,12 +104,12 @@ class Server {
 
     async save() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
-        console.log(`[SERVER] Saved server ${this.id}`);
+        console.log(`[SERVER] Saved server ${this.guild.name}`);
     }
 
     async delete() {
         await Database.run(Database.serverDeleteQuery, [this.id]);
-        console.log(`[SERVER] Deleted server ${this.id}`);
+        console.log(`[SERVER] Deleted server ${this.guild.name}`);
     }
     /**
      * @param {Discord.Guild} guild 
@@ -124,7 +124,7 @@ class Server {
         this.prefix = prefix;
         this.ticketManager.totaltickets = tickets;
 
-        console.log(`[SERVER] Loaded server ${guild.id}`);
+        console.log(`[SERVER] Loaded server ${this.guild.name}`);
     }
 
     getTicketManager() { return this.ticketManager; }

@@ -112,15 +112,16 @@ module.exports = {
                                                         const teamPromise = new Promise((resolve3, reject) => {
                                                             teamNames.forEach(async (name, index) => {
                                                                 const team = new Team(client, server, name, tier);
-                                                                await team.save();
                                                                 tier.addTeam(team);
-                                                                if (index === teamNames.length-1) resolve3();
+                                                                if (index === (teamNames.length-1)) {
+                                                                    resolve3();
+                                                                }
                                                             });
                                                         });
                                                         teamPromise.then(async () => {
                                                             server.getTierManager().addTier(tier);
                                                             await tier.save();
-                                                            console.log('new tier');
+                                                            await tier.saveTeams();
                                                             resolve2();
                                                         });
                                                     });
@@ -128,14 +129,12 @@ module.exports = {
                                                     if (i === tierAmount) resolve1();
                                                 }
                                             });
-
                                             promise.then(() => {
                                                 const embed4 = new Discord.MessageEmbed()
                                                     .setTitle(`You have successfully created ${tierAmount} tiers!`)
-                                                    .setDescription(`To continue setup for drivers per team per tier, please use the ${server.prex}setdriver command!`);
+                                                    .setDescription(`To continue setup for drivers per team per tier, please use the ${server.prefix}setdriver command!`);
                                                 message.channel.send(embed4);
                                             });
-
                                         } else {
                                             const embed2 = new Discord.MessageEmbed().setTitle('Ran out of time!');
                                             message.channel.send(embed2);
