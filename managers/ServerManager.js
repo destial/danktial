@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const Server = require('../items/Server');
 const Database = require("../database/Database");
+const { tierDeleteQuery, teamDeleteQuery, driversDeleteGuildQuery } = require('../database/Database');
 
 class ServerManager {
     /**
@@ -9,7 +10,7 @@ class ServerManager {
      */
     constructor(client) {
         /**
-         * @type {Discord.Collection<string, Server}
+         * @type {Discord.Collection<string, Server>}
          */
         this.servers = new Discord.Collection();
         this.client = client;
@@ -105,6 +106,29 @@ class ServerManager {
                     Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                 }
             });
+
+            const advancedRows = await Database.all(Database.advancedAttendanceQuery);
+            advancedRows.forEach(async row => {
+                try {
+                    const channel = await this.client.channels.fetch(row.channel);
+                    if (channel && channel.isText()) {
+                        const message = await channel.messages.fetch(row.id);
+                        if (message) {
+                            Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                        }
+                    } else {
+                        Database.run(Database.advancedAttendanceDeleteQuery, [message.id]).then(() => {}).catch(err => console.log(err));
+                    }
+                } catch(err) {
+                    Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                }
+            });
+
+            await Database.run(Database.tierDeleteGuildQuery, [server.id]);
+            await Database.run(Database.driversDeleteGuildQuery, [server.id]);
+            await Database.run(Database.teamDeleteGuildQuery, [server.id]);
+
+            await Database.run(Database.serverDeleteQuery, [server.id]);
             console.log(`[DELETED SERVER] Deleted server ${server.guild.name} of id ${server.id}`);
         }
     }

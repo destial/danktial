@@ -26,6 +26,11 @@ class Database {
     static get teamDeleteQuery() { return "DELETE FROM teams WHERE (guild=(?) AND name=(?) AND tier=(?))"; }
 
     /**
+     * `DELETE FROM teams WHERE guild=(?)`
+     */
+    static get teamDeleteGuildQuery() { return "DELETE FROM teams WHERE guild=(?)"; }
+
+    /**
      * `UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND name=(?) AND tier=(?))`
      */
     static get teamUpdateQuery() { return "UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND name=(?) AND tier=(?))"; }
@@ -61,6 +66,11 @@ class Database {
     static get tierDeleteQuery() { return "DELETE FROM tiers WHERE (guild=(?) AND name=(?))"; }
 
     /**
+     * `DELETE FROM tiers WHERE guild=(?)`
+     */
+    static get tierDeleteGuildQuery() { return "DELETE FROM tiers WHERE guild=(?)"; }
+
+    /**
      * `DELETE FROM advancedattendance WHERE id=(?)`
      */
     static get advancedAttendanceDeleteQuery() { return "DELETE FROM advancedattendance WHERE (id=(?))"; }
@@ -74,6 +84,11 @@ class Database {
      * `DELETE FROM drivers WHERE (id=(?) AND guild=(?) AND tier=(?))`
      */
     static get driversDeleteQuery() { return "DELETE FROM drivers WHERE (id=(?) AND guild=(?) AND tier=(?))"; }
+
+    /**
+     * `DELETE FROM drivers WHERE guild=(?)`
+     */
+    static get driversDeleteGuildQuery() { return "DELETE FROM drivers WHERE guild=(?)"; }
 
     /**
      * `INSERT INTO tiers (guild,name) VALUES (?,?)`

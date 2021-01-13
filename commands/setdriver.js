@@ -55,11 +55,12 @@ module.exports = {
                     const teamName = arguments[2];
                     const tier = server.getTierManager().getTier(tierName.toLowerCase());
                     if (tier) {
-                        const team = tier.getTeam(teamName.toLowerCase());
+                        const teamCol = tier.searchTeam(teamName.toLowerCase());
                         if (driverNumber) {
                             const driver = tier.getDriver(id);
                             const reserve = tier.getReserve(id);
-                            if (team) {
+                            if (teamCol.size === 1) {
+                                const team = teamCol.first();
                                 if (driver) {
                                     if (driver.number !== String(driverNumber)) {
                                         driver.updateNumber(String(driverNumber));
@@ -91,6 +92,15 @@ module.exports = {
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
+                            } else if(teamCol.size > 1) {
+                                const embed5 = new Discord.MessageEmbed();
+                                embed5.setAuthor('Team name was found in many instances! Try to use the exact name!');
+                                var teamList = '';
+                                teamCol.forEach(team => {
+                                    teamList += `- ${team.name}`;
+                                });
+                                embed5.setDescription(teamList);
+                                message.send(embed5);
                             } else if (teamName.toLowerCase().includes('reserve')) {
                                 if (driver) {
                                     const toReserve = driver.toReserve();

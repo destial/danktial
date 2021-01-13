@@ -121,6 +121,13 @@ class Tier {
     }
 
     /**
+     * @param {string} name
+     */
+    searchTeam(name) {
+        return this.teams.filter(team => team.name.includes(name.toLowerCase()));
+    }
+
+    /**
      * 
      * @param {string} id 
      */
