@@ -54,20 +54,24 @@ class CountManager {
                 case "member":
                     this.membercount = channel;
                     await Database.run(Database.countSaveQuery, [channel.id, "membercount"]);
+                    console.log(`[COUNT] Created membercount channel`);
                     resolve(this.membercount);
                     break;
                 case "channel":
                     this.channelcount = channel;
                     await Database.run(Database.countSaveQuery, [channel.id, "channelcount"]);
+                    console.log(`[COUNT] Created channelcount channel`);
                     resolve(this.channelcount);
                     break;
                 case "role":
                     this.rolecount = channel;
                     await Database.run(Database.countSaveQuery, [channel.id, "rolecount"]);
+                    console.log(`[COUNT] Created rolecount channel`);
                     resolve(this.rolecount);
                     break;
                 default:
                     resolve(undefined);
+                    break;
             }
         });
     }
@@ -83,23 +87,27 @@ class CountManager {
                 case "member":
                     if (this.membercount) {
                         await Database.run(Database.countDeleteQuery, [this.membercount.id]);
+                        console.log(`[COUNT] Deleted membercount channel`);
                     }
                     resolve(this.membercount);
                     break;
                 case "channel":
                     if (this.channelcount) {
                         await Database.run(Database.countDeleteQuery, [this.channelcount.id]);
+                        console.log(`[COUNT] Deleted channelcount channel`);
                     }
                     resolve(this.channelcount);
                     break;
                 case "role":
                     if (this.rolecount) {
                         await Database.run(Database.countDeleteQuery, [this.rolecount.id]);
+                        console.log(`[COUNT] Deleted rolecount channel`);
                     }
                     resolve(this.rolecount);
                     break;
                 default:
                     resolve(undefined);
+                    break;
             }
         });
     }
