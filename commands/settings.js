@@ -41,7 +41,7 @@ module.exports = {
             ]);
             client.shard.fetchClientValues('guilds.cache.size').then(results => {
                 const servers = results.reduce((acc, guildCount) => acc + guildCount, 0);
-                embed.setFooter(`Serving ${servers} guilds!`)
+                embed.setFooter(`Serving ${servers} guilds! • Built by destiall#9640`)
                 .setColor('RED');
                 message.channel.send(embed);
             });

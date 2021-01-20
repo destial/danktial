@@ -299,8 +299,8 @@ class AdvancedAttendance {
             });
             this.embed.addField('Reserves', reserveList, false);
         }
-        //console.log(this.embed);
-        await this.message.edit(this.embed);
+        console.log(this.embed);
+        this.message.edit(this.embed);
     }
 
     async update() {
