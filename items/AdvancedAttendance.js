@@ -227,7 +227,7 @@ class AdvancedAttendance {
         var hasReserves = false;
         this.embed.fields.forEach(field => {
             const team = this.tier.getTeam(field.name);
-            if (team) {
+            if (team && !field.name.toLowerCase().includes('reserves')) {
                 const driverArray = field.value.split('\n');
                 if (!driverArray.length) {
                     driverArray.push(field.value);
@@ -272,7 +272,7 @@ class AdvancedAttendance {
                         .replace(AdvancedAttendance.maybeEmoji, '')
                         .replace(AdvancedAttendance.unknownEmoji, '');
                     driverIDArray.push(id);
-                    if (!team.drivers.get(id)) {
+                    if (!this.tier.reserves.get(id)) {
                         driverArray.splice(index, 1);
                     }
                 });
@@ -299,8 +299,7 @@ class AdvancedAttendance {
             });
             this.embed.addField('Reserves', reserveList, false);
         }
-        console.log(this.embed);
-        await this.message.edit(this.embed);
+        this.message.edit(this.embed);
     }
 
     async update() {

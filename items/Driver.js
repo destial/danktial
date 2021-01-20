@@ -94,6 +94,19 @@ class Driver {
         await this.updateReserve();
         return this;
     }
+
+    /**
+     * @param {Team} team
+     * @returns {Driver}
+     */
+    async toDriver(team) {
+        this.team = team;
+        this.tier.removeReserve(this.id);
+        this.tier.addDriver(this);
+        team.setDriver(this);
+        await this.update();
+        return this;
+    }
 }
 
 module.exports = Driver;

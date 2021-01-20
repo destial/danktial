@@ -73,15 +73,15 @@ module.exports = {
                                     await driver.update();
                                     //console.log('driver exist');
                                 } else if (reserve && team) {
-                                    reserve.toDriver(team);
-                                    if (reserve.number != String(driverNumber)) {
-                                        await reserve.updateNum(String(driverNumber));
-                                    }
                                     reserve.setTier(tier);
                                     team.setDriver(reserve);
                                     tier.addDriver(reserve);
                                     tier.removeReserve(reserve.id);
-                                    await reserve.update();
+                                    if (reserve.number != String(driverNumber)) {
+                                        await reserve.updateNum(String(driverNumber));
+                                    }
+                                    reserve.toDriver(team);
+                                    //await reserve.update();
                                     //console.log('reserve exist');
                                 } else if (team) {
                                     const newDriver = new Driver(client, member, server, team, driverNumber, tier);
@@ -94,6 +94,9 @@ module.exports = {
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
+                                server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
+                                    await advanced.fix();
+                                });
                             } else if (teamCol.size > 1) {
                                 const embed5 = new Discord.MessageEmbed();
                                 embed5.setAuthor('Team name was found in many instances! Try to use the exact name!');
@@ -110,10 +113,10 @@ module.exports = {
                                     driver.team.removeDriver(driver.id);
                                     tier.addReserve(driver);
                                     tier.removeDriver(driver.id);
-                                    driver.toReserve();
                                     if (driver.number != String(driverNumber)) {
                                         await driver.updateNum(String(driverNumber));
                                     }
+                                    driver.toReserve();
                                     //await driver.update();
                                     //console.log('reserve driver exist');
                                 } else if (reserve) {
@@ -133,7 +136,9 @@ module.exports = {
                                 embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
-
+                                server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
+                                    await advanced.fix();
+                                });
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);
                                 embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);

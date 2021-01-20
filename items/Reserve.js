@@ -77,10 +77,9 @@ class Reserve extends Driver {
         this.team = team;
         this.tier.removeReserve(this.id);
         this.tier.addDriver(this);
-        const newDriver = new Driver(this.client, this.member, this.server, this.team, this.number, this.tier);
-        team.setDriver(newDriver);
-        await newDriver.update();
-        return newDriver;
+        team.setDriver(this);
+        await this.update();
+        return this;
     }
 }
 
