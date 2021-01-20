@@ -66,7 +66,7 @@ class Reserve extends Driver {
     }
 
     toFullName() {
-        return `${this.number} - ${this.member}`;
+        return `#${this.number} - ${this.member}`;
     }
 
     /**
@@ -74,11 +74,12 @@ class Reserve extends Driver {
      * @returns {Driver}
      */
     async toDriver(team) {
+        this.team = team;
         this.tier.removeReserve(this.id);
-        const newDriver = new Driver(this.client, this.member, this.server, team, this.number, this.tier);
-        await newDriver.update();
-        this.tier = undefined;
-        return newDriver;
+        this.tier.addDriver(this);
+        team.setDriver(this);
+        await this.update();
+        return this;
     }
 }
 

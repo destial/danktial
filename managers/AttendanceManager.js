@@ -33,6 +33,7 @@ class AttendanceManager {
     static get reject() { return "❌"; }
     static get tentative() { return "❔"; }
     static get delete() { return "🗑️"; }
+    static get unknown() { return "🟠"; }
 
     /**
      * @param {Discord.Client} client
@@ -140,14 +141,14 @@ class AttendanceManager {
                                     driverNames.push('-');
                                 }
                                 team.drivers.forEach(d => {
-                                    driverNames.push(`${AttendanceManager.tentative} ${d.member}`);
+                                    driverNames.push(`${AttendanceManager.unknown} ${d.member}`);
                                 });
                                 attendanceembed.addField(team.name, driverNames.join('\n'), false);
                             });
                             const reserveNames = [];
                             if (t.reserves.size !== 0) {
                                 t.reserves.forEach(reserve => {
-                                    reserveNames.push(`${AttendanceManager.tentative} ${reserve.member}`);
+                                    reserveNames.push(`${AttendanceManager.unknown} ${reserve.member}`);
                                 });
                                 attendanceembed.addField('Reserves', reserveNames.join('\n'), false);
                             }
@@ -187,7 +188,7 @@ class AttendanceManager {
     /**
      * 
      * @param {Discord.GuildMember} member 
-     * @param {Discord.GuildChannel} channel 
+     * @param {Discord.TextChannel} channel 
      * @returns {Promise<Attendance>}
      */
     async newAttendance(member, channel) {
@@ -271,7 +272,7 @@ class AttendanceManager {
                                     await m.react(AttendanceManager.delete);
                                     embed.setAuthor(`Successfully created event ${title}`);
                                     member.user.send(embed);
-                                    const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server.guild);
+                                    const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server.guild, m);
                                     this.events.set(attendance.id, attendance);
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
@@ -544,9 +545,9 @@ class AttendanceManager {
      * @param {Date} date
      */
     loadAttendance(message, date) {
-        const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild);
+        const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild, message);
         this.events.set(attendance.id, attendance);
-        console.log(`[ATTENDANCE] Loaded attendance ${attendance.title} of id: ${attendance.id}`);
+        console.log(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -558,7 +559,7 @@ class AttendanceManager {
     async loadAdvancedAttendance(message, tier, date) {
         const attendance = new AdvancedAttendance(this.client, message, this.server, tier, date, this);
         this.advancedEvents.set(attendance.id, attendance);
-        console.log(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} of id: ${attendance.id}`);
+        console.log(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -653,7 +654,7 @@ class AttendanceManager {
                     await message.delete({ timeout: 1000 });
                 }
                 await Database.run(Database.attendanceDeleteQuery, [attendanceevent.id]);
-                console.log(`[UPDATE] Deleted attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
+                console.log(`[UPDATE] Deleted attendance ${attendanceevent.title} of from ${this.server.guild.name}`);
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
@@ -675,8 +676,15 @@ class AttendanceManager {
                 if (!message.deleted) {
                     await message.delete({ timeout: 1000 });
                 }
+                attendanceevent.message.channel.messages.cache.forEach(async message => {
+                    if (!message.deleted) {
+                        if (message.createdAt.getTime() > attendanceevent.message.createdAt.getTime()) {
+                            await message.delete();
+                        }
+                    }
+                });
                 await Database.run(Database.advancedAttendanceDeleteQuery, [attendanceevent.id]);
-                console.log(`[UPDATE] Deleted attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
+                console.log(`[UPDATE] Deleted attendance ${attendanceevent.title} of from ${this.server.guild.name}`);
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }

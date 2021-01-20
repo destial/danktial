@@ -73,6 +73,10 @@ class Tier {
         }
     }
 
+    /**
+     * 
+     * @param {Driver} driver 
+     */
     loadDriver(driver) {
         if (!this.drivers.get(driver.id)) {
             this.drivers.set(driver.id, driver);
@@ -89,7 +93,7 @@ class Tier {
 
     /**
      * 
-     * @param {Reserve} reserve 
+     * @param {Reserve | Driver} reserve 
      */
     addReserve(reserve) {
         if (!this.reserves.get(reserve.id)) {

@@ -61,9 +61,9 @@ module.exports = {
                             const reserve = tier.getReserve(id);
                             if (teamCol.size === 1) {
                                 const team = teamCol.first();
-                                if (driver) {
-                                    if (driver.number !== String(driverNumber)) {
-                                        driver.updateNumber(String(driverNumber));
+                                if (driver && team) {
+                                    if (driver.number != String(driverNumber)) {
+                                        await driver.updateNumber(String(driverNumber));
                                     }
                                     driver.setNumber(String(driverNumber));
                                     driver.team.removeDriver(id);
@@ -71,28 +71,33 @@ module.exports = {
                                     driver.setTier(tier);
                                     team.setDriver(driver);
                                     await driver.update();
-                                } else if (reserve) {
-                                    const toDriver = reserve.toDriver();
-                                    if (toDriver.number !== String(driverNumber)) {
-                                        toDriver.updateNumber(String(driverNumber));
+                                    //console.log('driver exist');
+                                } else if (reserve && team) {
+                                    reserve.setTier(tier);
+                                    team.setDriver(reserve);
+                                    tier.addDriver(reserve);
+                                    tier.removeReserve(reserve.id);
+                                    if (reserve.number != String(driverNumber)) {
+                                        await reserve.updateNum(String(driverNumber));
                                     }
-                                    toDriver.setNumber(driverNumber);
-                                    toDriver.setTeam(team);
-                                    toDriver.setTier(tier);
-                                    team.setDriver(toDriver);
-                                    tier.addDriver(toDriver);
-                                    await toDriver.update();
-                                } else {
+                                    reserve.toDriver(team);
+                                    //await reserve.update();
+                                    //console.log('reserve exist');
+                                } else if (team) {
                                     const newDriver = new Driver(client, member, server, team, driverNumber, tier);
                                     tier.addDriver(newDriver);
                                     team.setDriver(newDriver);
                                     newDriver.setTeam(team);
                                     await newDriver.save();
+                                    //console.log('new driver');
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
-                            } else if(teamCol.size > 1) {
+                                server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
+                                    await advanced.fix();
+                                });
+                            } else if (teamCol.size > 1) {
                                 const embed5 = new Discord.MessageEmbed();
                                 embed5.setAuthor('Team name was found in many instances! Try to use the exact name!');
                                 var teamList = '';
@@ -102,31 +107,38 @@ module.exports = {
                                 embed5.setDescription(teamList);
                                 message.channel.send(embed5);
                             } else if (teamName.toLowerCase().includes('reserve')) {
+                                //console.log(driver);
                                 if (driver) {
-                                    const toReserve = driver.toReserve();
-                                    if (toReserve.number !== String(driverNumber)) {
-                                        toReserve.updateNumber(String(driverNumber));
+                                    driver.setTier(tier);
+                                    driver.team.removeDriver(driver.id);
+                                    tier.addReserve(driver);
+                                    tier.removeDriver(driver.id);
+                                    if (driver.number != String(driverNumber)) {
+                                        await driver.updateNum(String(driverNumber));
                                     }
-                                    toReserve.setNumber(driverNumber);
-                                    toReserve.setTier(tier);
-                                    tier.addReserve(toReserve);
-                                    await toReserve.updateReserve();
+                                    driver.toReserve();
+                                    //await driver.update();
+                                    //console.log('reserve driver exist');
                                 } else if (reserve) {
-                                    if (reserve.number !== String(driverNumber)) {
+                                    if (reserve.number != String(driverNumber)) {
                                         reserve.updateNumber(String(driverNumber));
                                     }
                                     reserve.setNumber(String(driverNumber));
                                     reserve.setTier(tier);
                                     await reserve.updateReserve();
+                                    //console.log('reserve reserve exist');
                                 } else {
-                                    const newReserve = new Reserve(client, member, server, driverNumber, tier);
+                                    const newReserve = new Reserve(client, member, server, String(driverNumber), tier);
                                     tier.addReserve(newReserve);
                                     await newReserve.save();
+                                    //console.log('new reserve');
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
-
+                                server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
+                                    await advanced.fix();
+                                });
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);
                                 embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);

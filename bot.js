@@ -20,7 +20,7 @@ client.once('ready', async () => {
     try {
         const Manager = new ServerManager(client);
         const loadServer = new Promise((resolve, reject) => {
-            client.guilds.cache.forEach((guild, index, map) => {
+            client.guilds.cache.forEach((guild) => {
                 Manager.fetch(guild.id).then(server => {
                     if (!server) {
                         const server = new Server(client, guild, undefined, '-', 0, Manager);
@@ -40,29 +40,32 @@ client.once('ready', async () => {
                                 if (guild && server) {
                                     const modlog = guild.channels.cache.find(c => c.id === row.log);
                                     server.load(guild, modlog, row.prefix, row.tickets);
-                                    //await server.save();
                                 } else if (!guild) {
                                     Database.run(Database.serverDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                                 }
                             });
                         });
                     } catch(err) {
-                        Database.run(Database.serverDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                         console.log(err);
                     }
                 });
-                if (serverRows.length !== client.guilds.cache.size) {
-                    client.guilds.cache.forEach(guild => {
-                        try {
-                            Manager.fetch(guild.id).then(async server => {
-                                await Database.run(Database.serverSaveQuery, [server.id, server.prefix, server.getTicketManager().totaltickets, (server.modlog ? server.modlog.id : 0)]);
-                                console.log(`[SERVER] Saved ${server.guild.name} to database`);
-                            });
-                        } catch(err) {
-                            console.log(err);
-                        }
-                    });
-                }
+
+                client.shard.fetchClientValues('guilds.cache.size').then(results => {
+                    const servers = results.reduce((acc, guildCount) => acc + guildCount, 0);
+                    if (serverRows.length < servers) {
+                        client.guilds.cache.forEach(async guild => {
+                            try {
+                                const exist = await Manager.fetch(guild.id);
+                                if (!exist) {
+                                    await Database.run(Database.serverSaveQuery, [guild.id, '-', 0, 0]);
+                                    console.log(`[SERVER] Saved ${server.guild.name} to database`);
+                                }
+                            } catch(err) {
+                                console.log(err);
+                            }
+                        });
+                    }
+                });
             });
 
             Database.all(Database.attendanceQuery).then(attendanceRows => {
@@ -80,7 +83,6 @@ client.once('ready', async () => {
                             Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         console.log(err);
                     }
                 });
@@ -104,7 +106,6 @@ client.once('ready', async () => {
                             Database.run(Database.ticketDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        Database.run(Database.ticketDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         console.log(err);
                     }
                 });
@@ -122,26 +123,25 @@ client.once('ready', async () => {
                                     await channel.edit({
                                         name: `Member Count: ${server.guild.memberCount}`
                                     });
-                                    console.log(`[COUNT] Loaded membercount channel from ${server.id}`);
+                                    console.log(`[COUNT] Loaded membercount channel from ${server.guild.name}`);
                                 } else if (row.name === "rolecount") {
                                     await server.getCountManager().setCount('role', channel);
                                     await channel.edit({
                                         name: `Role Count: ${server.guild.roles.cache.size}`
                                     });
-                                    console.log(`[COUNT] Loaded rolecount channel from ${server.id}`);
+                                    console.log(`[COUNT] Loaded rolecount channel from ${server.guild.name}`);
                                 } else if (row.name === "channelcount") {
                                     await server.getCountManager().setCount('channel', channel);
                                     await channel.edit({
                                         name: `Channel Count: ${server.guild.channels.cache.size}`
                                     });
-                                    console.log(`[COUNT] Loaded channelcount channel from ${server.id}`);
+                                    console.log(`[COUNT] Loaded channelcount channel from ${server.guild.name}`);
                                 }
                             }
                         } else {
                             Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         console.log(err);
                     }
                 });
@@ -164,7 +164,6 @@ client.once('ready', async () => {
                             Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         console.log(err);
                     }
                 });
@@ -224,15 +223,19 @@ client.once('ready', async () => {
                                             const tier = server.getTierManager().getTier(row.tier.toLowerCase());
                                             if (tier) {
                                                 const team = tier.teams.get(row.team.toLowerCase());
-                                                if (row.reserved == 0 && team) {
+                                                const existingD = tier.getDriver(row.id);
+                                                const existingR = tier.getReserve(row.id);
+                                                if (row.reserved == 0 && team && !existingD) {
                                                     const driver = new Driver(client, member, server, team, row.number, tier);
                                                     tier.addDriver(driver);
                                                     team.setDriver(driver);
                                                     console.log(`[DRIVER] Loaded driver ${driver.name} into tier ${driver.tier.name} in ${driver.guild.name}`);
-                                                } else {
+                                                } else if (row.reserved == 1 && !existingR) {
                                                     const reserve = new Reserve(client, member, server, row.number, tier);
                                                     tier.addReserve(reserve);
                                                     console.log(`[DRIVER] Loaded reserve ${reserve.name} into tier ${reserve.tier.name} in ${reserve.guild.name}`);
+                                                } else if (existingD || existingR) {
+                                                    Database.run(Database.driversDeleteQuery, [row.id, row.guild, row.tier]).then(() => {}).catch(err => console.log(err));
                                                 }
                                                 if (index === driverRows.length-1) resolve();
                                             }
@@ -282,7 +285,7 @@ client.once('ready', async () => {
                     });
 
                     Manager.servers.forEach(server => {
-                        server.log(`This bot has been restarted! Sorry for the troubles!`);
+                        server.log(`This bot has been restarted!`);
                     });
                 });
             });
@@ -291,13 +294,15 @@ client.once('ready', async () => {
             for (const file of listenerFiles) {
                 const listener = require(`./listeners/${file}`);
                 await listener.run(client, Manager).then(() => {}).catch(() => {});
-                if (client.shard.ids[0] === 0) console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
+                if (client.shard.ids[0] === 0) {
+                    console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
+                }
             }
-
-            setInterval(async () => {
-                const server = Manager.servers.random();
-                await client.user.setActivity(server.guild.name, { type: 'COMPETING' });
-            }, 1000 * 60 * 3);
+            if (client.shard.ids[0] === 0) {
+                setInterval(async () => {
+                    await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
+                }, 1000 * 60 * 5);
+            }
         });
     } catch(err) {
         console.log(err);

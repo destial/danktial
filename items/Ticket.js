@@ -92,13 +92,13 @@ class Ticket {
         return new Promise(async (resolve, reject) => {
             if (message.channel.id === this.channel.id) {
                 try {
-                    const a = await this.base.react(AttendanceManager.accept);
-                    const b = await this.base.react(AttendanceManager.reject);
+                    const a = await message.react(AttendanceManager.accept);
+                    const b = await message.react(AttendanceManager.reject);
                     let filter = (r, u) => (u.id === member.id && 
-                                            r.message.id === this.base.id && 
+                                            r.message.id === message.id && 
                                             (r.emoji.name === AttendanceManager.accept || r.emoji.name === AttendanceManager.reject));
 
-                    const collector = this.base.createReactionCollector(filter, { time: 60000 });
+                    const collector = message.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
                     collector.on('collect', async (r, u) => {
                         if (r.emoji.name === AttendanceManager.accept) {
@@ -113,6 +113,7 @@ class Ticket {
                         } else {
                             await a.remove();
                             await b.remove();
+                            await message.delete();
                             resolve(false);
                         }
                     });

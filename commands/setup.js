@@ -94,26 +94,71 @@ module.exports = {
                                                     return;
                                                 }
                                             }
-                                            if (!tierName.includes('{number}') && !tierName.includes('{letter}')) {
+                                            if (!tierName.includes('{number}') && !tierName.includes('{letter}') && tierAmount > 1) {
                                                 const embed6 = new Discord.MessageEmbed().setTitle('Please include a {number} or {letter} placeholder in your tier names!');
                                                 message.channel.send(embed6);
                                                 return;
                                             }
                                             const promise = new Promise(async (resolve1, reject) => {
-                                                const teamNames = 
-                                                    ['Mercedes-AMG Petronas', 'Scuderia Ferrari', 'Redbull Racing', 'Racing Point F1', 
-                                                    'Renault F1', 'McLaren F1', 'Haas F1 Team', 'Scuderia Alpha Tauri',
-                                                    'Alpha Romeo Sauber F1', 'Williams Racing'];
-                                                console.log(tierAmount);
+                                                /**
+                                                 * @type {Discord.Collection<string, string>}
+                                                 */
+                                                const teamNames = new Discord.Collection();
+                                                teamNames.set('Mercedes-AMG Petronas', 'https://cdn.discordapp.com/emojis/801293471440175105.png');
+                                                teamNames.set('Scuderia Ferrari', 'https://cdn.discordapp.com/emojis/801293471355895829.png');
+                                                teamNames.set('Redbull Racing', 'https://cdn.discordapp.com/emojis/801293470668554241.png');
+                                                teamNames.set('Racing Point F1', 'https://cdn.discordapp.com/emojis/801293860432773182.png');
+                                                teamNames.set('Renault F1', 'https://cdn.discordapp.com/emojis/801293860403544084.png');
+                                                teamNames.set('McLaren F1', 'https://cdn.discordapp.com/emojis/801293470484398120.png');
+                                                teamNames.set('Haas F1 Team', 'https://cdn.discordapp.com/emojis/801293861027577856.png');
+                                                teamNames.set('Scuderia Alpha Tauri', 'https://cdn.discordapp.com/emojis/801293860411932683.png');
+                                                teamNames.set('Alfa Romeo Sauber F1', 'https://cdn.discordapp.com/emojis/801293861648465991.png');
+                                                teamNames.set('Williams Racing', 'https://cdn.discordapp.com/emojis/801293860470521856.png');
+
                                                 for (var i = 1; i <= tierAmount; i++) {
-                                                    const tierPromise = new Promise((resolve2, reject) => {
+                                                    const tierPromise = new Promise(async (resolve2, reject) => {
                                                         const tier = new Tier(client, server, tierName.replace('{number}', String(i)).replace('{letter}', letters[i]));
                                                         server.log(`${message.member.user.tag} has created tier ${tier.name}`);
-                                                        const teamPromise = new Promise((resolve3, reject) => {
-                                                            teamNames.forEach(async (name, index) => {
-                                                                const team = new Team(client, server, name, tier);
+                                                        const teamPromise = new Promise(async (resolve3, reject) => {
+                                                            var addEmoji = false;
+                                                            var numOfEmoji = 50;
+                                                            switch (server.guild.premiumTier) {
+                                                                case 1:
+                                                                    numOfEmoji += 50;
+                                                                    break;
+                                                                case 2:
+                                                                    numOfEmoji += 100;
+                                                                    break;
+                                                                case 3:
+                                                                    numOfEmoji += 200;
+                                                                    break;
+                                                                default:
+                                                                    break;
+                                                            }
+                                                            const remainingSlots = numOfEmoji - server.guild.emojis.cache.size;
+                                                            if (remainingSlots >= 10) {
+                                                                //addEmoji = true;
+                                                            }
+                                                            teamNames.forEach(async (image, name) => {
+                                                                var newName = name;
+                                                                if (addEmoji) {
+                                                                    const emojiName = `dt${name.toLowerCase().replace(' ', '').replace('-', '')}`;
+                                                                    var emoji = server.guild.emojis.cache.find(e => e.name === emojiName);
+                                                                    try {
+                                                                        if (!emoji) emoji = await server.guild.emojis.create(image, emojiName);
+                                                                        if (emoji) {
+                                                                            newName = `${emoji} ${name}`;
+                                                                        }
+                                                                    } catch(err) {
+                                                                        emoji = await server.guild.emojis.create(image, emojiName);
+                                                                        if (emoji) {
+                                                                            newName = `${emoji} ${name}`;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                const team = new Team(client, server, newName, tier);
                                                                 tier.addTeam(team);
-                                                                if (index === (teamNames.length-1)) {
+                                                                if (name === teamNames.lastKey()) {
                                                                     resolve3();
                                                                 }
                                                             });

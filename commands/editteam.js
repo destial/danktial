@@ -70,12 +70,23 @@ module.exports = {
                                 await message.channel.send(embed);
                                 return;
                             }
-                            const team = tier.getTeam(name.toLowerCase());
-                            if (!team) {
+                            const teamCol = tier.searchTeam(name.toLowerCase());
+                            if (teamCol.size === 0) {
                                 embed.setAuthor('Invalid team name! Did not match any team. Please try again!');
                                 await message.channel.send(embed);
                                 return;
+                            } else if (teamCol.size > 1) {
+                                const embed5 = new Discord.MessageEmbed();
+                                embed5.setAuthor('Team name was found in many instances! Try to use the exact name!');
+                                var teamList = '';
+                                teamCol.forEach(team => {
+                                    teamList += `- ${team.name}\n`;
+                                });
+                                embed5.setDescription(teamList);
+                                message.channel.send(embed5);
+                                return;
                             }
+                            const team = teamCol.first();
 
                             if (messageReaction.emoji.name === "📝") {
                                 embed.setAuthor('What would you like to rename this team to?');
@@ -93,14 +104,14 @@ module.exports = {
                                         message.channel.send(embed);
                                         return;
                                     }
-                                    await team.update();
                                     var driverList1 = "";
-
+                                    team.name = updateName;
                                     embed.setAuthor(`Edited team ${team.name} under tier ${tier.name} with drivers:`);
                                     team.drivers.forEach(async driver => {
                                         driverList1 += (`- ${driver.member}\n`);
                                         await driver.update();
                                     });
+                                    await team.updateName(oldName);
                                     embed.setDescription(driverList1);
                                     await message.channel.send(embed);
                                     server.log(`${message.member.user.tag} has edited the name of team ${oldName} to ${team.name}`);

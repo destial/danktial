@@ -5,6 +5,7 @@ const Tier = require('./Tier');
 const Driver = require('./Driver');
 const Database = require('../database/Database');
 const schedule = require('node-schedule');
+const formatFormalTime = require('../utils/formatFormatTime');
 
 class AdvancedAttendance {
     /**
@@ -188,6 +189,11 @@ class AdvancedAttendance {
 
     async reset() {
         const promise = new Promise((resolve,reject) => {
+            if (this.embed.fields[0].name !== "Date & Time") {
+                this.embed.fields[0].name = "Date & Time";
+                const dateString = `${this.date.toDateString()} ${formatFormalTime(this.date, 'AEDT')}`;
+                this.embed.fields[0].value = dateString;
+            }
             this.embed.spliceFields(1, this.embed.fields.length-1);
             this.tier.teams.forEach(team => {
                 var driverList = '';
@@ -213,7 +219,87 @@ class AdvancedAttendance {
     }
 
     async fix() {
-        return;
+        if (this.embed.fields[0].name !== "Date & Time") {
+            this.embed.fields[0].name = "Date & Time";
+            const dateString = `${this.date.toDateString()} ${formatFormalTime(this.date, 'AEDT')}`;
+            this.embed.fields[0].value = dateString;
+        }
+        var hasReserves = false;
+        this.embed.fields.forEach(field => {
+            const team = this.tier.getTeam(field.name);
+            if (team && !field.name.toLowerCase().includes('reserves')) {
+                const driverArray = field.value.split('\n');
+                if (!driverArray.length) {
+                    driverArray.push(field.value);
+                }
+                const driverIDArray = [];
+                driverArray.forEach((rawString, index) => {
+                    const id = rawString.replace('<@', '').replace('>', '').replace('!', '').replace(' ', '')
+                        .replace(AdvancedAttendance.acceptEmoji, '')
+                        .replace(AdvancedAttendance.rejectEmoji, '')
+                        .replace(AdvancedAttendance.maybeEmoji, '')
+                        .replace(AdvancedAttendance.unknownEmoji, '');
+                    driverIDArray.push(id);
+                    if (!team.drivers.get(id)) {
+                        driverArray.splice(index, 1);
+                    }
+                });
+                const driverIDValidArray = team.drivers.keyArray();
+                const differenceCache = driverIDValidArray.filter(a => !driverIDArray.includes(a) && (a !== '' || a !== '-'));
+                const differencePost = driverIDArray.filter(a => !driverIDValidArray.includes(a) &&  (a !== '-'));
+                differenceCache.forEach(diff => {
+                    driverArray.push(`${AdvancedAttendance.unknownEmoji} <@${diff}>`);
+                });
+                differencePost.forEach(diff => {
+                    const index = driverIDArray.indexOf(diff);
+                    if (index > -1)
+                        driverArray.splice(index, 1);
+                });
+                if (differenceCache.length || differencePost.length) {
+                    field.value = (driverArray.length ? driverArray.join('\n') : '-');
+                }
+            } else if (field.name.toLowerCase().includes('reserves')) {
+                hasReserves = true;
+                const driverArray = field.value.split('\n');
+                if (!driverArray.length) {
+                    driverArray.push(field.value);
+                }
+                const driverIDArray = [];
+                driverArray.forEach((rawString, index) => {
+                    const id = rawString.replace('<@', '').replace('>', '').replace('!', '').replace(' ', '')
+                        .replace(AdvancedAttendance.acceptEmoji, '')
+                        .replace(AdvancedAttendance.rejectEmoji, '')
+                        .replace(AdvancedAttendance.maybeEmoji, '')
+                        .replace(AdvancedAttendance.unknownEmoji, '');
+                    driverIDArray.push(id);
+                    if (!this.tier.reserves.get(id)) {
+                        driverArray.splice(index, 1);
+                    }
+                });
+                const driverIDValidArray = this.tier.reserves.keyArray();
+                const differenceCache = driverIDValidArray.filter(a => !driverIDArray.includes(a) && (a !== '' || a !== '-'));
+                const differencePost = driverIDArray.filter(a => !driverIDValidArray.includes(a) &&  (a !== '-'));
+                differenceCache.forEach(diff => {
+                    driverArray.push(`${AdvancedAttendance.unknownEmoji} <@${diff}>`);
+                });
+                differencePost.forEach(diff => {
+                    const index = driverIDArray.indexOf(diff);
+                    if (index > -1)
+                        driverArray.splice(index, 1);
+                });
+                if (differenceCache.length || differencePost.length) {
+                    field.value = (driverArray.length ? driverArray.join('\n') : '-');
+                }
+            }
+        });
+        if (!hasReserves && this.tier.reserves.size !== 0) {
+            var reserveList = '';
+            this.tier.reserves.forEach(reserve => {
+                reserveList += `${AdvancedAttendance.unknownEmoji} ${reserve.member}\n`;
+            });
+            this.embed.addField('Reserves', reserveList, false);
+        }
+        this.message.edit(this.embed);
     }
 
     async update() {

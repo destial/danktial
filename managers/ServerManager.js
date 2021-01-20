@@ -51,11 +51,9 @@ class ServerManager {
                         if (message) {
                             Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
-                    } else {
-                        Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 } catch (err) {
-                    Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                    console.log(err);
                 }
             });
 
@@ -68,11 +66,9 @@ class ServerManager {
                         if (base) {
                             Database.run(Database.ticketDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
-                    } else {
-                        Database.run(Database.ticketDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 } catch (err) {
-                    Database.run(Database.ticketDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                    console.log(err);
                 }
             });
 
@@ -82,11 +78,9 @@ class ServerManager {
                     const channel = await this.client.channels.fetch(row.id);
                     if (channel && channel.type === "voice") {
                         Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
-                    } else {
-                        Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
-                }   catch (err) {
-                    Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                } catch (err) {
+                    console.log(err);
                 }
             });
 
@@ -98,14 +92,10 @@ class ServerManager {
                         const panel = await channel.messages.fetch(row.id);
                         if (panel) {
                             Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
-                        } else {
-                            Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
-                    } else {
-                        Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 } catch (err) {
-                    Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                    console.log(err);
                 }
             });
 
@@ -118,11 +108,9 @@ class ServerManager {
                         if (message) {
                             Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
-                    } else {
-                        Database.run(Database.advancedAttendanceDeleteQuery, [message.id]).then(() => {}).catch(err => console.log(err));
                     }
                 } catch(err) {
-                    Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                    console.log(err);
                 }
             });
 
