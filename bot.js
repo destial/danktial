@@ -230,13 +230,11 @@ client.once('ready', async () => {
                                                     tier.addDriver(driver);
                                                     team.setDriver(driver);
                                                     console.log(`[DRIVER] Loaded driver ${driver.name} into tier ${driver.tier.name} in ${driver.guild.name}`);
-                                                } else if (!existingR) {
+                                                } else if (row.reserved == 1 && !existingR) {
                                                     const reserve = new Reserve(client, member, server, row.number, tier);
                                                     tier.addReserve(reserve);
                                                     console.log(`[DRIVER] Loaded reserve ${reserve.name} into tier ${reserve.tier.name} in ${reserve.guild.name}`);
-                                                } else if (existingD) {
-                                                    Database.run(Database.driversDeleteQuery, [row.id, row.guild, row.tier]).then(() => {}).catch(err => console.log(err));
-                                                } else if (existingR) {
+                                                } else if (existingD || existingR) {
                                                     Database.run(Database.driversDeleteQuery, [row.id, row.guild, row.tier]).then(() => {}).catch(err => console.log(err));
                                                 }
                                                 if (index === driverRows.length-1) resolve();

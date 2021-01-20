@@ -74,11 +74,12 @@ class Reserve extends Driver {
      * @returns {Driver}
      */
     async toDriver(team) {
+        this.team = team;
         this.tier.removeReserve(this.id);
-        const newDriver = new Driver(this.client, this.member, this.server, team, this.number, this.tier);
+        this.tier.addDriver(this);
+        const newDriver = new Driver(this.client, this.member, this.server, this.team, this.number, this.tier);
         team.setDriver(newDriver);
         await newDriver.update();
-        this.tier = undefined;
         return newDriver;
     }
 }

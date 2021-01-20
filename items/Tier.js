@@ -73,6 +73,10 @@ class Tier {
         }
     }
 
+    /**
+     * 
+     * @param {Driver} driver 
+     */
     loadDriver(driver) {
         if (!this.drivers.get(driver.id)) {
             this.drivers.set(driver.id, driver);
