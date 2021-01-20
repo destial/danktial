@@ -54,6 +54,7 @@ module.exports = {
                                 break;
                         }
                     }
+                    await reaction.users.remove(user);
                 }
             }
         });

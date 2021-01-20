@@ -34,7 +34,11 @@ class ReactionRolePanel {
      * @param {string} emojiid 
      */
     removeReactionRoleByEmoji(emojiid) {
-        this.reactions.delete(emojiid);
+        const keyArray = this.reactions.keyArray();
+        const key = keyArray.find(k => k.includes(emojiid));
+        if (key) {
+            this.reactions.delete(key);
+        }
     }
 
     /**
