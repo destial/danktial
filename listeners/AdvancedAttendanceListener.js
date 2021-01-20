@@ -23,37 +23,37 @@ module.exports = {
             if (!reaction.message.guild) return;
             const server = await servers.fetch(reaction.message.guild.id);
             if (server) {
-                try {
-                    const attendance = server.getAttendanceManager().fetchAdvanced(reaction.message.id);
-                    if (attendance) {
-                        var driver = attendance.tier.getDriver(user.id);
-                        if (!driver) {
-                            driver = attendance.tier.getReserve(user.id);
-                        }
-                        if (driver) {
-                            switch (reaction.emoji.name) {
-                                case AttendanceManager.accept:
-                                    await attendance.accept(driver);
-                                    break;
-                                case AttendanceManager.reject:
-                                    await attendance.reject(driver);
-                                    break;
-                                case AttendanceManager.tentative:
-                                    await attendance.maybe(driver);
-                                    break;
-                                case AttendanceManager.delete:
-                                    if (isStaff(driver.member)) {
-                                        await server.getAttendanceManager().awaitDeleteAdvancedAttendance(reaction, user);
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        await reaction.users.remove(user);
+                const attendance = server.getAttendanceManager().fetchAdvanced(reaction.message.id);
+                if (attendance) {
+                    var driver = attendance.tier.getDriver(user.id);
+                    if (!driver) {
+                        driver = attendance.tier.getReserve(user.id);
                     }
-                } catch(err) {
-                    console.log(err);
+                    if (driver) {
+                        switch (reaction.emoji.name) {
+                            case AttendanceManager.accept:
+                                await attendance.accept(driver);
+                                break;
+                            case AttendanceManager.reject:
+                                await attendance.reject(driver);
+                                break;
+                            case AttendanceManager.tentative:
+                                await attendance.maybe(driver);
+                                break;
+                            case AttendanceManager.delete:
+                                if (isStaff(driver.member)) {
+                                    await server.getAttendanceManager().awaitDeleteAdvancedAttendance(reaction, user);
+                                }
+                                break;
+                            case AdvancedAttendance.editEmoji:
+                                if (isStaff(driver.member)) {
+                                    await server.getAttendanceManager().editAdvancedAttendance(driver.member);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 }
             }
         });
