@@ -29,10 +29,10 @@ class TierManager {
 
     /**
      * 
-     * @param {string} name 
+     * @param {Tier} tier 
      */
-    removeTier(name) {
-        this.tiers.delete(name.toLowerCase());
+    removeTier(tier) {
+        this.tiers.delete(tier.name.toLowerCase());
     }
 
     /**

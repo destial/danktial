@@ -47,6 +47,40 @@ module.exports = {
                 }
             }
         });
-    }
 
+        client.on('messageDelete', async message => {
+            if (!message.author) return;
+            if (message.author.bot) return;
+            const server = await servers.fetch(message.guild.id);
+            if (server) {
+                const attendance = server.getAttendanceManager().fetch(message.id);
+                if (attendance) {
+                    await attendance.delete();
+                }
+            }
+        });
+
+        client.on('guildMemberUpdate', async (oldMember, newMember) => {
+            if (oldMember.user.username !== newMember.user.username) {
+                const server = await servers.fetch(newMember.guild.id);
+                if (server) {
+                    server.getAttendanceManager().getEvents().forEach(async attendance => {
+                        if (attendance.accepted.get(oldMember.user.username)) {
+                            attendance.accepted.delete(oldMember.user.username);
+                            attendance.accept(newMember.user);
+                            await attendance.message.edit(attendance.embed);
+                        } else if (attendance.rejected.get(oldMember.user.username)) {
+                            attendance.rejected.delete(oldMember.user.username);
+                            attendance.reject(newMember.user);
+                            await attendance.message.edit(attendance.embed);
+                        } else if (attendance.tentative.get(oldMember.user.username)) {
+                            attendance.tentative.delete(oldMember.user.username);
+                            attendance.maybe(newMember.user);
+                            await attendance.message.edit(attendance.embed);
+                        }
+                    });
+                }
+            }
+        });
+    }
 };

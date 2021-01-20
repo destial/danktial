@@ -38,7 +38,7 @@ module.exports = {
                             await server.getCountManager().getCount('channel').edit({
                                 name: `Channel Count: ${server.guild.channels.cache.size}`
                             });
-                            await server.log(`Created a channel!`, `${channel} - ${channel.name}`);
+                            await server.log(`Deleted a channel!`, `${channel} - ${channel.name}`);
                         }
                     }
                 }

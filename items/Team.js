@@ -63,8 +63,17 @@ class Team {
     }
 
     async update() {
-        await Database.run(Database.teamUpdateQuery, [this.server.id, this.name, this.tier.name, this.server.id, this.tier.name]);
+        await Database.run(Database.teamUpdateQuery, [this.server.id, this.name, this.tier.name, this.server.id, this.name, this.tier.name]);
         console.log(`[TEAM] Updated team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+    }
+
+    /**
+     * 
+     * @param {string} oldName 
+     */
+    async updateName(oldName) {
+        await Database.run(Database.teamUpdateNameQuery, [this.name, this.server.id, oldName, this.tier.name]);
+        console.log(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 }
 

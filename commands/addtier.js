@@ -30,7 +30,7 @@ module.exports = {
             }
             const name = args.join(' ');
             const tier = new Tier(client, server, name);
-            embed.setAuthor('Tag/Mention all the drivers who are in this tier, not including reserves');
+            embed.setAuthor('Tag/Mention all the drivers who are in this tier, including reserves');
             await message.channel.send(embed);
             const filter = m => m.author.id === message.author.id;
             const collector = message.channel.createMessageCollector(filter, {
@@ -51,7 +51,7 @@ module.exports = {
                     driverList += (`- ${reserve.member}\n`);
                     reserve.save();
                 });
-                embed.setDescription(driverList);
+                embed.setDescription(`${driverList}\nNext step is using` + server.prefix + `setdriver`);
                 await message.channel.send(embed);
                 server.log(`${message.member.user.tag} has added tier ${tier.name}`);
                 await Database.run(Database.tierSaveQuery, [server.id, name]);

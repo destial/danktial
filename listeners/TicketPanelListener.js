@@ -31,13 +31,6 @@ module.exports = {
         });
 
         client.on('messageDelete', async message => {
-            if (message.partial) {
-                try {
-                    message = await message.fetch();
-                } catch (err) {
-                    console.log('[ERROR] Something happened while fetching uncached deleted messages!', err);
-                }
-            }
             const server = await servers.fetch(message.guild.id);
             await server.getTicketManager().removeTicketPanel(message.id);
         });

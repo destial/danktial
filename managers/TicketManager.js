@@ -57,7 +57,7 @@ class TicketManager {
      */
     async loadTicketPanel(panel) {
         this.ticketpanels.set(panel.id, panel);
-        console.log(`[PANEL] Loaded ticket panel ${panel.id}`);
+        console.log(`[PANEL] Loaded ticket panel ${panel.id} from ${this.server.guild.name}`);
     }
 
     /**
@@ -69,7 +69,7 @@ class TicketManager {
         if (deleted) {
             try {
                 await Database.run(Database.ticketDeleteQuery, [id]);
-                console.log(`[UPDATE] Deleted ticket panel ${id}`);
+                console.log(`[UPDATE] Deleted ticket panel ${id} from ${this.server.guild.name}`);
             } catch (err) {
                 console.log(err);
             }
@@ -157,7 +157,7 @@ class TicketManager {
     async loadTicket(ticket) {
         this.opentickets.set(ticket.id, ticket);
         this.totaltickets = this.opentickets.size;
-        console.log(`[TICKET] Loaded ticket ${ticket.channel.name} of id: ${ticket.id}`);
+        console.log(`[TICKET] Loaded ticket ${ticket.channel.name} from ${this.server.guild.name}`);
     }
 
     /**
