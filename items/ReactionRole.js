@@ -16,7 +16,7 @@ class ReactionRole {
         this.role = role;
         this.message = message;
         this.server = server;
-        this.id = this.emoji.id;
+        this.id = this.emoji.id + this.message.id;
     }
 }
 

@@ -5,6 +5,7 @@ const Tier = require('./Tier');
 const Driver = require('./Driver');
 const Database = require('../database/Database');
 const schedule = require('node-schedule');
+const formatFormalTime = require('../utils/formatFormatTime');
 
 class AdvancedAttendance {
     /**
@@ -188,6 +189,11 @@ class AdvancedAttendance {
 
     async reset() {
         const promise = new Promise((resolve,reject) => {
+            if (this.embed.fields[0].name !== "Date & Time") {
+                this.embed.fields[0].name = "Date & Time";
+                const dateString = `${this.date.toDateString()} ${formatFormalTime(this.date, 'AEDT')}`;
+                this.embed.fields[0].value = dateString;
+            }
             this.embed.spliceFields(1, this.embed.fields.length-1);
             this.tier.teams.forEach(team => {
                 var driverList = '';
