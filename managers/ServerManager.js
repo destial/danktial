@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Server = require('../items/Server');
 const Database = require("../database/Database");
 const { tierDeleteQuery, teamDeleteQuery, driversDeleteGuildQuery } = require('../database/Database');
+const QueueWorker = require('../database/QueueWorker');
 
 class ServerManager {
     /**
@@ -13,6 +14,7 @@ class ServerManager {
          * @type {Discord.Collection<string, Server>}
          */
         this.servers = new Discord.Collection();
+        this.queueWorker = new QueueWorker(this);
         this.client = client;
     }
 
