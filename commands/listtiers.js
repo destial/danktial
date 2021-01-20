@@ -23,6 +23,9 @@ module.exports = {
             if (!args.length) {
                 embed.setAuthor('This is all the tiers:');
                 var tierList = '';
+                if (server.getTierManager().tiers.size === 0) {
+                    tierList = '-';
+                }
                 server.getTierManager().tiers.forEach(tier => {
                     tierList += `- ${tier.name}\n`;
                 });
@@ -39,14 +42,14 @@ module.exports = {
                             driverNames.push('-');
                         }
                         team.drivers.forEach(driver => {
-                            driverNames.push(`<@${driver.id}>`);
+                            driverNames.push(`#${driver.number} - <@${driver.id}>`);
                         });
                         embed.addField(team.name, driverNames.join('\n'), false);
                     });
                     if (tier.reserves.size !== 0) {
                         const reserveNames = [];
                         tier.reserves.forEach(reserve => {
-                            reserveNames.push(`<@${reserve.id}>`);
+                            reserveNames.push(`#${reserve.number} - <@${reserve.id}>`);
                         });
                         embed.addField('Reserves', reserveNames, false);
                     }
