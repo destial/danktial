@@ -42,14 +42,14 @@ module.exports = {
                             driverNames.push('-');
                         }
                         team.drivers.forEach(driver => {
-                            driverNames.push(`#${driver.number} - <@${driver.id}>`);
+                            driverNames.push(driver.toFullName());
                         });
                         embed.addField(team.name, driverNames.join('\n'), false);
                     });
                     if (tier.reserves.size !== 0) {
                         const reserveNames = [];
                         tier.reserves.forEach(reserve => {
-                            reserveNames.push(`#${reserve.number} - <@${reserve.id}>`);
+                            reserveNames.push(reserve.toFullName());
                         });
                         embed.addField('Reserves', reserveNames, false);
                     }

@@ -41,19 +41,20 @@ module.exports = {
                 if (tier) {
                     const driver = tier.getDriver(member.id);
                     const reserve = tier.getReserve(member.id);
+                    const embed2 = new Discord.MessageEmbed();
                     if (driver) {
                         driver.team.removeDriver(member.id);
                         tier.removeDriver(member.id);
                         await driver.delete();
-                        embed.setAuthor(`Removed driver ${driver.name} from tier ${tier.name}`);
+                        embed2.setAuthor(`Removed driver ${driver.name} from tier ${tier.name}`);
                     } else if (reserve) {
                         tier.removeReserve(member.id);
                         await reserve.delete();
-                        embed.setAuthor(`Removed reserve ${driver.name} from tier ${tier.name}`);
+                        embed2.setAuthor(`Removed reserve ${driver.name} from tier ${tier.name}`);
                     } else {
-                        embed.setAuthor(`Unknown driver / reserve ${member.user.username}`);
+                        embed2.setAuthor(`Unknown driver / reserve ${member.user.username}`);
                     }
-                    await message.channel.send(embed);
+                    await message.channel.send(embed2);
                 }
             }
         }

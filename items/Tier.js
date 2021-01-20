@@ -89,7 +89,7 @@ class Tier {
 
     /**
      * 
-     * @param {Reserve} reserve 
+     * @param {Reserve | Driver} reserve 
      */
     addReserve(reserve) {
         if (!this.reserves.get(reserve.id)) {
