@@ -281,7 +281,7 @@ client.once('ready', async () => {
                     });
 
                     Manager.servers.forEach(server => {
-                        server.log(`This bot has been restarted! Sorry for the troubles!`);
+                        server.log(`This bot has been restarted!`);
                     });
                 });
             });
@@ -290,13 +290,15 @@ client.once('ready', async () => {
             for (const file of listenerFiles) {
                 const listener = require(`./listeners/${file}`);
                 await listener.run(client, Manager).then(() => {}).catch(() => {});
-                if (client.shard.ids[0] === 0) console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
+                if (client.shard.ids[0] === 0) {
+                    console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
+                }
             }
-
-            setInterval(async () => {
-                const server = Manager.servers.random();
-                await client.user.setActivity(server.guild.name, { type: 'COMPETING' });
-            }, 1000 * 60 * 3);
+            if (client.shard.ids[0] === 0) {
+                setInterval(async () => {
+                    await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
+                }, 1000 * 60 * 5);
+            }
         });
     } catch(err) {
         console.log(err);

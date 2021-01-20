@@ -94,7 +94,7 @@ module.exports = {
                                                     return;
                                                 }
                                             }
-                                            if (!tierName.includes('{number}') && !tierName.includes('{letter}')) {
+                                            if (!tierName.includes('{number}') && !tierName.includes('{letter}') && tierAmount > 1) {
                                                 const embed6 = new Discord.MessageEmbed().setTitle('Please include a {number} or {letter} placeholder in your tier names!');
                                                 message.channel.send(embed6);
                                                 return;
@@ -103,14 +103,13 @@ module.exports = {
                                                 const teamNames = 
                                                     ['Mercedes-AMG Petronas', 'Scuderia Ferrari', 'Redbull Racing', 'Racing Point F1', 
                                                     'Renault F1', 'McLaren F1', 'Haas F1 Team', 'Scuderia Alpha Tauri',
-                                                    'Alpha Romeo Sauber F1', 'Williams Racing'];
-                                                console.log(tierAmount);
+                                                    'Alfa Romeo Sauber F1', 'Williams Racing'];;
                                                 for (var i = 1; i <= tierAmount; i++) {
                                                     const tierPromise = new Promise((resolve2, reject) => {
                                                         const tier = new Tier(client, server, tierName.replace('{number}', String(i)).replace('{letter}', letters[i]));
                                                         server.log(`${message.member.user.tag} has created tier ${tier.name}`);
                                                         const teamPromise = new Promise((resolve3, reject) => {
-                                                            teamNames.forEach(async (name, index) => {
+                                                            teamNames.forEach((name, index) => {
                                                                 const team = new Team(client, server, name, tier);
                                                                 tier.addTeam(team);
                                                                 if (index === (teamNames.length-1)) {

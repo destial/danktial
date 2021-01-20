@@ -52,6 +52,10 @@ class Server {
 
         this.triggerManager = new TriggerManager(client, this);
 
+        /**
+         * @constant
+         * @private
+         */
         this.reactionRoleManager = new ReactionRoleManager(client, this);
     }
 

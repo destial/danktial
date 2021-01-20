@@ -54,41 +54,18 @@ module.exports = {
                                 break;
                         }
                     }
-                    await reaction.users.remove(user);
                 }
             }
         });
 
         client.on('messageDelete', async message => {
-            if (message.partial) {
-                try {
-                    message = await message.fetch();
-                } catch(err) {
-                    console.log('[ERROR] Something happened while fetching uncached deleted messages!');
-                }
-            }
-            if (!message.author.bot) return;
+            if (!message.author) return;
+            if (message.author.bot) return;
             const server = await servers.fetch(message.guild.id);
             if (server) {
                 const attendance = server.getAttendanceManager().fetchAdvanced(message.id);
                 if (attendance) {
                     await attendance.delete();
-                }
-            }
-        });
-
-        client.on('guildMemberUpdate', async (oldMember, newMember) => {
-            if (oldMember.partial) {
-                try {
-                    oldMember = await oldMember.fetch();
-                } catch(err) {
-                    console.log(err);
-                }
-            }
-            if (oldMember.user.username !== newMember.user.username) {
-                const server = await servers.fetch(newMember.guild.id);
-                if (server) {
-                    
                 }
             }
         });

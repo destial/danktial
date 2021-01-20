@@ -27,7 +27,7 @@ module.exports = {
                 return;
             }
             const name = args.join(' ');
-            const tier = server.getTierManager().getTier(name.toLowerCase());
+            const tier = server.getTierManager().getTier(name);
             if (tier) {
                 try {
                     tier.teams.forEach(async team => {

@@ -10,6 +10,7 @@ function formatTrack(string) {
 
     const countryAlias = new Discord.Collection();
     countryAlias.set('melbourne', 'australia');
+    countryAlias.set('albert park', 'australia');
     countryAlias.set('baku', 'azerbaijan');
     countryAlias.set('hanoi', 'vietnam');
     countryAlias.set('chinese', 'china');

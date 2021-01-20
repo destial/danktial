@@ -141,14 +141,14 @@ class AttendanceManager {
                                     driverNames.push('-');
                                 }
                                 team.drivers.forEach(d => {
-                                    driverNames.push(`${AttendanceManager.tentative} ${d.member}`);
+                                    driverNames.push(`${AttendanceManager.unknown} ${d.member}`);
                                 });
                                 attendanceembed.addField(team.name, driverNames.join('\n'), false);
                             });
                             const reserveNames = [];
                             if (t.reserves.size !== 0) {
                                 t.reserves.forEach(reserve => {
-                                    reserveNames.push(`${AttendanceManager.tentative} ${reserve.member}`);
+                                    reserveNames.push(`${AttendanceManager.unknown} ${reserve.member}`);
                                 });
                                 attendanceembed.addField('Reserves', reserveNames.join('\n'), false);
                             }
@@ -188,7 +188,7 @@ class AttendanceManager {
     /**
      * 
      * @param {Discord.GuildMember} member 
-     * @param {Discord.GuildChannel} channel 
+     * @param {Discord.TextChannel} channel 
      * @returns {Promise<Attendance>}
      */
     async newAttendance(member, channel) {
@@ -272,7 +272,7 @@ class AttendanceManager {
                                     await m.react(AttendanceManager.delete);
                                     embed.setAuthor(`Successfully created event ${title}`);
                                     member.user.send(embed);
-                                    const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server.guild);
+                                    const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server.guild, m);
                                     this.events.set(attendance.id, attendance);
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
@@ -545,7 +545,7 @@ class AttendanceManager {
      * @param {Date} date
      */
     loadAttendance(message, date) {
-        const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild);
+        const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild, message);
         this.events.set(attendance.id, attendance);
         console.log(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
     }

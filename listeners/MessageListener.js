@@ -10,11 +10,7 @@ module.exports = {
     async run(client, servers) {
         client.on('messageDelete', async (message) => {
             if (message.partial) {
-                try {
-                    message = await message.fetch();
-                } catch (err) {
-                    console.log('[ERROR] Something happened while fetching uncached deleted messages!', err);
-                }
+                return;
             }
             if (!message.author) return;
             if (message.author.bot) return;

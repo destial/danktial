@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const schedule = require('node-schedule');
+const Database = require('../database/Database');
 
 class Attendance {
     /**
@@ -8,11 +9,13 @@ class Attendance {
      * @param {string} id
      * @param {Date} date
      * @param {Discord.Guild} guild
+     * @param {Discord.Message} message
      */
-    constructor(embed, id, date, guild) {
+    constructor(embed, id, date, guild, message) {
         /**
          * @constant
          */
+        this.message = message;
         this.id = id;
         this.embed = embed;
         this.title = embed.title;
@@ -83,6 +86,16 @@ class Attendance {
     static get accept() { return "✅"; }
     static get reject() { return "❌"; }
     static get tentative() { return "❔"; }
+
+    async delete() {
+        await Database.run(Database.attendanceDeleteQuery, [this.id]);
+        console.log(`[ATTENDANCE] Deleted attendance ${this.title} from ${this.guild.name}`);
+    }
+
+    async save() {
+        await Database.run(Database.attendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id]);
+        console.log(`[ATTENDANCE] Saved attendance ${this.title} from ${this.guild.name}`);
+    }
 
     /**
      * 
