@@ -38,6 +38,11 @@ class Database {
     static get teamUpdateQuery() { return "UPDATE teams SET guild=(?), name=(?), tier=(?) WHERE (guild=(?) AND name=(?) AND tier=(?))"; }
 
     /**
+     * `UPDATE teams SET name=(?) WHERE (guild=(?) AND name(?) AND tier=(?))`
+     */
+    static get teamUpdateNameQuery() { return "UPDATE teams SET name=(?) WHERE (guild=(?) AND name=(?) AND tier=(?))"; }
+
+    /**
      * `UPDATE drivers SET reserved=(?), team=(?) WHERE (id=(?) AND guild=(?) AND number=(?) AND tier=(?))`
      */
     static get driverUpdateQuery() { return "UPDATE drivers SET reserved=(?), team=(?) WHERE (id=(?) AND guild=(?) AND number=(?) AND tier=(?))"; }

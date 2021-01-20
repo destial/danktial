@@ -4,8 +4,9 @@ const AttendanceManager = require("../managers/AttendanceManager");
 const CountManager = require("../managers/CountManager");
 const Database = require("../database/Database");
 const ServerManager = require("../managers/ServerManager");
-const Tier = require('./Tier');
 const TierManager = require('../managers/TierManager');
+const TriggerManager = require('../managers/TriggerManager');
+const ReactionRoleManager = require('../managers/ReactionRoleManager');
 
 class Server {
     /**
@@ -48,6 +49,10 @@ class Server {
          * @private
          */
         this.tierManager = new TierManager(client, this);
+
+        this.triggerManager = new TriggerManager(client, this);
+
+        this.reactionRoleManager = new ReactionRoleManager(client, this);
     }
 
     /**
@@ -131,6 +136,7 @@ class Server {
     getAttendanceManager() { return this.attendanceManager; }
     getCountManager() { return this.countManager; }
     getTierManager() { return this.tierManager; }
+    getReactionRoleManager() { return this.reactionRoleManager; }
 }
 
 module.exports = Server;

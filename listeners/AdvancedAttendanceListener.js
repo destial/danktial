@@ -45,6 +45,11 @@ module.exports = {
                                     await server.getAttendanceManager().awaitDeleteAdvancedAttendance(reaction, user);
                                 }
                                 break;
+                            case AdvancedAttendance.editEmoji:
+                                if (isStaff(driver.member)) {
+                                    await server.getAttendanceManager().editAdvancedAttendance(driver.member);
+                                }
+                                break;
                             default:
                                 break;
                         }
