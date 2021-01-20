@@ -1,10 +1,10 @@
 const Discord = require("discord.js");
 const formatFormalTime = require('./formatFormatTime');
 
-class Embed {
+class Embed extends Discord.MessageEmbed{
     constructor() {
-        this.embed = new Discord.MessageEmbed();
-        this.embed.setColor('RED');
+        super();
+        this.setColor('RED');
     }
 
     /**
@@ -14,21 +14,19 @@ class Embed {
      * @param {Discord.EmbedFieldData[]} fields
      */
     setInfo(title, description, fields) {
-        if (this.embed) {
-            delete this.embed;
-            this.embed = new Discord.MessageEmbed();
-            this.embed.setColor('RED');
-        }
-        
-        this.embed.setFooter(new Date().toDateString());
-        this.embed.setTitle(title);
+        this.setTitle(null);
+        this.setDescription(null);
+        this.fields = [];
+
+        this.setTitle(title);
         if (description) {
-            this.embed.setDescription(description);
+            this.setDescription(description);
         }
-        if (fields) {
-            this.embed.addFields(fields);
+        if (fields || fields.length) {
+            this.addFields(fields);
         }
-        return this.embed;
+        console.log(this);
+        return this;
     }
 }
 

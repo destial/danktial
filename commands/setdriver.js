@@ -92,7 +92,7 @@ module.exports = {
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
-                            } else if(teamCol.size > 1) {
+                            } else if (teamCol.size > 1) {
                                 const embed5 = new Discord.MessageEmbed();
                                 embed5.setAuthor('Team name was found in many instances! Try to use the exact name!');
                                 var teamList = '';
@@ -105,9 +105,8 @@ module.exports = {
                                 if (driver) {
                                     const toReserve = driver.toReserve();
                                     if (toReserve.number !== String(driverNumber)) {
-                                        toReserve.updateNumber(String(driverNumber));
+                                        await toReserve.updateNumber(String(driverNumber));
                                     }
-                                    toReserve.setNumber(driverNumber);
                                     toReserve.setTier(tier);
                                     tier.addReserve(toReserve);
                                     await toReserve.updateReserve();

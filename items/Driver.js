@@ -33,8 +33,8 @@ class Driver {
     }
 
     async update() {
-        await Database.run(Database.driverUpdateQuery, [0, (this.team ? this.team.name : ""), this.id, this.guild.id, this.number, this.tier.name]);
-        console.log(`[DRIVER] Updated driver ${this.name} from ${this.guild.name}`);
+        await Database.run(Database.driverUpdateQuery, [(this.team ? 1 : 0), (this.team ? this.team.name : ""), this.id, this.guild.id, this.number, this.tier.name]);
+        console.log(`[DRIVER] Updated ${this.team ? "driver" : "reserve"} ${this.name} from ${this.guild.name}`);
     }
 
     async updateReserve() {
@@ -82,7 +82,7 @@ class Driver {
     }
 
     toFullName() {
-        return `${this.number} - ${this.member}`;
+        return `#${this.number} - ${this.member}`;
     }
 
     /**
@@ -92,7 +92,7 @@ class Driver {
         this.tier.removeDriver(this.id);
         this.team = undefined;
         this.tier = undefined;
-        await this.updateReserve();
+        await this.update();
         return this;
     }
 }
