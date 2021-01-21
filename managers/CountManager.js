@@ -4,10 +4,10 @@ const Server = require('../items/Server');
 
 class CountManager {
     /**
-     * 
+     * @param {Discord.Client} client
      * @param {Server} server 
      */
-    constructor(server) {
+    constructor(client, server) {
         /**
          * @type {Discord.GuildChannel} 
          */
@@ -24,11 +24,12 @@ class CountManager {
         this.rolecount = undefined;
 
         this.server = server;
+        this.client = client;
     }
 
     /**
      * 
-     * @param {string} name 
+     * @param {"member" | "channel" | "role"} name 
      */
     getCount(name) {
         switch (name.toLowerCase()) {
@@ -45,7 +46,7 @@ class CountManager {
 
     /**
      * 
-     * @param {string} name 
+     * @param {"member" | "channel" | "role"} name 
      * @param {Discord.GuildChannel} channel 
      */
     setCount(name, channel) {

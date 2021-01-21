@@ -18,9 +18,92 @@ class Database {
             database.run('CREATE TABLE IF NOT EXISTS advancedattendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32), tier VARCHAR(255))');
             database.run('CREATE TABLE IF NOT EXISTS tiers (guild VARCHAR(32), name VARCHAR(255))');
             database.run('CREATE TABLE IF NOT EXISTS teams (guild VARCHAR(32), name VARCHAR(255), tier VARCHAR(255))');
+            database.run('CREATE TABLE IF NOT EXISTS triggers (guild VARCHAR(32), trigger VARCHAR(255), response VARCHAR(255))');
+            database.run('CREATE TABLE IF NOT EXISTS reactionrolepanels (id VARCHAR(32) PRIMARY KEY, channel VARCHAR(32))');
+            database.run('CREATE TABLE IF NOT EXISTS reactionroles (guild VARCHAR(32), panel VARCHAR(32), emoji VARCHAR(32), role VARCHAR(32))');
         });
         return database;
     }
+
+    /**
+     * `DELETE FROM reactionrolepanels WHERE id=(?)`
+     */
+    static get reactionRolePanelDeleteQuery() { return "DELETE FROM reactionrolepanels WHERE id=(?)"; }
+
+    /**
+     * `DELETE FROM reactionroles WHERE guild=(?)`
+     */
+    static get reactionRoleDeleteGuildQuery() { return "DELETE FROM reactionroles WHERE guild=(?)"; }
+
+    /**
+     * `DELETE FROM reactionroles WHERE (guild=(?) AND panel=(?) AND emoji=(?) AND role=(?))`
+     */
+    static get reactionRoleDeleteQuery() { return "DELETE FROM reactionroles WHERE (guild=(?) AND panel=(?) AND emoji=(?) AND role=(?))"; }
+
+    /**
+     * `REPLACE INTO reactionrolepanels (id,channel) VALUES (?,?)`
+     */
+    static get reactionRolePanelUpdateQuery() { return "REPLACE INTO reactionrolepanels (id,channel) VALUES (?,?)"; }
+
+    /**
+     * `UPDATE reactionroles SET role=(?) WHERE (guild=(?) AND panel=(?) AND emoji=(?) AND role=(?)`
+     */
+    static get reactionRoleUpdateRoleQuery() { return "UPDATE reactionroles SET role=(?) WHERE (guild=(?) AND panel=(?) AND emoji=(?) AND role=(?))"; }
+
+    /**
+     * `UPDATE reactionroles SET emoji=(?) WHERE (guild=(?) AND panel=(?) AND emoji=(?) AND role=(?)`
+     */
+    static get reactionRoleUpdateEmojiQuery() { return "UPDATE reactionroles SET emoji=(?) WHERE (guild=(?) AND panel=(?) AND emoji=(?) AND role=(?))"; }
+
+    /**
+     * `INSERT INTO reactionrolepanel (id,channel) VALUES (?,?)`
+     */
+    static get reactionRolePanelSaveQuery() { return "INSERT INTO reactionrolepanels (id,channel) VALUES (?,?)"; }
+
+    /**
+     * `INSERT INTO reactionroles (guild,panel,emoji,role) VALUES (?,?,?,?)`
+     */
+    static get reactionRoleSaveQuery() { return "INSERT INTO reactionroles (guild,panel,emoji,role) VALUES (?,?,?,?)"; }
+
+    /**
+     * `SELECT * FROM reactionrolepanels`
+     */
+    static get reactionRolePanelQuery() { return "SELECT * FROM reactionrolepanels"; }
+
+    /**
+     * `SELECT * FROM reactionroles`
+     */
+    static get reactionRoleQuery() { return "SELECT * FROM reactionroles"; }
+
+    /**
+     * `DELETE FROM triggers WHERE guild=(?)`
+     */
+    static get triggerDeleteGuildQuery() { return "DELETE FROM triggers WHERE guild=(?)"; }
+
+    /**
+     * `DELETE FROM triggers WHERE (guild=(?) AND trigger=(?) AND response=(?))`
+     */
+    static get triggerDeleteQuery() { return "DELETE FROM triggers WHERE (guild=(?) AND trigger=(?) AND response=(?))"; }
+
+    /**
+     * `UPDATE triggers SET response=(?) WHERE (guild=(?) AND trigger=(?) AND response=(?))`
+     */
+    static get triggerUpdateResponseQuery() { return "UPDATE triggers SET response=(?) WHERE (guild=(?) AND trigger=(?) AND response=(?))"; }
+
+    /**
+     * `UPDATE triggers SET trigger=(?) WHERE (guild=(?) AND trigger=(?) AND response=(?))`
+     */
+    static get triggerUpdateTriggerQuery() { return "UPDATE triggers SET trigger=(?) WHERE (guild=(?) AND trigger=(?) AND response=(?))"; }
+
+    /**
+     * `INSERT INTO triggers (guild,trigger,response) VALUES (?,?,?)`
+     */
+    static get triggerSaveQuery() { return "INSERT INTO triggers (guild,trigger,response) VALUES (?,?,?)"; }
+
+    /**
+     * `SELECT * FROM triggers`
+     */
+    static get triggerQuery() { return "SELECT * FROM triggers"; }
 
     /**
      * `DELETE FROM teams WHERE (guild=(?) AND name=(?) AND tier=(?))`

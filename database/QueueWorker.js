@@ -17,8 +17,7 @@ class QueueWorker {
 
         setInterval(() => {
             Database.multipleRun(this.queue).then(() => {
-                delete this.queue;
-                this.queue = [];
+                this.clear();
             }).catch((err) => {
                 console.log(err);
             });
@@ -34,7 +33,7 @@ class QueueWorker {
     }
 
     clear() {
-        delete this.queue;
+        this.queue = [];
     }
 }
 
