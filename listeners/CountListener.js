@@ -10,13 +10,6 @@ module.exports = {
     async run(client, servers) {
         try {
             client.on('channelDelete', async (channel) => {
-                if (channel.partial) {
-                    try {
-                        channel = await channel.fetch();
-                    } catch (err) {
-                        console.log("[ERROR] Something wrong while fetching uncached channels!", err);
-                    }
-                }
                 if (!channel.guild) return;
                 const server = await servers.fetch(channel.guild.id);
                 if (server) {
@@ -45,13 +38,6 @@ module.exports = {
             });
 
             client.on('channelCreate', async (channel) => {
-                if (channel.partial) {
-                    try {
-                        channel = await channel.fetch();
-                    } catch (err) {
-                        console.log('[ERROR] Something wrong while fetching uncached channels!', err);
-                    }
-                }
                 if (!channel.guild) return;
                 const server = await servers.fetch(channel.guild.id);
                 if (server) {

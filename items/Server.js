@@ -42,7 +42,7 @@ class Server {
          * @constant
          * @private
          */
-        this.countManager = new CountManager(this);
+        this.countManager = new CountManager(client, this);
 
         /**
          * @constant
@@ -50,6 +50,10 @@ class Server {
          */
         this.tierManager = new TierManager(client, this);
 
+        /**
+         * @constant
+         * @private
+         */
         this.triggerManager = new TriggerManager(client, this);
 
         /**
@@ -104,7 +108,7 @@ class Server {
                 if (fields) {
                     embed.addFields(fields);
                 }
-                await this.modlog.send(embed);
+                return await this.modlog.send(embed);
             } catch (err) {
                 console.log(err);
             }
