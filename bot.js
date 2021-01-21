@@ -142,7 +142,8 @@ client.once('ready', async () => {
                             Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        console.log(err);
+                        //console.log(err);
+                        Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
             });
@@ -281,6 +282,8 @@ client.once('ready', async () => {
                                     console.log(err);
                                 }
                             });
+                            const { Logger } = require('./utils/Utils');
+                            Logger.log('danktial is now online!');
                         });
                     });
 

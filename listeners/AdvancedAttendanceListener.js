@@ -67,6 +67,7 @@ module.exports = {
                 const attendance = server.getAttendanceManager().fetchAdvanced(message.id);
                 if (attendance) {
                     await attendance.delete();
+                    server.getAttendanceManager().getAdvancedEvents().delete(attendance.id);
                 }
             }
         });

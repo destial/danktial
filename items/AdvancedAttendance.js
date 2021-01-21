@@ -49,15 +49,21 @@ class AdvancedAttendance {
         this.unknown = new Discord.Collection();
 
         this.embed.fields.forEach(field => {
-            if (field.value.includes('\n')) {
+            if (field.value.includes('\n') || field.name !== "Date & Time") {
                 const splits = field.value.split('\n');
+                if (!splits.length && field.value !== '-') {
+                    splits.push(field.value);
+                }
                 splits.forEach(value => {
                     if (value.startsWith(AdvancedAttendance.rejectEmoji)) {
                         const raw = value.replace(`${AdvancedAttendance.rejectEmoji} `, '');
                         const id = raw.replace('<@', '').replace('!', '').replace('>', '');
                         const driver = this.tier.getDriver(id);
+                        const reserve = this.tier.getReserve(id);
                         if (driver) {
                             this.rejected.set(driver.id, driver);
+                        } else if (reserve) {
+                            this.rejected.set(reserve.id, reserve);
                         }
                     }
 
@@ -65,8 +71,11 @@ class AdvancedAttendance {
                         const raw = value.replace(`${AdvancedAttendance.acceptEmoji} `, '');
                         const id = raw.replace('<@', '').replace('!', '').replace('>', '');
                         const driver = this.tier.getDriver(id);
+                        const reserve = this.tier.getReserve(id);
                         if (driver) {
                             this.accepted.set(driver.id, driver);
+                        } else if (reserve) {
+                            this.accepted.set(reserve.id, reserve);
                         }
                     }
 
@@ -74,8 +83,11 @@ class AdvancedAttendance {
                         const raw = value.replace(`${AdvancedAttendance.maybeEmoji} `, '');
                         const id = raw.replace('<@', '').replace('!', '').replace('>', '');
                         const driver = this.tier.getDriver(id);
+                        const reserve = this.tier.getReserve(id);
                         if (driver) {
                             this.tentative.set(driver.id, driver);
+                        } else if (reserve) {
+                            this.tentative.set(reserve.id, reserve);
                         }
                     }
 
@@ -83,8 +95,11 @@ class AdvancedAttendance {
                         const raw = value.replace(`${AdvancedAttendance.unknownEmoji} `, '');
                         const id = raw.replace('<@', '').replace('!', '').replace('>', '');
                         const driver = this.tier.getDriver(id);
+                        const reserve = this.tier.getReserve(id);
                         if (driver) {
                             this.unknown.set(driver.id, driver);
+                        } else if (reserve) {
+                            this.unknown.set(reserve.id, reserve);
                         }
                     }
                 });
@@ -93,8 +108,8 @@ class AdvancedAttendance {
 
         const fiveMinBefore = this.date.getTime() - 300000;
         if (fiveMinBefore > new Date().getTime()) {
-            this.schedule = schedule.scheduleJob(this.embed.title, fiveMinBefore, () => {
-                this.accepted.forEach(async (participant) => {
+            this.schedule = schedule.scheduleJob(this.embed.title, new Date(fiveMinBefore), () => {
+                this.accepted.forEach((participant) => {
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(`You have an event scheduled in 5 minutes!`);
                     embed.setDescription(this.embed.title);
@@ -102,7 +117,7 @@ class AdvancedAttendance {
                 });
                 this.schedule.cancel();
             });
-            console.log(`[ADATTENDANCE] Created new schedule for ${this.schedule.name}`);
+            console.log(`[ADATTENDANCE] Created new schedule for ${this.schedule.name} at ${new Date(fiveMinBefore).toString()}`);
         }
     }
 
@@ -252,8 +267,14 @@ class AdvancedAttendance {
                 });
                 differencePost.forEach(diff => {
                     const index = driverIDArray.indexOf(diff);
-                    if (index > -1)
+                    if (index > -1) {
                         driverArray.splice(index, 1);
+                        const id = driverIDArray[index];
+                        this.accepted.delete(id);
+                        this.rejected.delete(id);
+                        this.tentative.delete(id);
+                        this.unknown.delete(id);
+                    }
                 });
                 if (differenceCache.length || differencePost.length) {
                     field.value = (driverArray.length ? driverArray.join('\n') : '-');
@@ -284,8 +305,14 @@ class AdvancedAttendance {
                 });
                 differencePost.forEach(diff => {
                     const index = driverIDArray.indexOf(diff);
-                    if (index > -1)
+                    if (index > -1) {
                         driverArray.splice(index, 1);
+                        const id = driverIDArray[index];
+                        this.accepted.delete(id);
+                        this.rejected.delete(id);
+                        this.tentative.delete(id);
+                        this.unknown.delete(id);
+                    }
                 });
                 if (differenceCache.length || differencePost.length) {
                     field.value = (driverArray.length ? driverArray.join('\n') : '-');
@@ -327,8 +354,8 @@ class AdvancedAttendance {
         this.embed.setTimestamp(date);
         this.schedule.cancel();
         const fiveMinBefore = this.date.getTime() - 300000;
-        this.schedule = schedule.scheduleJob(this.embed.title, fiveMinBefore, () => {
-            this.accepted.forEach(async (participant) => {
+        this.schedule = schedule.scheduleJob(this.embed.title, new Date(fiveMinBefore), () => {
+            this.accepted.forEach((participant) => {
                 const embed = new Discord.MessageEmbed();
                 embed.setAuthor(`You have an event scheduled in 5 minutes!`);
                 embed.setDescription(this.embed.title);
@@ -336,8 +363,7 @@ class AdvancedAttendance {
             });
             this.schedule.cancel();
         });
-        console.log(`[ADATTENDANCE] Created new schedule for ${this.schedule.name}`);
-        console.log(`[ADATTENDANCE] Edited schedule for ${this.schedule.name}`);
+        console.log(`[ADATTENDANCE] Edited schedule for ${this.schedule.name} to ${new Date(fiveMinBefore).toString()}`);
         this.message.edit(this.embed.spliceFields(0, 1, {
             name: "Date & Time", value: (dateString), inline: false
         }));

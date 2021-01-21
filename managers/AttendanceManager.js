@@ -485,7 +485,7 @@ class AttendanceManager {
                             }
                             member.user.send(embed2).then((m3) => {
                                 let mfilter = m => m.author.id === member.id;
-                                let mcollector = m3.channel.createMessageCollector(mfilter, {time: 60000});
+                                const mcollector = m3.channel.createMessageCollector(mfilter, { max: 1, time: 60000});
                                 mcollector.on('collect', async (message) => {
                                     /**
                                      * @type {string}
@@ -508,11 +508,12 @@ class AttendanceManager {
                                             } else {
                                                 const dateString = `${date.toDateString()} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
                                                 attendanceevent.updateDate(date, dateString);
-                                                mcollector.stop();
                                             }
+                                            mcollector.stop();
                                         }).catch((err) => {
                                             embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY 20:30 AEDT)");
                                             member.user.send(embed2);
+                                            mcollector.stop();
                                         });
                                     }
                                 });
