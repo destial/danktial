@@ -16,6 +16,9 @@ class Attendance {
          * @constant
          */
         this.message = message;
+        /**
+         * @constant
+         */
         this.id = id;
         this.embed = embed;
         this.title = embed.title;

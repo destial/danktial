@@ -47,7 +47,7 @@ module.exports = {
                                 break;
                             case AdvancedAttendance.editEmoji:
                                 if (isStaff(driver.member)) {
-                                    await server.getAttendanceManager().editAdvancedAttendance(driver.member);
+                                    await server.getAttendanceManager().editAdvancedAttendance(driver.member, attendance);
                                 }
                                 break;
                             default:

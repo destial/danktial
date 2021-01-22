@@ -16,7 +16,7 @@ module.exports = {
                     const server = new Server(client, guild, undefined, "-", 0, servers);
                     servers.addServer(server);
                     server.save();
-                    console.log(`[SERVER] Joined server ${guild.id}`);
+                    console.log(`[SERVER] Joined server ${guild.name}`);
                 }
             } catch (err) {
                 console.log('[ERROR] Something happened while trying to add a server!', err);
@@ -27,7 +27,7 @@ module.exports = {
             try {
                 const server = await servers.fetch(guild.id);
                 await servers.removeServer(server);
-                console.log(`[SERVER] Left server ${guild.id}`);
+                console.log(`[SERVER] Left server ${guild.name}`);
             } catch (err) {
                 console.log('[ERROR] Something happened while trying to add a server!', err);
             }

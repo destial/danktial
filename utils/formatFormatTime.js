@@ -11,11 +11,11 @@ function formatFormalTime(date, timezone) {
     } else if (timezone.toUpperCase() === "AEST") {
         hours = hours + 2;
     }
-    var unit = (hours > 12 && hours < 24 ? "PM" : "AM");
+    var unit = (hours >= 12 && hours < 24 ? "PM" : "AM");
     hours = (hours > 12 && hours < 24 ? hours - 12 : (hours > 24 ? hours - 24 : hours));
     mins = (mins < 10 ? "0" : "") + mins;
 
-    return (`${hours}:${mins}${unit} ${timezone}`);
+    return (`${hours}:${mins}${unit} ${timezone.toUpperCase()}`);
 }
 
 module.exports = formatFormalTime;

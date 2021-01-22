@@ -76,7 +76,7 @@ module.exports = {
                                 });
                             });
                         });
-                    } else if (!server.getCountManager().getCount('member') && !server.getCountManager().getCount('channel') && !server.getCountManager().getCount('role')) {
+                    } else if (category && !server.getCountManager().getCount('member') && !server.getCountManager().getCount('channel') && !server.getCountManager().getCount('role')) {
                         server.guild.channels.create(`Member Count: ${server.guild.memberCount}`, {
                             type: 'voice',
                             permissionOverwrites: [

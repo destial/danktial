@@ -45,10 +45,10 @@ class ServerManager {
             const attendanceRows = await Database.all(Database.attendanceQuery);
             attendanceRows.forEach(async row => {
                 try {
-                    const channel = await this.client.channels.fetch(row.channel);
+                    const channel = server.guild.channels.cache.get(row.channel);
                     if (channel && channel.isText()) {
                         const message = await channel.messages.fetch(row.id);
-                        if (message) {
+                        if (message && message.guild.id === server.id) {
                             Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     }
@@ -60,10 +60,10 @@ class ServerManager {
             const ticketRows = await Database.all(Database.ticketQuery);
             ticketRows.forEach(async row => {
                 try {
-                    const channel = await this.client.channels.fetch(row.id);
+                    const channel = server.guild.channels.cache.get(row.id);
                     if (channel && channel.isText()) {
                         const base = await channel.messages.fetch(row.base);
-                        if (base) {
+                        if (base && base.guild.id === server.id) {
                             Database.run(Database.ticketDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     }
@@ -75,8 +75,8 @@ class ServerManager {
             const countRows = await Database.all(Database.countQuery);
             countRows.forEach(async row => {
                 try {
-                    const channel = await this.client.channels.fetch(row.id);
-                    if (channel && channel.type === "voice") {
+                    const channel = server.guild.channels.cache.get(row.id);
+                    if (channel && channel.type === "voice" && channel.guild.id === server.id) {
                         Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 } catch (err) {
@@ -87,11 +87,26 @@ class ServerManager {
             const panelRows = await Database.all(Database.ticketPanelQuery);
             panelRows.forEach(async row => {
                 try {
-                    const channel = await this.client.channels.fetch(row.channel);
+                    const channel = server.guild.channels.cache.get(row.channel);
                     if (channel && channel.isText()) {
                         const panel = await channel.messages.fetch(row.id);
-                        if (panel) {
+                        if (panel && panel.guild.id === server.id) {
                             Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                        }
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            });
+
+            const rrpanelRows = await Database.all(Database.reactionRolePanelQuery);
+            rrpanelRows.forEach(async row => {
+                try {
+                    const channel = server.guild.channels.cache.get(row.channel);
+                    if (channel && channel.isText()) {
+                        const panel = await channel.messages.fetch(row.id);
+                        if (panel && panel.guild.id === server.id) {
+                            Database.run(Database.reactionRolePanelQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     }
                 } catch (err) {
@@ -102,10 +117,10 @@ class ServerManager {
             const advancedRows = await Database.all(Database.advancedAttendanceQuery);
             advancedRows.forEach(async row => {
                 try {
-                    const channel = await this.client.channels.fetch(row.channel);
+                    const channel = server.guild.channels.cache.get(row.channel);
                     if (channel && channel.isText()) {
                         const message = await channel.messages.fetch(row.id);
-                        if (message) {
+                        if (message && message.guild.id === server.id) {
                             Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     }
@@ -117,9 +132,11 @@ class ServerManager {
             await Database.run(Database.tierDeleteGuildQuery, [server.id]);
             await Database.run(Database.driversDeleteGuildQuery, [server.id]);
             await Database.run(Database.teamDeleteGuildQuery, [server.id]);
+            await Database.run(Database.triggerDeleteGuildQuery, [server.id]);
+            await Database.run(Database.reactionRoleDeleteGuildQuery, [server.id]);
 
             await Database.run(Database.serverDeleteQuery, [server.id]);
-            console.log(`[DELETED SERVER] Deleted server ${server.guild.name} of id ${server.id}`);
+            console.log(`[DELETED SERVER] Deleted server ${server.guild.name}`);
         }
     }
 

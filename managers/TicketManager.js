@@ -89,16 +89,13 @@ class TicketManager {
                 if (!category) {
                     category = await this.server.guild.channels.create('tickets', {
                         type: 'category',
-                        permissionOverwrites: [
-                            {
+                        permissionOverwrites: [{
                                 id: this.server.guild.roles.everyone.id,
                                 deny: ['VIEW_CHANNEL']
-                            },
-                            {
+                            }, {
                                 id: clientuser.id,
                                 allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'MANAGE_CHANNELS', 'MANAGE_MESSAGES', 'ADD_REACTIONS', 'READ_MESSAGE_HISTORY']
-                            }
-                        ]
+                            }]
                     });
                     const roles = this.server.guild.roles.cache.filter(r => r.permissions.has('KICK_MEMBERS'));
                     roles.forEach(async (r) => {
@@ -111,20 +108,16 @@ class TicketManager {
                 }
                 const ticketChannel = await this.server.guild.channels.create(`ticket-${formatTicket(++this.totaltickets)}`, {
                     type: 'text',
-                    permissionOverwrites: [
-                        {
+                    permissionOverwrites: [{
                             id: this.server.guild.roles.everyone.id,
                             deny: ['VIEW_CHANNEL']
-                        },
-                        {
+                        }, {
                             id: member.id,
                             allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'ATTACH_FILES']
-                        },
-                        {
+                        }, {
                             id: clientuser.id,
                             allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'MANAGE_CHANNELS', 'MANAGE_MESSAGES', 'ADD_REACTIONS', 'READ_MESSAGE_HISTORY']
-                        }
-                    ],
+                        }],
                     parent: category
                 });
                 if (this.server.modlog) {
