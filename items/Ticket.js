@@ -160,6 +160,11 @@ class Ticket {
             }
         });
     }
+
+    async save() {
+        await Database.run(Database.ticketSaveQuery, this.id, this.member.id, this.number, this.base.id);
+        console.log(`[TICKET] Created new ticket ${this.number}`);
+    }
 }
 
 module.exports = Ticket;

@@ -21,14 +21,20 @@ module.exports = {
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
             const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
             embed.setFooter(`*WARINING* This command is deprecated and should be avoided! Use ${server.prefix}dupetier instead!`);
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             const name = args.join(' ');
+            if (name.length >= 256) {
+                const embed6 = new Discord.MessageEmbed().setAuthor(`Tier name cannot be longer than 256 characters!`);
+                message.channel.send(embed6);
+                return;
+            }
             const tier = new Tier(client, server, name);
             embed.setAuthor('Tag/Mention all the drivers who are in this tier, including reserves');
             await message.channel.send(embed);

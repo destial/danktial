@@ -26,6 +26,7 @@ module.exports = {
                     const desc = titleDesc[1];
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(message.member.user.username);
+                    embed.setColor('RED');
                     embed.setTitle(title);
                     if (desc) {
                         embed.setDescription(desc);

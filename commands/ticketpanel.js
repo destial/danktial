@@ -18,6 +18,7 @@ module.exports = {
         if (isStaff(message.member)) {
             if (!args.length) {
                 const embed = new Discord.MessageEmbed();
+                embed.setColor('RED');
                 embed.setAuthor(`Usage is:`);
                 embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
                 await message.channel.send(embed);

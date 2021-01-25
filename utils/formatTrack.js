@@ -1,14 +1,17 @@
-const Discord = require('discord.js');
+const { Collection } = require('discord.js');
 /**
  * @param {string} string
- * @returns {string} thumbnail url
+ * @returns {string | undefined} thumbnail url
  */
 function formatTrack(string) {
     const countries = ['australia', 'bahrain', 'china', 'azerbaijan', 'vietnam', 'spain', 'netherlands', 'monaco', 'canada', 
                         'france', 'austria', 'great britain', 'hungary', 'belgium', 'italy', 'singapore', 
                         'russia', 'japan', 'mexico', 'united states', 'brazil', 'abu dhabi', 'saudi arabia'];
 
-    const countryAlias = new Discord.Collection();
+    /**
+     * @type {Collection<string, string>}
+     */
+    const countryAlias = new Collection();
     countryAlias.set('melbourne', 'australia');
     countryAlias.set('albert park', 'australia');
     countryAlias.set('baku', 'azerbaijan');
@@ -30,6 +33,7 @@ function formatTrack(string) {
     countryAlias.set('britain', 'great britain');
     countryAlias.set('silverstone', 'great britain');
     countryAlias.set('spa francorshamp', 'belgium');
+    countryAlias.set('spafrancorshamp', 'belgium');
     countryAlias.set('spa-francorshamp', 'belgium');
     countryAlias.set('belgian', 'belgium');
     countryAlias.set('marina bay', 'singapore');
@@ -50,7 +54,7 @@ function formatTrack(string) {
         return thumbnailUrl.replace('{COUNTRY}', country.replace(' ', '-'));
     } else {
         const aliasArray = countryAlias.keyArray();
-        const alias = aliasArray.find(alias => string.toLowerCase().includes(alias));
+        const alias = aliasArray.find(a => string.toLowerCase().includes(a));
         if (alias) {
             const c = countryAlias.get(alias);
             return thumbnailUrl.replace('{COUNTRY}', c.replace(' ', '-'));

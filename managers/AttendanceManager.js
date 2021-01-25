@@ -44,6 +44,7 @@ class AttendanceManager {
      */
     async newAdvancedAttendance(client, server, member, channel) {
         const embed = new Discord.MessageEmbed();
+        embed.setColor('RED');
         if (server.getTierManager().tiers.size === 0) {
             return new Promise(async (resolve, reject) => {
                 embed.setAuthor(`You do not have any tiers! Please create a tier using ${server.prefix}addtier`);
@@ -98,6 +99,7 @@ class AttendanceManager {
                 const timezone = answers[3];
                 const tier = answers[4];
                 const replyEmbed = new Discord.MessageEmbed();
+                replyEmbed.setColor('RED');
                 if (!title || !description || !date || !timezone || !tier) {
                     replyEmbed.setAuthor("Ran out of time!");
                     await member.user.send(replyEmbed);
@@ -154,7 +156,7 @@ class AttendanceManager {
                             }
                             attendanceembed.setFooter(t.name);
                             attendanceembed.setTimestamp(dateObject);
-                            attendanceembed.setColor('RANDOM');
+                            attendanceembed.setColor('RED');
                             channel.send(attendanceembed).then(async (m) => {
                                 await m.react(AttendanceManager.accept);
                                 await m.react(AttendanceManager.reject);
@@ -264,7 +266,7 @@ class AttendanceManager {
                                 );
                                 attendanceembed.setFooter('Local Time');
                                 attendanceembed.setTimestamp(dateObject);
-                                attendanceembed.setColor('RANDOM');
+                                attendanceembed.setColor('RED');
                                 channel.send(attendanceembed).then(async (m) => {
                                     await m.react(AttendanceManager.accept);
                                     await m.react(AttendanceManager.reject);

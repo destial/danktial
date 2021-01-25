@@ -21,6 +21,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             const { channel } = message;
             const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
             if (!args.length) {
                 embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${this.name} ${this.usage}\n**Yes / No**\n${server.prefix}${this.name} "Do you like this bot?"`);
                 channel.send(embed);
@@ -47,10 +48,12 @@ module.exports = {
                     if (!arguments.length) {
                         embed.setDescription(`${AttendanceManager.accept} Yes\n${AttendanceManager.reject} No`);
                         embed.setTimestamp(new Date());
-                        channel.send(`❔ **${question}**`, embed).then((message) => {
-                            message.react(AttendanceManager.accept).then(() => {
-                                message.react(AttendanceManager.reject);
+                        channel.send(`❔ **${question}**`, embed).then((messag) => {
+                            messag.react(AttendanceManager.accept).then(() => {
+                                messag.react(AttendanceManager.reject);
                             });
+                            message.delete({ timeout: 1000 });
+                            server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, question);
                             resolve();
                         });
                     } else {
@@ -64,12 +67,12 @@ module.exports = {
                             }
                             embed.setDescription(arguments.join('\n'));
                             embed.setTimestamp(new Date());
-                            channel.send(`📊 **${question}**`, embed).then(async (message) => {
+                            channel.send(`📊 **${question}**`, embed).then(async (messag) => {
                                 for (var i = 0; i < arguments.length; i++) {
-                                    await message.react(reactions[i]);
+                                    await messag.react(reactions[i]);
                                 }
-                                await message.delete({ timeout: 1000 });
-                                server.log(`${message.member.user.tag} has created a poll in ${message.channel}`);
+                                message.delete({ timeout: 1000 });
+                                server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, question);
                                 resolve();
                             });
                         } else if (arguments.length > 10) {
@@ -83,9 +86,9 @@ module.exports = {
                             }
                             embed.setDescription(firstPart.join('\n'));
                             embed.setTimestamp(new Date());
-                            channel.send(`📊 **${question}**`, embed).then(async (message) => {
+                            channel.send(`📊 **${question}**`, embed).then(async (messag) => {
                                 for (var iii = 0; iii < firstPart.length; iii++) {
-                                    await message.react(reactions[iii]);
+                                    await messag.react(reactions[iii]);
                                 }
                                 embed.setDescription(secondPart.join('\n'));
                                 embed.setTimestamp(new Date());
@@ -93,8 +96,8 @@ module.exports = {
                                     for (var iiii = 0; iiii < secondPart.length; iiii++) {
                                         await mes.react(reactions[iiii]);
                                     }
-                                    await message.delete({ timeout: 1000 });
-                                    server.log(`${message.member.user.tag} has created a poll in ${message.channel}`);
+                                    message.delete({ timeout: 1000 });
+                                    server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, question);
                                     resolve();
                                 });
                             });

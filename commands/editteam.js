@@ -22,6 +22,7 @@ module.exports = {
         try {
             if (isStaff(message.member)) {
                 const embed = new Discord.MessageEmbed();
+                embed.setColor('RED');
                 if (!args.length) {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
@@ -77,6 +78,7 @@ module.exports = {
                                 return;
                             } else if (teamCol.size > 1) {
                                 const embed5 = new Discord.MessageEmbed();
+                                embed5.setColor('RED');
                                 embed5.setAuthor('Team name was found in many instances! Try to use the exact name!');
                                 var teamList = '';
                                 teamCol.forEach(team => {
@@ -98,6 +100,11 @@ module.exports = {
                                 nameCollector.on('end', async mCol => {
                                     const oldName = team.name;
                                     const updateName = mCol.first().content;
+                                    if (updateName.length >= 256) {
+                                        embed.setAuthor(`Team name cannot be longer than 256 characters!`);
+                                        message.channel.send(embed);
+                                        return;
+                                    }
                                     const existingTeam = tier.getTeam(updateName.toLowerCase());
                                     if (existingTeam) {
                                         embed.setAuthor('Team with that name already exists in that tier! Please try a different name!');

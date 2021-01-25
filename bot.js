@@ -78,6 +78,8 @@ client.once('ready', async () => {
                                 const server = await Manager.fetch(message.guild.id);
                                 const date = new Date().setTime(row.date);
                                 server.getAttendanceManager().loadAttendance(message, date);
+                            } else {
+                                Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                             }
                         } else {
                             Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
@@ -142,8 +144,8 @@ client.once('ready', async () => {
                             Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        //console.log(err);
-                        Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                        console.log(err);
+                        //Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
             });
@@ -269,6 +271,7 @@ client.once('ready', async () => {
                                             const tier = server.getTierManager().getTier(row.tier.toLowerCase());
                                             if (tier) {
                                                 await server.getAttendanceManager().loadAdvancedAttendance(message, tier, date);
+                                                await channel.messages.fetch({after: message.id});
                                             } else {
                                                 Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                                             }
@@ -296,12 +299,13 @@ client.once('ready', async () => {
             const listenerFiles = fs.readdirSync('./listeners').filter(file => file.endsWith('.js'));
             for (const file of listenerFiles) {
                 const listener = require(`./listeners/${file}`);
-                await listener.run(client, Manager).then(() => {}).catch(() => {});
+                await listener.run(client, Manager);
                 if (client.shard.ids[0] === 0) {
                     console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
                 }
             }
             if (client.shard.ids[0] === 0) {
+                await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
                 setInterval(async () => {
                     await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
                 }, 1000 * 60 * 5);

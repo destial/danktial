@@ -70,7 +70,8 @@ module.exports = {
                                         server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                 
                                         const embed = new Discord.MessageEmbed()
-                                            .setAuthor('Created All Counts!');
+                                            .setAuthor('Created All Counts!')
+                                            .setColor('RED');
                                         message.channel.send(embed);
                                     });
                                 });
@@ -117,7 +118,8 @@ module.exports = {
                                     server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
             
                                     const embed = new Discord.MessageEmbed()
-                                        .setAuthor('Created All Counts!');
+                                        .setAuthor('Created All Counts!')
+                                        .setColor('RED');
                                     message.channel.send(embed);
                                 });
                             });
@@ -147,7 +149,8 @@ module.exports = {
                                 }).then(membercount => {
                                     server.getCountManager().setCount('member', membercount);
                                     const embed = new Discord.MessageEmbed()
-                                        .setAuthor('Created Member Count!');
+                                        .setAuthor('Created Member Count!')
+                                        .setColor('RED');
                                     message.channel.send(embed);
                                     server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                                 });
@@ -165,7 +168,8 @@ module.exports = {
                             }).then(membercount => {
                                 server.getCountManager().setCount('member', membercount);
                                 const embed = new Discord.MessageEmbed()
-                                    .setAuthor('Created Member Count!');
+                                    .setAuthor('Created Member Count!')
+                                    .setColor('RED');
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                             });
@@ -195,7 +199,8 @@ module.exports = {
                                 }).then(rolecount => {
                                     server.getCountManager().setCount('role', rolecount);
                                     const embed = new Discord.MessageEmbed()
-                                        .setAuthor('Created Role Count!');
+                                        .setAuthor('Created Role Count!')
+                                        .setColor('RED');
                                     message.channel.send(embed);
                                     server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                                 });
@@ -213,7 +218,8 @@ module.exports = {
                             }).then(rolecount => {
                                 server.getCountManager().setCount('role', rolecount);
                                 const embed = new Discord.MessageEmbed()
-                                    .setAuthor('Created Role Count!');
+                                    .setAuthor('Created Role Count!')
+                                    .setColor('RED');
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                             });
@@ -243,7 +249,8 @@ module.exports = {
                                 }).then(channelcount => {
                                     server.getCountManager().setCount('channel', channelcount);
                                     const embed = new Discord.MessageEmbed()
-                                        .setAuthor('Created Channel Count!');
+                                        .setAuthor('Created Channel Count!')
+                                        .setColor('RED');
                                     message.channel.send(embed);
                                     server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                                 });
@@ -261,7 +268,8 @@ module.exports = {
                             }).then(channelcount => {
                                 server.getCountManager().setCount('channel', channelcount);
                                 const embed = new Discord.MessageEmbed()
-                                    .setAuthor('Created Channel Count!');
+                                    .setAuthor('Created Channel Count!')
+                                    .setColor('RED');
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                             });
@@ -269,7 +277,8 @@ module.exports = {
                     } else {
                         const embed = new Discord.MessageEmbed()
                             .setAuthor('Usage is:')
-                            .setDescription(`${server.prefix}${this.name} ${this.usage}`);
+                            .setDescription(`${server.prefix}${this.name} ${this.usage}`)
+                            .setColor('RED');
                         await message.channel.send(embed);
                     }
                 }

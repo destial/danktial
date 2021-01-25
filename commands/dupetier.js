@@ -19,6 +19,7 @@ module.exports = {
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
             const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
@@ -41,6 +42,11 @@ module.exports = {
                     const reply = col.first();
                     if (reply) {
                         const newName = reply.content;
+                        if (newName.length >= 256) {
+                            const embed6 = new Discord.MessageEmbed().setAuthor(`Tier name cannot be longer than 256 characters!`);
+                            message.channel.send(embed6);
+                            return;
+                        }
                         const newTier = new Tier(client, server, newName);
                         newTier.save();
                         const promise = new Promise((resolve, reject) => {

@@ -38,6 +38,7 @@ class TicketManager {
     async addTicketPanel(client, channel, title) {
         const embed = new Discord.MessageEmbed();
         embed.setAuthor(title, client.user.avatarURL());
+        embed.setColor('RED');
         embed.setDescription(`To create a report, react with ${TicketManager.emoji}`);
         try {
             const panelMessage = await channel.send(embed);
@@ -128,11 +129,12 @@ class TicketManager {
                 }
                 const baseMessage = await ticketChannel.send(new Discord.MessageEmbed()
                     .setAuthor(`${member.displayName} has created a ticket!`)
-                    .setDescription(`Reason: ${reason ? reason: "None"}`));
+                    .setDescription(`Reason: ${reason ? reason: "None"}`)
+                    .setColor('RED'));
                 await baseMessage.react(TicketManager.lock);
                 const ticket = new Ticket(member, this.totaltickets, ticketChannel, baseMessage, this);
                 this.opentickets.set(ticket.id, ticket);
-                await Database.run(Database.ticketSaveQuery, [ticket.id, member.id, this.totaltickets, baseMessage.id]);
+                await ticket.save();
                 await Database.run(Database.serverSaveQuery, [this.server.guild.id, this.server.prefix, this.totaltickets, (this.server.modlog ? this.server.modlog.id : 0)]);
                 console.log(`[UPDATE] Created ${ticket.channel.name} by ${ticket.member.displayName}`);
                 resolve(ticket);

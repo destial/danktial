@@ -6,6 +6,7 @@ const Driver = require('./Driver');
 const Database = require('../database/Database');
 const schedule = require('node-schedule');
 const formatFormalTime = require('../utils/formatFormatTime');
+const Attendance = require('./Attendance');
 
 class AdvancedAttendance {
     /**
@@ -326,7 +327,14 @@ class AdvancedAttendance {
             });
             this.embed.addField('Reserves', reserveList, false);
         }
-        this.message.edit(this.embed);
+        await this.message.edit(this.embed);
+        this.message.reactions.removeAll().then(async () => {
+            await this.message.react(Attendance.accept);
+            await this.message.react(Attendance.reject);
+            await this.message.react(Attendance.tentative);
+            await this.message.react(Attendance.delete);
+            await this.message.react(AdvancedAttendance.editEmoji);
+        });
     }
 
     async update() {

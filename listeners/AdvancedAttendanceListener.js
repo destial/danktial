@@ -59,6 +59,49 @@ module.exports = {
             }
         });
 
+        client.on('messageReactionRemove', async (reaction, user) => {
+            if (!reaction.message.guild) return;
+            if (user.bot) {
+                const server = await servers.fetch(reaction.message.guild.id);
+                if (server) {
+                    const attendance = server.getAttendanceManager().fetchAdvanced(reaction.message.id);
+                    if (attendance) {
+                        attendance.message.reactions.removeAll().then(async () => {
+                            await attendance.message.react(AttendanceManager.accept);
+                            await attendance.message.react(AttendanceManager.reject);
+                            await attendance.message.react(AttendanceManager.tentative);
+                            await attendance.message.react(AttendanceManager.delete);
+                            await attendance.message.react(AdvancedAttendance.editEmoji);
+                        });
+                    }
+                }
+            }
+        });
+
+        client.on('messageReactionRemoveAll', async (message) => {
+            if (message.partial) {
+                try {
+                    message = await message.fetch();
+                } catch(err) {
+                    console.log(err);
+                }
+            }
+            if (!message.guild) return;
+            if (!message.author) return;
+            if (!message.author.bot) return;
+            const server = await servers.fetch(message.guild.id);
+            if (server) {
+                const attendance = server.getAttendanceManager().fetchAdvanced(message.id);
+                if (attendance) {
+                    await attendance.message.react(AttendanceManager.accept);
+                    await attendance.message.react(AttendanceManager.reject);
+                    await attendance.message.react(AttendanceManager.tentative);
+                    await attendance.message.react(AttendanceManager.delete);
+                    await attendance.message.react(AdvancedAttendance.editEmoji);
+                }
+            }
+        });
+
         client.on('messageDelete', async message => {
             if (!message.author) return;
             if (message.author.bot) return;

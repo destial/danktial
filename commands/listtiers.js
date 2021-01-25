@@ -19,6 +19,7 @@ module.exports = {
      */
     async run(client, server, command, args, message) {
         const embed = new Discord.MessageEmbed();
+        embed.setColor('RED');
         try {
             if (!args.length) {
                 embed.setAuthor('This is all the tiers:');

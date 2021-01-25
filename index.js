@@ -3,7 +3,6 @@ const { ShardingManager } = require('discord.js');
 const formatFormalTime = require('./utils/formatFormatTime');
 
 const shards = new ShardingManager('./bot.js', {
-    token: process.env.DISCORD_TOKEN,
     totalShards: 'auto'
 });
 

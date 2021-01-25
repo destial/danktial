@@ -23,6 +23,7 @@ module.exports = {
         if (isStaff(message.member)) {
             try {
                 const embed = new Discord.MessageEmbed();
+                embed.setColor('RED');
                 if (!args.length) {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);
@@ -99,6 +100,7 @@ module.exports = {
                                 });
                             } else if (teamCol.size > 1) {
                                 const embed5 = new Discord.MessageEmbed();
+                                embed5.setColor('RED');
                                 embed5.setAuthor('Team name was found in many instances! Try to use the exact name!');
                                 var teamList = '';
                                 teamCol.forEach(team => {
@@ -137,7 +139,8 @@ module.exports = {
                                 message.channel.send(embed);
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
-                                    await advanced.fix();
+                                    if (advanced.tier.name === tier.name)
+                                        await advanced.fix();
                                 });
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);

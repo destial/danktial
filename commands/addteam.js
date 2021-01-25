@@ -21,17 +21,24 @@ module.exports = {
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
             const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             if (server.getTierManager().tiers.size === 0) {
                 embed.setAuthor(`There are no tiers available! Create a new tier using ${server.prefix}addtier`);
+                message.channel.send(embed);
                 return;
             }
             const name = args.join(' ');
+            if (name.length >= 256) {
+                embed.setAuthor(`Team name cannot be longer than 256 characters!`);
+                message.channel.send(embed);
+                return;
+            }
             let counter = 0;
             const questions = [
                 'What tier is this team under?',

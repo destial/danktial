@@ -89,6 +89,7 @@ class Attendance {
     static get accept() { return "✅"; }
     static get reject() { return "❌"; }
     static get tentative() { return "❔"; }
+    static get delete() { return "🗑️"; }
 
     async delete() {
         await Database.run(Database.attendanceDeleteQuery, [this.id]);

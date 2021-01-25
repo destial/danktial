@@ -17,6 +17,7 @@ module.exports = {
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
             const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
             if (command === this.name) {
                 if (!args.length) {
                     embed.setAuthor('Usage is:');
