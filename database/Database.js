@@ -340,6 +340,7 @@ class Database {
                         console.log(err);
                         reject(err);
                     }
+                    console.log(`[DB] Ran ${query.query}`);
                 });
             });
             Database.db().close(err => {
@@ -360,11 +361,12 @@ class Database {
         const collection = new Collection();
         return new Promise(async (resolve, reject) => {
             queries.forEach(query => {
-                Database.db().all(query.query, [], (err, rows) => {
+                Database.db().all(query.query, query.args, (err, rows) => {
                     if (err) {
                         console.log(err);
                         reject(err);
                     } else {
+                        console.log(`[DB] All ${query.query}`);
                         collection.set(query, rows);
                     }
                 });
