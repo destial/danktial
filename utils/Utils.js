@@ -1,32 +1,23 @@
-const Discord = require("discord.js");
+const { MessageEmbed, EmbedFieldData } = require("discord.js");
 const formatFormalTime = require('./formatFormatTime');
 
-class Embed extends Discord.MessageEmbed{
-    constructor() {
-        super();
-        this.setColor('RED');
-    }
-
+class Embed {
     /**
-     * 
      * @param {string} title 
      * @param {string} description 
-     * @param {Discord.EmbedFieldData[]} fields
+     * @param {EmbedFieldData[]} fields
      */
-    setInfo(title, description, fields) {
-        this.setTitle(null);
-        this.setDescription(null);
-        this.fields = [];
-
-        this.setTitle(title);
+    static setInfo(title, description, fields) {
+        const embed = new MessageEmbed();
+        embed.setTitle(title);
         if (description) {
-            this.setDescription(description);
+            embed.setDescription(description);
         }
         if (fields || fields.length) {
-            this.addFields(fields);
+            embed.addFields(fields);
         }
-        console.log(this);
-        return this;
+        console.log(embed);
+        return embed;
     }
 }
 

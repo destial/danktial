@@ -16,11 +16,13 @@ class QueueWorker {
         this.queue = [];
 
         setInterval(() => {
-            Database.multipleRun(this.queue).then(() => {
-                this.clear();
-            }).catch((err) => {
-                console.log(err);
-            });
+            if (this.queue.length) {
+                Database.multipleRun(this.queue).then(() => {
+                    this.clear();
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }
         }, 1000 * 60 * 60 * 3);
     }
 

@@ -6,7 +6,7 @@ class Query {
      */
     constructor(query, args) {
         this.query = query;
-        this.args = args;
+        this.args = args || [];
     }
 }
 

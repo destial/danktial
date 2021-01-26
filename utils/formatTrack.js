@@ -26,9 +26,9 @@ function formatTrack(string) {
     countryAlias.set('zandvoort', 'netherlands');
     countryAlias.set('dutch', 'netherlands');
     countryAlias.set('french', 'france');
+    countryAlias.set('paul ricard', 'france');
     countryAlias.set('styrian', 'austria');
     countryAlias.set('redbull ring', 'austria');
-    countryAlias.set('paul ricard', 'france');
     countryAlias.set('british', 'great britain');
     countryAlias.set('britain', 'great britain');
     countryAlias.set('silverstone', 'great britain');
@@ -41,7 +41,7 @@ function formatTrack(string) {
     countryAlias.set('italian', 'italy');
     countryAlias.set('suzuka', 'japan');
     countryAlias.set('mexican', 'mexico');
-    countryAlias.set('usa', 'united states');
+    countryAlias.set('usa g', 'united states');
     countryAlias.set('america', 'united states');
     countryAlias.set('sao paolo', 'brazil');
     countryAlias.set('yas marina', 'abu dhabi');
