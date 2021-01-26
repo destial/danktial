@@ -14,7 +14,7 @@ module.exports = {
                 try {
                     reaction = await reaction.fetch();
                 } catch (err) {
-                    console.log(err);
+                    console.log(`[TICKET] Something happened while trying to cache uncached message reactions!`);
                 }
             }
             if (user.bot) return;

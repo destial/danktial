@@ -40,7 +40,15 @@ class TriggerManager {
      * @param {string} triggerString 
      */
     fetchTrigger(triggerString) {
-        this.triggers.get(triggerString);
+        return this.triggers.get(triggerString);
+    }
+
+    /**
+     * 
+     * @param {string} triggerString 
+     */
+    searchTrigger(triggerString) {
+        return this.triggers.find(t => triggerString.includes(t.trigger));
     }
 }
 

@@ -15,7 +15,7 @@ module.exports = {
                 try {
                     reaction = await reaction.fetch();
                 } catch (err) {
-                    console.log(err);
+                    console.log(`[ATTENDANCE] Something happened while trying to cache uncached message reactions!`);
                 }
             }
             if (user.bot) return;
@@ -71,7 +71,7 @@ module.exports = {
                 try {
                     message = await message.fetch();
                 } catch(err) {
-                    console.log(err);
+                    console.log(`[ATTENDANCE] Something happened while trying to cache uncached message reactions!`);
                 }
             }
             if (!message.guild) return;

@@ -86,6 +86,7 @@ client.once('ready', async () => {
                         }
                     } catch (err) {
                         console.log(err);
+                        //Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
             });
@@ -168,6 +169,7 @@ client.once('ready', async () => {
                         }
                     } catch (err) {
                         console.log(err);
+                        //Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
             });

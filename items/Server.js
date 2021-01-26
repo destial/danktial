@@ -144,6 +144,7 @@ class Server {
     getAttendanceManager() { return this.attendanceManager; }
     getCountManager() { return this.countManager; }
     getTierManager() { return this.tierManager; }
+    getTriggerManager() { return this.triggerManager; }
     getReactionRoleManager() { return this.reactionRoleManager; }
 }
 

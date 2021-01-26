@@ -69,7 +69,7 @@ class TicketManager {
         const deleted = this.ticketpanels.delete(id);
         if (deleted) {
             try {
-                await Database.run(Database.ticketDeleteQuery, [id]);
+                await Database.run(Database.ticketPanelDeleteQuery, [id]);
                 console.log(`[UPDATE] Deleted ticket panel ${id} from ${this.server.guild.name}`);
             } catch (err) {
                 console.log(err);

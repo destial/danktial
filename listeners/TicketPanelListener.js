@@ -14,7 +14,7 @@ module.exports = {
                 try {
                     reaction = await reaction.fetch();
                 } catch (err) {
-                    console.log('[ERROR] Something happened while fetching uncached message reactions!', err);
+                    console.log('[TICKETPANEL] Something happened while fetching uncached message reactions!');
                 }
             }
             if (user.bot) return;

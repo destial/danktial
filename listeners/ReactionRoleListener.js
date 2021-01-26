@@ -14,14 +14,7 @@ module.exports = {
                 try {
                     reaction = await reaction.fetch();
                 } catch(err) {
-                    console.log(`[REACTIONROLE] Something wrong while caching uncached message reactions addition!`, err);
-                }
-            }
-            if (user.partial) {
-                try {
-                    user = await user.fetch();
-                } catch(err) {
-                    console.log(`[REACTIONROLE] Something wrong while caching uncached message reactions addition!`, err);
+                    console.log(`[REACTIONROLE] Something wrong while caching uncached message reactions addition!`);
                 }
             }
             if (!reaction.message.guild) return;
@@ -47,14 +40,7 @@ module.exports = {
                 try {
                     reaction = await reaction.fetch();
                 } catch(err) {
-                    console.log(`[REACTIONROLE] Something wrong while caching uncached message reactions removal!`, err);
-                }
-            }
-            if (user.partial) {
-                try {
-                    user = await user.fetch();
-                } catch(err) {
-                    console.log(`[REACTIONROLE] Something wrong while caching uncached message reactions removal!`, err);
+                    console.log(`[REACTIONROLE] Something wrong while caching uncached message reactions removal!`);
                 }
             }
             if (!reaction.message.guild) return;

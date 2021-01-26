@@ -10,7 +10,7 @@ module.exports = {
     name: 'setdriver',
     aliases: ['set-driver', 'setupdriver'],
     usage: '[ @driver "driver number" "tier name" "team name" ]',
-    example: '@destiall "81" "Tier 1" "Alpha Romeo Sauber F1"',
+    example: '@destiall "81" "Tier 1" "Alfa Romeo Sauber F1"',
     description: 'Adds a driver/reserve to an existing tier',
     /**
      * @param {Discord.Client} client 

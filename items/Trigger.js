@@ -39,6 +39,11 @@ class Trigger {
         await Database.run(Database.triggerUpdateResponseQuery, [this.response, this.server.id, this.trigger, oldResponse]);
         console.log(`[TRIGGERS] Updated response ${oldresponse} to ${this.response} under ${this.server.guild.name}`);
     }
+
+    async delete() {
+        await Database.run(Database.triggerDeleteQuery, [this.server.id, this.trigger, this.response]);
+        console.log(`[TRIGGERS] Deleted trigger ${this.trigger} with ${this.response}`);
+    }
 }
 
 module.exports = Trigger;

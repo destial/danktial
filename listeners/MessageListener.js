@@ -9,9 +9,6 @@ module.exports = {
      */
     async run(client, servers) {
         client.on('messageDelete', async (message) => {
-            if (message.partial) {
-                return;
-            }
             if (!message.author) return;
             if (message.author.bot) return;
             if (!message.content) return;
@@ -31,18 +28,18 @@ module.exports = {
                 } catch (err) {
                     console.log('[ERROR] Something happened while fetching uncached edited messages!', err);
                 }
-                if (!newMessage.author) return;
-                if (newMessage.author.bot) return;
-                if (oldMessage.content === newMessage.content) return;
-                const server = await servers.fetch(newMessage.id);
-                if (server) {
-                    if (server.modlog) {
-                        const fields = [
-                            { name: 'Old Message', value: oldMessage.content, inline: false },
-                            { name: 'New Message', value: newMessage.content, inline: false }
-                        ];
-                        await server.log(`Message updated from user ${newMessage.member.user.tag}`, undefined, fields);
-                    }
+            }
+            if (!newMessage.author) return;
+            if (newMessage.author.bot) return;
+            if (oldMessage.content === newMessage.content) return;
+            const server = await servers.fetch(newMessage.id);
+            if (server) {
+                if (server.modlog) {
+                    const fields = [
+                        { name: 'Old Message', value: oldMessage.content, inline: false },
+                        { name: 'New Message', value: newMessage.content, inline: false }
+                    ];
+                    await server.log(`Message updated from user ${newMessage.member.user.tag}`, undefined, fields);
                 }
             }
         });
