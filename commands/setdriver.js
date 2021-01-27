@@ -1,9 +1,7 @@
 const Discord = require('discord.js');
-const Database = require('../database/Database');
 const Driver = require('../items/Driver');
 const Reserve = require('../items/Reserve');
 const Server = require('../items/Server');
-const Tier = require('../items/Tier');
 const isStaff = require('../utils/isStaff');
 
 module.exports = {
