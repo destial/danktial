@@ -169,6 +169,7 @@ class AttendanceManager {
                                 this.advancedEvents.set(attendance.id, attendance);
                                 try {
                                     await attendance.save();
+                                    server.log(`${member.user.tag} has created advancedattendance ${attendance.embed.title}`);
                                     resolve(attendance);
                                 } catch (err) {
                                     console.log(err);
@@ -279,6 +280,7 @@ class AttendanceManager {
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
                                         console.log(`[UPDATE] Saved attendance ${attendance.title} of id ${attendance.id}`);
+                                        server.log(`${member.user.tag} has created attendance ${attendance.title}`);
                                         resolve(attendance);
                                     } catch (err) {
                                         console.log(err);

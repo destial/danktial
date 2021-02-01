@@ -1,5 +1,6 @@
 const { Collection } = require('discord.js');
 /**
+ * Get country flag url from a string
  * @param {string} string
  * @returns {string | undefined} thumbnail url
  */

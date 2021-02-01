@@ -1,5 +1,5 @@
 /**
-* 
+* Converts a date with the format `DD/MM/YYYY HH:MM TMZE` to a Date object
 * @param {string} date "DD/MM/YYYY HH:MM AEDT"; 
 * @returns {Promise<Date>}
 */

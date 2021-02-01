@@ -1,6 +1,10 @@
 const { MessageEmbed, EmbedFieldData } = require("discord.js");
 const formatFormalTime = require('./formatFormatTime');
 
+/**
+ * Useless right now.
+ * @deprecated
+ */
 class Embed {
     /**
      * @param {string} title 
@@ -21,7 +25,16 @@ class Embed {
     }
 }
 
+/**
+ * Static logger. Formats a message to console / terminal.
+ */
 class Logger {
+    /**
+     * Sends a logger message
+     */
+    static boot(message) {
+        console.log(`[${formatFormalTime(new Date(), 'SGT')}-BOOT] ${message}`);
+    }
     /**
      * Sends a logger message
      */

@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Server = require('../items/Server');
 const AttendanceManager = require('../managers/AttendanceManager');
 const isStaff = require('../utils/isStaff');
+const parseQuotations = require('../utils/parseQuotations');
 
 module.exports = {
     name: 'poll',
@@ -29,18 +30,9 @@ module.exports = {
             } else {
                 const reactions = ["🇦", "🇧","🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯"];
                 var str = args.join(" ");
-                var arguments = [];
-                while (true) {
-                    var num = str.indexOf('"');
-                    if (num === -1) break;
-                    str = str.substring(num+1);
-                    num = str.indexOf('"');
-                    const arg = str.substring(0, num);
-                    if (arg === " " || arg === "") continue;
-                    arguments.push(arg);
-                }
+                var arguments = parseQuotations(str);
                 if (!arguments.length) {
-                    embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}poll "What's Your Favorite Color?" "Blue" "Red" "Yellow"\n**Yes / No**\n${prefix}poll "Do you like this bot?"`);
+                    embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}poll "What's Your Favorite Color?" "Blue" "Red" "Yellow"\n**Yes / No**\n${server.prefix}poll "Do you like this bot?"`);
                     channel.send(embed);
                     reject();
                 } else {

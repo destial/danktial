@@ -10,24 +10,31 @@ const Tier = require('./items/Tier');
 const Driver = require('./items/Driver');
 const Team = require('./items/Team');
 const Reserve = require('./items/Reserve');
+const { Logger } = require('./utils/Utils');
+const nodemon = require('nodemon');
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
 });
 
 client.login(process.env.DISCORD_TOKEN);
 
+const Manager = new ServerManager(client);
+
 client.once('ready', async () => {
     try {
-        if (client.shard.ids[0] === 0) {
-            await client.user.setStatus('dnd');
-        }
-        const Manager = new ServerManager(client);
         const loadServer = new Promise((resolve, reject) => {
             client.guilds.cache.forEach((guild) => {
                 Manager.fetch(guild.id).then(server => {
                     if (!server) {
                         const server = new Server(client, guild, undefined, '-', 0, Manager);
                         Manager.addServer(server).then(() => {}).catch((err) => console.log(err));
+                    }
+                });
+                guild.channels.cache.forEach(channel => {
+                    if (channel.isText()) {
+                        channel.messages.fetch({limit: 100}, true, true).catch(err => {
+                            Logger.boot(`Error loading channel messages of ${channel.name} under ${channel.guild.name}`);
+                        });
                     }
                 });
             });
@@ -48,25 +55,26 @@ client.once('ready', async () => {
                                 }
                             });
                         });
-                    } catch(err) {
-                        console.log(`[BOOT] Error loading server ${row.id}`);
-                    }
-                });
 
-                client.shard.fetchClientValues('guilds.cache.size').then(results => {
-                    const servers = results.reduce((acc, guildCount) => acc + guildCount, 0);
-                    if (serverRows.length < servers) {
-                        client.guilds.cache.forEach(async guild => {
-                            try {
-                                const exist = await Manager.fetch(guild.id);
-                                if (!exist) {
-                                    await Database.run(Database.serverSaveQuery, [guild.id, '-', 0, 0]);
-                                    console.log(`[SERVER] Saved ${server.guild.name} to database`);
-                                }
-                            } catch(err) {
-                                console.log(`[BOOT] Error loading server ${row.id}`);
+                        client.shard.fetchClientValues('guilds.cache.size').then(results => {
+                            const servers = results.reduce((acc, guildCount) => acc + guildCount, 0);
+                            if (serverRows.length < servers) {
+                                client.guilds.cache.forEach(async guild => {
+                                    try {
+                                        const exist = await Manager.fetch(guild.id);
+                                        if (!exist) {
+                                            await Database.run(Database.serverSaveQuery, [guild.id, '-', 0, 0]);
+                                            console.log(`[SERVER] Saved ${server.guild.name} to database`);
+                                        }
+                                    } catch(err) {
+                                        console.log(`[BOOT] Error loading server ${row.id}`);
+                                    }
+                                });
                             }
                         });
+
+                    } catch(err) {
+                        console.log(`[BOOT] Error loading server ${row.id}`);
                     }
                 });
             });
@@ -193,6 +201,7 @@ client.once('ready', async () => {
                             console.log(`[BOOT] Error loading tier ${row.name}`);
                         }
                     });
+                    if (tierRows.length === 0) resolve();
                 });
             });
 
@@ -216,6 +225,7 @@ client.once('ready', async () => {
                                 console.log(`[BOOT] Error loading team ${row.name}`);
                             }
                         });
+                        if (teamRows.length === 0) resolve();
                     });
                 });
 
@@ -257,13 +267,11 @@ client.once('ready', async () => {
                                     console.log(`[BOOT] Error loading driver ${row.id}`);
                                 }
                             });
-                            if (driverRows.length === 0) {
-                                resolve();
-                            }
+                            if (driverRows.length === 0) resolve();
                         });
                     });
 
-                    loadDrivers.then(() => {
+                    loadDrivers.then(async () => {
                         Database.all(Database.advancedAttendanceQuery).then(attendanceRows => {
                             attendanceRows.forEach(async (row, index) => {
                                 try {
@@ -290,15 +298,21 @@ client.once('ready', async () => {
                                     console.log(`[BOOT] Error loading advancedattendance ${row.id}`);
                                 }
                             });
-                            const { Logger } = require('./utils/Utils');
                             Logger.log('danktial is now online!');
+                            const date = new Date();
+                            Manager.servers.forEach(async server => {
+                                //await server.log(`danktial has been restarted!`);
+                                if (server.modlog) {
+                                    await server.modlog.setTopic(`danktial has been online since ${date.toString()}`);
+                                    setInterval(async () => {
+                                        await server.modlog.setTopic(`danktial has been online since ${date.toString()}`);
+                                    }, 1000*60*5);
+                                }
+                            });
                         });
-                        Manager.servers.forEach(server => {
-                            server.log(`danktial has been restarted!`);
-                        });
+                        await client.user.setStatus('online', client.shard.ids);
                         if (client.shard.ids[0] === 0) {
-                            client.user.setStatus('online');
-                            client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
+                            await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
                         }
                     });
                 });
@@ -316,4 +330,31 @@ client.once('ready', async () => {
     } catch(err) {
         console.log(err);
     } 
+});
+
+nodemon({script: 'index.js'}).on('restart', () => {
+    Manager.servers.forEach(async server => {
+        if (server.modlog) {
+            await server.modlog.setTopic(`danktial is restarting!`);
+        }
+    });
+}).on('exit', () => {
+    Manager.servers.forEach(async server => {
+        if (server.modlog) {
+            await server.modlog.setTopic(`danktial is offline!`);
+        }
+    });
+}).on('crash', () => {
+    Manager.servers.forEach(async server => {
+        await server.log(`danktial has crashed!`);
+        if (server.modlog) {
+            await server.modlog.setTopic(`danktial is offline!`);
+        }
+    });
+}).on('quit', () => {
+    Manager.servers.forEach(async server => {
+        if (server.modlog) {
+            await server.modlog.setTopic(`danktial is offline!`);
+        }
+    });
 });

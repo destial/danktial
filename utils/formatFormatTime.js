@@ -1,5 +1,5 @@
 /**
- * 
+ * Converts a date object to a formal time string representation with the given timezone
  * @param {Date} date 
  * @param {string} timezone 
  */

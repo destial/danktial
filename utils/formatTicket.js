@@ -1,5 +1,5 @@
 /**
- * 
+ * Format ticket number
  * @param {number} number 
  */
 function formatTicket(number) {

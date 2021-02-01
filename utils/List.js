@@ -1,4 +1,8 @@
 const { Collection } = require('discord.js');
+
+/**
+ * A collection with more features.
+ */
 class List extends Collection {
     constructor(entries) {
         super(entries);
