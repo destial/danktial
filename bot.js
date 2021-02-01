@@ -18,6 +18,9 @@ client.login(process.env.DISCORD_TOKEN);
 
 client.once('ready', async () => {
     try {
+        if (client.shard.ids[0] === 0) {
+            await client.user.setStatus('dnd');
+        }
         const Manager = new ServerManager(client);
         const loadServer = new Promise((resolve, reject) => {
             client.guilds.cache.forEach((guild) => {
@@ -46,7 +49,7 @@ client.once('ready', async () => {
                             });
                         });
                     } catch(err) {
-                        console.log(`[BOOT] Error loading ${row}`);
+                        console.log(`[BOOT] Error loading server ${row.id}`);
                     }
                 });
 
@@ -61,7 +64,7 @@ client.once('ready', async () => {
                                     console.log(`[SERVER] Saved ${server.guild.name} to database`);
                                 }
                             } catch(err) {
-                                console.log(`[BOOT] Error loading ${row}`);
+                                console.log(`[BOOT] Error loading server ${row.id}`);
                             }
                         });
                     }
@@ -85,7 +88,7 @@ client.once('ready', async () => {
                             Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        console.log(`[BOOT] Error loading ${row}`);
+                        console.log(`[BOOT] Error loading attendance ${row.id}`);
                         //Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
@@ -109,7 +112,7 @@ client.once('ready', async () => {
                             Database.run(Database.ticketDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        console.log(`[BOOT] Error loading ${row}`);
+                        console.log(`[BOOT] Error loading ticket ${row.id}`);
                     }
                 });
             });
@@ -145,7 +148,7 @@ client.once('ready', async () => {
                             Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        console.log(`[BOOT] Error loading ${row}`);
+                        console.log(`[BOOT] Error loading count ${row.id}`);
                         //Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
@@ -168,7 +171,7 @@ client.once('ready', async () => {
                             Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                         }
                     } catch (err) {
-                        console.log(`[BOOT] Error loading ${row}`);
+                        console.log(`[BOOT] Error loading ticketpanel ${row.id}`);
                         //Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
@@ -187,7 +190,7 @@ client.once('ready', async () => {
                             }
                             if (index === tierRows.length-1) resolve();
                         } catch (err) {
-                            console.log(`[BOOT] Error loading ${row}`);
+                            console.log(`[BOOT] Error loading tier ${row.name}`);
                         }
                     });
                 });
@@ -210,7 +213,7 @@ client.once('ready', async () => {
                                 }
                                 if (index === teamRows.length-1) resolve();
                             } catch(err) {
-                                console.log(`[BOOT] Error loading ${row}`);
+                                console.log(`[BOOT] Error loading team ${row.name}`);
                             }
                         });
                     });
@@ -251,7 +254,7 @@ client.once('ready', async () => {
                                         Database.run(Database.driversDeleteQuery, [row.id, row.guild, row.tier]).then(() => {}).catch(err => console.log(err));
                                     }
                                 } catch (err) { 
-                                    console.log(`[BOOT] Error loading ${row}`);
+                                    console.log(`[BOOT] Error loading driver ${row.id}`);
                                 }
                             });
                             if (driverRows.length === 0) {
@@ -275,16 +278,16 @@ client.once('ready', async () => {
                                                 await server.getAttendanceManager().loadAdvancedAttendance(message, tier, date);
                                                 await channel.messages.fetch({after: message.id});
                                             } else {
-                                                Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                                                Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                                             }
                                         } else {
-                                            Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                                            Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                                         }
                                     } else {
-                                        Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                                        Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                                     }
                                 } catch (err) {
-                                    console.log(`[BOOT] Error loading ${row}`);
+                                    console.log(`[BOOT] Error loading advancedattendance ${row.id}`);
                                 }
                             });
                             const { Logger } = require('./utils/Utils');
@@ -293,6 +296,10 @@ client.once('ready', async () => {
                         Manager.servers.forEach(server => {
                             server.log(`danktial has been restarted!`);
                         });
+                        if (client.shard.ids[0] === 0) {
+                            client.user.setStatus('online');
+                            client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
+                        }
                     });
                 });
             });
@@ -304,12 +311,6 @@ client.once('ready', async () => {
                 if (client.shard.ids[0] === 0) {
                     console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
                 }
-            }
-            if (client.shard.ids[0] === 0) {
-                await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
-                setInterval(async () => {
-                    await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
-                }, 1000 * 60 * 5);
             }
         });
     } catch(err) {

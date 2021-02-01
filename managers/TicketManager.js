@@ -98,7 +98,7 @@ class TicketManager {
                                 allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'MANAGE_CHANNELS', 'MANAGE_MESSAGES', 'ADD_REACTIONS', 'READ_MESSAGE_HISTORY']
                             }]
                     });
-                    const roles = this.server.guild.roles.cache.filter(r => r.permissions.has('KICK_MEMBERS'));
+                    const roles = this.server.guild.roles.cache.filter(r => r.permissions.has('KICK_MEMBERS') || r.name.toLowerCase().includes('steward'));
                     roles.forEach(async (r) => {
                         await category.createOverwrite(r.id, {
                             SEND_MESSAGES: true,
@@ -121,13 +121,21 @@ class TicketManager {
                         }],
                     parent: category
                 });
+                const roles = this.server.guild.roles.cache.filter(r => r.permissions.has('KICK_MEMBERS') || r.name.toLowerCase().includes('steward'));
+                roles.forEach(async (r) => {
+                    await ticketChannel.createOverwrite(r.id, {
+                        SEND_MESSAGES: true,
+                        READ_MESSAGE_HISTORY: true,
+                        VIEW_CHANNEL: true
+                    });
+                });
                 if (this.server.modlog) {
                     this.server.modlog.send(new Discord.MessageEmbed()
                         .setAuthor(`${member.displayName} has created ${ticketChannel.name}`)
                         .setTimestamp()
                         .setColor('GREEN'));
                 }
-                const baseMessage = await ticketChannel.send(new Discord.MessageEmbed()
+                const baseMessage = await ticketChannel.send(`${member} here's your ticket!`, new Discord.MessageEmbed()
                     .setAuthor(`${member.displayName} has created a ticket!`)
                     .setDescription(`Reason: ${reason ? reason: "None"}`)
                     .setColor('RED'));

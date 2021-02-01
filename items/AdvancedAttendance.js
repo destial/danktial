@@ -343,6 +343,9 @@ class AdvancedAttendance {
     }
 
     async delete() {
+        if (this.schedule) {
+            this.schedule.cancel();
+        }
         await Database.run(Database.advancedAttendanceDeleteQuery, [this.id]);
         console.log(`[ADATTENDANCE] Deleted attendance ${this.embed.title} from ${this.server.guild.name}`);
     }

@@ -629,13 +629,13 @@ class AttendanceManager {
         const attendanceevent = this.fetch(message.id);
         if (attendanceevent) {
             try {
-                attendanceevent.schedule.cancel();
+                if (attendanceevent.schedule)
+                    attendanceevent.schedule.cancel();
                 this.events.delete(attendanceevent.id);
                 if (!message.deleted) {
                     await message.delete({ timeout: 1000 });
                 }
-                await Database.run(Database.attendanceDeleteQuery, [attendanceevent.id]);
-                console.log(`[UPDATE] Deleted attendance ${attendanceevent.title} from ${this.server.guild.name}`);
+                await attendanceevent.delete();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
@@ -657,15 +657,16 @@ class AttendanceManager {
                 if (!message.deleted) {
                     await message.delete({ timeout: 1000 });
                 }
-                attendanceevent.message.channel.messages.cache.forEach(async message => {
-                    if (!message.deleted) {
-                        if (message.createdAt.getTime() > attendanceevent.message.createdAt.getTime()) {
-                            await message.delete();
-                        }
-                    }
-                });
-                await Database.run(Database.advancedAttendanceDeleteQuery, [attendanceevent.id]);
-                console.log(`[UPDATE] Deleted attendance ${attendanceevent.embed.title} from ${this.server.guild.name}`);
+                // attendanceevent.message.channel.messages.cache.forEach(async message => {
+                //     if (!message.deleted) {
+                //         if (message.createdAt.getTime() > attendanceevent.message.createdAt.getTime()) {
+                //             if (!this.fetchAdvanced(message.id) && !this.fetch(message.id)) {
+                //                  await message.delete();
+                //              }
+                //         }
+                //     }
+                // });
+                await attendanceevent.delete();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
@@ -680,7 +681,7 @@ class AttendanceManager {
      * @param {string} id 
     */
     fetch(id) {
-        return this.events.find((e) => e.id === id);
+        return this.events.get(id);
     }
 
     /**
