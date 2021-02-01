@@ -50,6 +50,24 @@ class TriggerManager {
     searchTrigger(triggerString) {
         return this.triggers.find(t => triggerString.includes(t.trigger));
     }
+
+    /**
+     * 
+     * @param {string} triggerString 
+     */
+    getTrigger(triggerString) {
+        const trigger = this.triggers.find(t => triggerString.toLowerCase().includes(t.trigger.toLowerCase()));
+        if (trigger) {
+            if (trigger.trigger.startsWith('!')) {
+                return trigger;
+            } else {
+                if (triggerString == trigger.trigger) {
+                    return trigger;
+                }
+            }
+        }
+        return undefined;
+    }
 }
 
 module.exports = TriggerManager;

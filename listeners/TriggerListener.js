@@ -14,7 +14,7 @@ module.exports = {
             if (!message.guild) return;
             const server = await servers.fetch(message.guild.id);
             if (server) {
-                const trigger = server.getTriggerManager().searchTrigger(message.content) || server.getTriggerManager().fetchTrigger(message.content);
+                const trigger = server.getTriggerManager().getTrigger(message.content);
                 if (trigger) {
                     message.channel.send(trigger.response);
                 }
