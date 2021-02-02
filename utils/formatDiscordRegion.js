@@ -25,10 +25,10 @@ function formatDiscordRegion(region) {
         case 'russia':
             timezone = 'Europe/Kirov';
             break;
-        case 'south africa':
+        case 'southafrica':
             timezone = 'Africa/Lubumbashi';
             break;
-        case 'hong kong':
+        case 'hongkong':
             break;
         case 'singapore':
             break;

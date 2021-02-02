@@ -100,10 +100,12 @@ class Server {
         if (this.modlog) {
             try {
                 const locale = formatDiscordRegion(this.guild.region);
+                const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
                 const embed = new Discord.MessageEmbed()
                     .setAuthor(`[LOG] ${title}`)
                     .setColor('ORANGE')
-                    .setFooter(`${new Date().toLocaleDateString('en-US', { timeZone: locale })} ${new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' })}`);
+                    .setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${this.guild.region.toLocaleUpperCase()}`);
                 if (description) {
                     embed.setDescription(description);
                 }
