@@ -7,6 +7,7 @@ const ServerManager = require("../managers/ServerManager");
 const TierManager = require('../managers/TierManager');
 const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
+const formatDiscordRegion = require('../utils/formatDiscordRegion');
 
 class Server {
     /**
@@ -98,16 +99,18 @@ class Server {
     async log(title, description, fields) {
         if (this.modlog) {
             try {
+                const locale = formatDiscordRegion(this.guild.region);
                 const embed = new Discord.MessageEmbed()
                     .setAuthor(`[LOG] ${title}`)
                     .setColor('ORANGE')
-                    .setFooter(new Date().toString());
+                    .setFooter(`${new Date().toLocaleDateString('en-US', { timeZone: locale })} ${new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' })}`);
                 if (description) {
                     embed.setDescription(description);
                 }
                 if (fields) {
                     embed.addFields(fields);
                 }
+
                 return await this.modlog.send(embed);
             } catch (err) {
                 console.log(err);
