@@ -7,6 +7,7 @@ const formatDate = require('../utils/formatDate');
 const formatFormalTime = require('../utils/formatFormatTime');
 const Tier = require('../items/Tier');
 const formatTrack = require('../utils/formatTrack');
+const { timezones, timezoneNames } = require('../utils/timezones');
 
 class AttendanceManager {
     /**
@@ -57,8 +58,7 @@ class AttendanceManager {
             const questions = [
                 "What is the title of this event?",
                 "What is the description of the event?",
-                "What is the date of this event? Format should be: DD/MM/YYYY 20:30",
-                "What is the timezone of the event? Reply with (AEDT / AEST / SGT)",
+                "What is the date of this event? Format should be: DD/MM/YYYY 20:30 TMZE",
                 "What is the tier of this event? Reply with the following:"
             ];
             const tierNames = [];
@@ -69,9 +69,10 @@ class AttendanceManager {
              * @type {string}
              */
             var answers = [];
-            const dateformat = "DD/MM/YYYY 20:30";
+            const dateformat = "DD/MM/YYYY 20:30 TMZE";
 
             embed.setAuthor(questions[counter++]);
+            embed.setColor('RED');
             const dm = await member.user.send(embed);
             const filter = m => m.author.id === member.id;
             const collector = dm.channel.createMessageCollector(filter, {
@@ -80,12 +81,21 @@ class AttendanceManager {
             });
 
             collector.on('collect', async (message, col) => {
+                const embed3 = new Discord.MessageEmbed();
+                embed3.setColor('RED');
                 if (counter < questions.length) {
-                    embed.setAuthor(questions[counter++]);
+                    embed3.setAuthor(questions[counter++]);
+                    if (counter === questions.length-1) {
+                        var allTimezones = 'Here are your choices for timezones:\n';
+                        timezones.keyArray().forEach(tmze => {
+                            allTimezones += "`" + tmze + "`\n";
+                        });
+                        embed3.setDescription(allTimezones);
+                    }
                     if (counter === questions.length) {
-                        embed.setDescription(tierNames.join('\n'));
+                        embed3.setDescription(tierNames.join('\n'));
                     } 
-                    await member.user.send(embed);
+                    await member.user.send(embed3);
                 }
             });
 
@@ -96,17 +106,16 @@ class AttendanceManager {
                 const title = answers[0];
                 const description = answers[1];
                 const date = answers[2];
-                const timezone = answers[3];
-                const tier = answers[4];
+                const tier = answers[3];
                 const replyEmbed = new Discord.MessageEmbed();
                 replyEmbed.setColor('RED');
-                if (!title || !description || !date || !timezone || !tier) {
+                if (!title || !description || !date || !tier) {
                     replyEmbed.setAuthor("Ran out of time!");
                     await member.user.send(replyEmbed);
                     resolve(undefined);
-                } else if (date.length !== dateformat.length) {
-                    replyEmbed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30)");
-                    replyEmbed.setDescription(`E.g: 01/01/2021 10:45 or 20/04/2021 09:30`);
+                } else if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
+                    replyEmbed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30 TMZE)");
+                    replyEmbed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
                     await member.user.send(embed);
                     resolve(undefined);
                 } else if (!server.getTierManager().getTier(tier.toLowerCase())) {
@@ -117,7 +126,7 @@ class AttendanceManager {
                 } else {
                     const t = server.getTierManager().getTier(tier.toLowerCase());
                     const attendanceembed = new Discord.MessageEmbed();
-                    formatDate(`${date} ${timezone.toUpperCase()}`).then((dateObject) => {
+                    formatDate(`${date.toUpperCase()}`).then((dateObject) => {
                         const dateNow = new Date();
                         if (dateObject.getTime() < dateNow.getTime()) {
                             const difference = dateNow.getTime()-dateObject.getTime();
@@ -126,7 +135,7 @@ class AttendanceManager {
                             member.user.send(replyEmbed);
                             resolve();
                         } else {
-                            const dateString = `${dateObject.toDateString()} ${formatFormalTime(dateObject, timezone.toUpperCase())}`;
+                            const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(date.substring(date.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
                             attendanceembed.setTitle(title);
                             attendanceembed.setDescription(description);
                             if (formatTrack(title)) {
@@ -169,7 +178,7 @@ class AttendanceManager {
                                 this.advancedEvents.set(attendance.id, attendance);
                                 try {
                                     await attendance.save();
-                                    server.log(`${member.user.tag} has created advancedattendance ${attendance.embed.title}`);
+                                    //server.log(`${member.user.tag} has created advancedattendance ${attendance.embed.title}`);
                                     resolve(attendance);
                                 } catch (err) {
                                     console.log(err);
@@ -201,16 +210,16 @@ class AttendanceManager {
             const questions = [
                 "What is the title of this event?",
                 "What is the description of the event?",
-                "What is the date of this event? Format should be: DD/MM/YYYY 20:30",
-                "What is the timezone of the event? Reply with (AEDT / AEST / SGT)"
+                "What is the date of this event? Format should be: DD/MM/YYYY 20:30 TMZE"
             ];
             /**
              * @type {string[]}
              */
             var answers = [];
-            const dateformat = "DD/MM/YYYY 20:30";
+            const dateformat = "DD/MM/YYYY 20:30 TMZE";
 
             embed.setAuthor(questions[counter++]);
+            embed.setColor('RED');
             member.user.send(embed).then((dm) => {
                 const filter = m => m.author.id === member.id;
                 const collector = dm.channel.createMessageCollector(filter, {
@@ -218,9 +227,18 @@ class AttendanceManager {
                     time: 5*60000
                 });
                 collector.on('collect', async (message, col) => {
+                    const embed3 = new Discord.MessageEmbed();
                     if (counter < questions.length) {
-                        embed.setAuthor(questions[counter++]);
-                        member.user.send(embed);
+                        embed3.setAuthor(questions[counter++]);
+                        embed3.setColor('RED');
+                        if (counter === questions.length) {
+                            var allTimezones = 'Here are your choices for timezones:\n';
+                            timezones.keyArray().forEach(tmze => {
+                                allTimezones += "`" + tmze + "`\n";
+                            });
+                            embed3.setDescription(allTimezones);
+                        }
+                        member.user.send(embed3);
                     }
                 });
                 collector.on('end', async (collected) => {
@@ -230,19 +248,18 @@ class AttendanceManager {
                     const title = answers[0];
                     const description = answers[1];
                     const date = answers[2];
-                    const timezone = answers[3];
-                    if (!title || !description || !date || !timezone) {
+                    if (!title || !description || !date) {
                         embed.setAuthor("Ran out of time!");
                         member.user.send(embed);
                         resolve(undefined);
-                    } else if (date.length !== dateformat.length) {
-                        embed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30)");
-                        embed.setDescription(`E.g: 01/01/2021 10:45 or 20/04/2021 09:30`);
+                    } else if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
+                        embed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30 TMZE)");
+                        embed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
                         member.user.send(embed);
                         resolve(undefined);
                     } else {
                         const attendanceembed = new Discord.MessageEmbed();
-                        formatDate(`${date} ${timezone.toUpperCase()}`).then((dateObject) => {
+                        formatDate(`${date.toUpperCase()}}`).then((dateObject) => {
                             const dateNow = new Date();
                             if (dateObject.getTime() < dateNow.getTime()) {
                                 const difference = dateNow.getTime()-dateObject.getTime();
@@ -251,7 +268,7 @@ class AttendanceManager {
                                 member.user.send(embed);
                                 resolve();
                             } else {
-                                const dateString = `${dateObject.toDateString()} ${formatFormalTime(dateObject, timezone.toUpperCase())}`;
+                                const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(date.substring(date.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
                                 attendanceembed.setTitle(title);
                                 attendanceembed.setDescription(description);
                                 if (formatTrack(title)) {
@@ -273,14 +290,16 @@ class AttendanceManager {
                                     await m.react(AttendanceManager.reject);
                                     await m.react(AttendanceManager.tentative);
                                     await m.react(AttendanceManager.delete);
-                                    embed.setAuthor(`Successfully created event ${title}`);
-                                    member.user.send(embed);
+                                    const embed3 = new Discord.MessageEmbed();
+                                    embed3.setAuthor(`Successfully created event ${title}`);
+                                    embed3.setColor('RED');
+                                    member.user.send(embed3);
                                     const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server.guild, m);
                                     this.events.set(attendance.id, attendance);
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
                                         console.log(`[UPDATE] Saved attendance ${attendance.title} of id ${attendance.id}`);
-                                        server.log(`${member.user.tag} has created attendance ${attendance.title}`);
+                                        //server.log(`${member.user.tag} has created attendance ${attendance.title}`);
                                         resolve(attendance);
                                     } catch (err) {
                                         console.log(err);
@@ -306,6 +325,7 @@ class AttendanceManager {
      */
     async editAttendance(member) {
         const embed = new Discord.MessageEmbed();
+        embed.setColor('RED');
         const allevents = []; const alleventsid = [];
         let counter = 0;
         this.events.forEach((event) => {
@@ -341,6 +361,7 @@ class AttendanceManager {
                 const attendanceevent = this.fetch(alleventsid[index]);
                 member.user.send(attendanceevent.embed).then((em) => {
                     const embed2 = new Discord.MessageEmbed();
+                    embed2.setColor('RED');
                     embed2.setAuthor("Select the options to edit: (🇹 for title) (🇩 for description) (📆 for date)");
                     member.user.send(embed2).then(async (m) => {
                         await m.react("🇹");
@@ -362,6 +383,11 @@ class AttendanceManager {
                                 embed2.setAuthor("Enter the new description:");
                             } else if (emojiname === "📆") {
                                 embed2.setAuthor("Enter the new date: (Format is DD/MM/YYYY 20:30 AEDT)");
+                                var allTimezones = 'Here are your choices for timezones:\n';
+                                timezones.keyArray().forEach(tmze => {
+                                    allTimezones += "`" + tmze + "`\n";
+                                });
+                                embed2.setDescription(allTimezones);
                             }
                             member.user.send(embed2).then((m3) => {
                                 let mfilter = m => m.author.id === member.id;
@@ -426,8 +452,10 @@ class AttendanceManager {
      */
     async editAdvancedAttendance(member, attendanceevent) {
         const embed = new Discord.MessageEmbed();
+        embed.setColor('RED');
         member.user.send(attendanceevent.embed).then((em) => {
             const embed2 = new Discord.MessageEmbed();
+            embed2.setColor('RED');
             embed2.setAuthor("Select the options to edit: (🇹 for title) (🇩 for description) (📆 for date)");
             member.user.send(embed2).then(async (m) => {
                 await m.react("🇹");
@@ -449,6 +477,11 @@ class AttendanceManager {
                         embed2.setAuthor("Enter the new description:");
                     } else if (emojiname === "📆") {
                         embed2.setAuthor("Enter the new date: (Format is DD/MM/YYYY 20:30 AEDT)");
+                        var allTimezones = 'Here are your choices for timezones:\n';
+                        timezones.keyArray().forEach(tmze => {
+                            allTimezones += "`" + tmze + "`\n";
+                        });
+                        embed2.setDescription(allTimezones);
                     }
                     member.user.send(embed2).then((m3) => {
                         let mfilter = m => m.author.id === member.id;
@@ -553,6 +586,7 @@ class AttendanceManager {
     async awaitDeleteAttendance(reaction, user) {
         reaction.message.guild.members.fetch(user.id).then((member) => {
             const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
             const attendance = this.fetch(reaction.message.id);
             if (attendance) {
                 embed.setAuthor(`Are you sure you want to delete ${attendance.title}?`);
@@ -592,6 +626,7 @@ class AttendanceManager {
     async awaitDeleteAdvancedAttendance(reaction, user) {
         reaction.message.guild.members.fetch(user.id).then((member) => {
             const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
             const attendance = this.fetchAdvanced(reaction.message.id);
             if (attendance) {
                 embed.setAuthor(`Are you sure you want to delete ${attendance.embed.title}?`);

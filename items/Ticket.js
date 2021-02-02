@@ -30,7 +30,7 @@ class Ticket {
         await this.channel.edit({
             permissionOverwrites: [
                 {
-                    id: member,
+                    id: member.id,
                     allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'ATTACH_FILES']
                 }
             ]
@@ -58,13 +58,13 @@ class Ticket {
 
                     const collector = this.base.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
-                    collector.on('collect', async (r, u) => {
+                    collector.once('collect', async (r, u) => {
                         if (r.emoji.name === AttendanceManager.accept) {
                             yesdelete = true;
                         }
                         collector.stop();
                     });
-                    collector.on('end', async (collected) => {
+                    collector.once('end', async (collected) => {
                         if (yesdelete) {
                             await this.close(member);
                             resolve(true);
@@ -100,13 +100,13 @@ class Ticket {
 
                     const collector = message.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
-                    collector.on('collect', async (r, u) => {
+                    collector.once('collect', async (r, u) => {
                         if (r.emoji.name === AttendanceManager.accept) {
                             yesdelete = true;
                         }
                         collector.stop();
                     });
-                    collector.on('end', async (collected) => {
+                    collector.once('end', async (collected) => {
                         if (yesdelete) {
                             await this.close(member);
                             resolve(true);
@@ -132,7 +132,7 @@ class Ticket {
      * @param {Discord.GuildMember} member
      * @returns {Promise<boolean>}
      */
-    close(member) {
+    async close(member) {
         return new Promise(async (resolve, reject) => {
             try {
                 const embed = new Discord.MessageEmbed()

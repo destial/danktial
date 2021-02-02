@@ -17,6 +17,7 @@ module.exports = {
                     servers.addServer(server);
                     server.save();
                     console.log(`[SERVER] Joined server ${guild.name}`);
+                    await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
                 }
             } catch (err) {
                 console.log('[ERROR] Something happened while trying to add a server!', err);
@@ -28,6 +29,7 @@ module.exports = {
                 const server = await servers.fetch(guild.id);
                 await servers.removeServer(server);
                 console.log(`[SERVER] Left server ${guild.name}`);
+                await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
             } catch (err) {
                 console.log('[ERROR] Something happened while trying to add a server!', err);
             }

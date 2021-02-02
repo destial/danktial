@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('events').EventEmitter.defaultMaxListeners = 15;
 const Discord = require('discord.js');
 const Database = require('./database/Database');
 const Server = require('./items/Server');
@@ -12,11 +13,13 @@ const Team = require('./items/Team');
 const Reserve = require('./items/Reserve');
 const { Logger } = require('./utils/Utils');
 const nodemon = require('nodemon');
+
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
 });
 
 client.login(process.env.DISCORD_TOKEN);
+client.setMaxListeners(15);
 
 const Manager = new ServerManager(client);
 
@@ -30,11 +33,13 @@ client.once('ready', async () => {
                         Manager.addServer(server).then(() => {}).catch((err) => console.log(err));
                     }
                 });
-                guild.channels.cache.forEach(channel => {
-                    if (channel.isText()) {
-                        channel.messages.fetch({limit: 100}, true, true).catch(err => {
+                guild.channels.cache.forEach(async channel => {
+                    if (channel.isText() && channel.manageable && channel.viewable) {
+                        try {
+                            await channel.messages.fetch({limit: 100}, true, true);
+                        } catch(err) {
                             Logger.boot(`Error loading channel messages of ${channel.name} under ${channel.guild.name}`);
-                        });
+                        }
                     }
                 });
             });
@@ -331,30 +336,33 @@ client.once('ready', async () => {
         console.log(err);
     } 
 });
+try {
+    nodemon({script: 'index.js'}).on('restart', () => {
+        Manager.servers.forEach(async server => {
+            if (server.modlog) {
+                await server.modlog.setTopic(`danktial is restarting!`);
+            }
+        });
+    }).on('exit', () => {
+        Manager.servers.forEach(async server => {
+            if (server.modlog) {
+                await server.modlog.setTopic(`danktial is offline!`);
+            }
+        });
+    }).on('crash', () => {
+        Manager.servers.forEach(async server => {
+            await server.log(`danktial has crashed!`);
+            if (server.modlog) {
+                await server.modlog.setTopic(`danktial is offline!`);
+            }
+        });
+    }).on('quit', () => {
+        Manager.servers.forEach(async server => {
+            if (server.modlog) {
+                await server.modlog.setTopic(`danktial is offline!`);
+            }
+        });
+    });
+} catch(err) {
 
-nodemon({script: 'index.js'}).on('restart', () => {
-    Manager.servers.forEach(async server => {
-        if (server.modlog) {
-            await server.modlog.setTopic(`danktial is restarting!`);
-        }
-    });
-}).on('exit', () => {
-    Manager.servers.forEach(async server => {
-        if (server.modlog) {
-            await server.modlog.setTopic(`danktial is offline!`);
-        }
-    });
-}).on('crash', () => {
-    Manager.servers.forEach(async server => {
-        await server.log(`danktial has crashed!`);
-        if (server.modlog) {
-            await server.modlog.setTopic(`danktial is offline!`);
-        }
-    });
-}).on('quit', () => {
-    Manager.servers.forEach(async server => {
-        if (server.modlog) {
-            await server.modlog.setTopic(`danktial is offline!`);
-        }
-    });
-});
+}

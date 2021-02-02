@@ -11,3 +11,7 @@ shards.on('shardCreate', shard => {
 });
 
 shards.spawn(shards.totalShards);
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.log('Unhandled Rejection at:', promise, 'Reason:', reason);
+});
