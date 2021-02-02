@@ -58,7 +58,7 @@ class AttendanceManager {
             const questions = [
                 "What is the title of this event?",
                 "What is the description of the event?",
-                "What is the date of this event? Format should be: DD/MM/YYYY 20:30 TMZE",
+                "What is the date of this event? Format should be: DD/MM/YYYY hh:mm TMZE",
                 "What is the tier of this event? Reply with the following:"
             ];
             const tierNames = [];
@@ -69,7 +69,7 @@ class AttendanceManager {
              * @type {string}
              */
             var answers = [];
-            const dateformat = "DD/MM/YYYY 20:30 TMZE";
+            const dateformat = "DD/MM/YYYY hh:mm TMZE";
 
             embed.setAuthor(questions[counter++]);
             embed.setColor('RED');
@@ -114,7 +114,7 @@ class AttendanceManager {
                     await member.user.send(replyEmbed);
                     resolve(undefined);
                 } else if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
-                    replyEmbed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30 TMZE)");
+                    replyEmbed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY hh:mm TMZE)");
                     replyEmbed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
                     await member.user.send(embed);
                     resolve(undefined);
@@ -210,13 +210,13 @@ class AttendanceManager {
             const questions = [
                 "What is the title of this event?",
                 "What is the description of the event?",
-                "What is the date of this event? Format should be: DD/MM/YYYY 20:30 TMZE"
+                "What is the date of this event? Format should be: DD/MM/YYYY hh:mm TMZE"
             ];
             /**
              * @type {string[]}
              */
             var answers = [];
-            const dateformat = "DD/MM/YYYY 20:30 TMZE";
+            const dateformat = "DD/MM/YYYY hh:mm TMZE";
 
             embed.setAuthor(questions[counter++]);
             embed.setColor('RED');
@@ -253,7 +253,7 @@ class AttendanceManager {
                         member.user.send(embed);
                         resolve(undefined);
                     } else if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
-                        embed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY 20:30 TMZE)");
+                        embed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY hh:mm TMZE)");
                         embed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
                         member.user.send(embed);
                         resolve(undefined);
@@ -382,7 +382,7 @@ class AttendanceManager {
                             } else if (emojiname === "🇩") {
                                 embed2.setAuthor("Enter the new description:");
                             } else if (emojiname === "📆") {
-                                embed2.setAuthor("Enter the new date: (Format is DD/MM/YYYY 20:30 AEDT)");
+                                embed2.setAuthor("Enter the new date: (Format is DD/MM/YYYY hh:mm TMZE)");
                                 var allTimezones = 'Here are your choices for timezones:\n';
                                 timezones.keyArray().forEach(tmze => {
                                     allTimezones += "`" + tmze + "`\n";
@@ -414,12 +414,12 @@ class AttendanceManager {
                                                 embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
                                                 member.user.send(embed);
                                             } else {
-                                                const dateString = `${date.toDateString()} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
+                                                const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(edit.substring(edit.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
                                                 mcollector.stop();
                                                 attendanceevent.updateDate(date, dateString);
                                             }
                                         }).catch((err) => {
-                                            embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY 20:30 AEDT)");
+                                            embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY hh:mm TMZE)");
                                             member.user.send(embed2);
                                         });
                                     }
@@ -427,10 +427,12 @@ class AttendanceManager {
                                 mcollector.on('end', async (mcollected) => {
                                     attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                         try {
+                                            const embed3 = new Discord.MessageEmbed();
+                                            embed3.setColor('RED');
                                             await Database.run(Database.attendanceSaveQuery, [attendanceevent.id, String(attendanceevent.date.getTime()), attendanceevent.message.channel.id]);
                                             console.log(`[UPDATE] Edited attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
-                                            embed2.setAuthor("Successfully edited event!");
-                                            member.user.send(embed2);
+                                            embed3.setAuthor("Successfully edited event!");
+                                            member.user.send(embed3);
                                             attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
                                         } catch (err) {
                                             console.log(err);
@@ -476,7 +478,7 @@ class AttendanceManager {
                     } else if (emojiname === "🇩") {
                         embed2.setAuthor("Enter the new description:");
                     } else if (emojiname === "📆") {
-                        embed2.setAuthor("Enter the new date: (Format is DD/MM/YYYY 20:30 AEDT)");
+                        embed2.setAuthor("Enter the new date: (Format is DD/MM/YYYY 20:30 TMZE)");
                         var allTimezones = 'Here are your choices for timezones:\n';
                         timezones.keyArray().forEach(tmze => {
                             allTimezones += "`" + tmze + "`\n";
@@ -491,14 +493,16 @@ class AttendanceManager {
                         });
                         mcollector.on('end', async (mcollected) => {
                             let edit = mcollected.first().content;
+                            const embed3 = new Discord.MessageEmbed();
+                            embed3.setColor('RED');
                             if (edit) {
                                 if (emojiname === "🇹") {
                                     attendanceevent.embed.setTitle(edit);
                                     attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                         try {
                                             await attendanceevent.update();
-                                            embed2.setAuthor(`Successfully edited attendance!`);
-                                            member.user.send(embed2);
+                                            embed3.setAuthor(`Successfully edited attendance!`);
+                                            member.user.send(embed3);
                                             attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
@@ -510,8 +514,8 @@ class AttendanceManager {
                                     attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                         try {
                                             await attendanceevent.update();
-                                            embed2.setAuthor(`Successfully edited attendance!`);
-                                            member.user.send(embed2);
+                                            embed3.setAuthor(`Successfully edited attendance!`);
+                                            member.user.send(embed3);
                                             attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
@@ -528,14 +532,14 @@ class AttendanceManager {
                                             member.user.send(embed);
                                             return;
                                         } else {
-                                            const dateString = `${date.toDateString()} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
+                                            const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(edit.substring(edit.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
                                             attendanceevent.updateDate(date, dateString);
                                         }
                                         attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                             try {
                                                 await attendanceevent.update();
-                                                embed2.setAuthor(`Successfully edited attendance!`);
-                                                member.user.send(embed2);
+                                                embed3.setAuthor(`Successfully edited attendance!`);
+                                                member.user.send(embed3);
                                                 attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                                 return;
                                             } catch (err) {
@@ -543,7 +547,7 @@ class AttendanceManager {
                                             }
                                         });
                                     }).catch((err) => {
-                                        embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY 20:30 AEDT)");
+                                        embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY 20:30 TMZE)");
                                         member.user.send(embed2);
                                     });
                                 }

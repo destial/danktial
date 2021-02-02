@@ -305,17 +305,17 @@ client.once('ready', async () => {
                             });
                             Logger.log('danktial is now online!');
                             const date = new Date();
-                            Manager.servers.forEach(async server => {
+                            Manager.servers.forEach(server => {
                                 //await server.log(`danktial has been restarted!`);
                                 if (server.modlog) {
-                                    await server.modlog.setTopic(`danktial has been online since ${date.toString()}`);
-                                    setInterval(async () => {
-                                        await server.modlog.setTopic(`danktial has been online since ${date.toString()}`);
-                                    }, 1000*60*5);
+                                    server.modlog.setTopic(`danktial has been online since ${date.toString()}`);
+                                    // setInterval(async () => {
+                                    //     await server.modlog.setTopic(`danktial has been online since ${date.toString()}`);
+                                    // }, 1000*60*5);
                                 }
                             });
                         });
-                        await client.user.setStatus('online', client.shard.ids);
+                        //await client.user.setStatus('online', client.shard.ids);
                         if (client.shard.ids[0] === 0) {
                             await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
                         }
