@@ -152,7 +152,6 @@ class Ticket {
                     await Database.run(Database.ticketDeleteQuery, [this.id]);
                     console.log(`[TICKET] ${member.displayName} has closed ${this.channel.name} by ${this.member.displayName}`);
                     this.ticketManager.opentickets.delete(this.id);
-                    resolve(true);
                 }, 5000);
             } catch (err) {
                 console.log(err);

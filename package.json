@@ -5,7 +5,7 @@
     },
     "module": "modules",
     "scripts": {
-        "start": "nodemon --delay 10 index.js"
+        "start": "nodemon --delay 10"
     },
     "dependencies": {
         "discord.js": "^12.5.1",
