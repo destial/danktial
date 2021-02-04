@@ -8,6 +8,7 @@ const TierManager = require('../managers/TierManager');
 const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
 const formatDiscordRegion = require('../utils/formatDiscordRegion');
+const serverSchema = require('../database/schemas/server-schema');
 
 class Server {
     /**
@@ -71,7 +72,7 @@ class Server {
     async setPrefix(prefix) { 
         this.prefix = prefix;
         try {
-            await this.save();
+            await this.update();
         } catch (err) {
             console.log(err);
         }
@@ -84,7 +85,7 @@ class Server {
     async setModLog(channel) {
         this.modlog = channel;
         try {
-            await this.save();
+            await this.update();
         } catch (err) {
             console.log(err);
         }
@@ -122,11 +123,19 @@ class Server {
 
     async save() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
+        await serverSchema.create({ id: this.id, prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
         console.log(`[SERVER] Saved server ${this.guild.name}`);
+    }
+
+    async update() {
+        await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
+        await serverSchema.findOneAndUpdate({ id: this.id }, { prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
+        console.log(`[SERVER] Updated server ${this.guild.name}`);
     }
 
     async delete() {
         await Database.run(Database.serverDeleteQuery, [this.id]);
+        await serverSchema.deleteOne({ id: this.id });
         console.log(`[SERVER] Deleted server ${this.guild.name}`);
     }
     /**
