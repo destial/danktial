@@ -20,7 +20,6 @@ const client = new Discord.Client({
 client.login(process.env.DISCORD_TOKEN);
 client.setMaxListeners(15);
 const Manager = new ServerManager(client);
-console.log(client);
 client.once('ready', () => {
     console.log('REEEEEEEEEEEEEADDDDDDDDDDDDDDDYYYYYYYYYYYYYYYYYY');
     try {
