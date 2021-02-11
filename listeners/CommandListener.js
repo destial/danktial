@@ -33,8 +33,7 @@ module.exports = {
                     const command = args.shift().toLowerCase();
                     try {
                         await client.commands.get(command).run(client, server, command, args, message);
-                    } catch (err) {
-                    }
+                    } catch (err) {}
                 }
             }
         });
