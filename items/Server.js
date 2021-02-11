@@ -8,7 +8,7 @@ const TierManager = require('../managers/TierManager');
 const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
 const formatDiscordRegion = require('../utils/formatDiscordRegion');
-const serverSchema = require('../database/schemas/server-schema');
+//const serverSchema = require('../database/schemas/server-schema');
 
 class Server {
     /**
@@ -104,7 +104,7 @@ class Server {
                 const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
                 const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
                 const embed = new Discord.MessageEmbed()
-                    .setAuthor(`[LOG] ${title}`)
+                    .setAuthor(title)
                     .setColor('ORANGE')
                     .setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${this.guild.region.toLocaleUpperCase()}`);
                 if (description) {
@@ -113,7 +113,6 @@ class Server {
                 if (fields) {
                     embed.addFields(fields);
                 }
-
                 return await this.modlog.send(embed);
             } catch (err) {
                 console.log(err);
@@ -123,19 +122,19 @@ class Server {
 
     async save() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
-        await serverSchema.create({ id: this.id, prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
+        //await serverSchema.create({ id: this.id, prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
         console.log(`[SERVER] Saved server ${this.guild.name}`);
     }
 
     async update() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
-        await serverSchema.findOneAndUpdate({ id: this.id }, { prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
+        //await serverSchema.findOneAndUpdate({ id: this.id }, { prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
         console.log(`[SERVER] Updated server ${this.guild.name}`);
     }
 
     async delete() {
         await Database.run(Database.serverDeleteQuery, [this.id]);
-        await serverSchema.deleteOne({ id: this.id });
+        //await serverSchema.deleteOne({ id: this.id });
         console.log(`[SERVER] Deleted server ${this.guild.name}`);
     }
     /**

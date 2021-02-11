@@ -1,5 +1,6 @@
 const ServerManager = require('../managers/ServerManager');
 const Discord = require('discord.js');
+const formatAccountAge = require('../utils/formatAccountAge');
 
 module.exports = {
     /**
@@ -79,7 +80,7 @@ module.exports = {
                             name: `Member Count: ${server.guild.memberCount}`
                         });
                     }
-                    await server.log('Member joined!', `${member} - ${member.user.tag}`);
+                    await server.log(`Member joined!`, `${member} - ${member.user.tag}`, [{ name: `Account Age`, value: `${formatAccountAge(member.user.createdAt)} old`, inline: false}]);
                 }
             });
 
@@ -91,7 +92,7 @@ module.exports = {
                             name: `Member Count: ${server.guild.memberCount}`
                         });
                     }
-                    await server.log('Member left!', `${member} - ${member.user.tag}`);
+                    await server.log('Member left!', `${member} - ${member.user.tag}`, [{ name: `Joined Since`, value: `${formatAccountAge(member.joinedAt)} ago`, inline: false}]);
                 }
             });
         } catch(err) {

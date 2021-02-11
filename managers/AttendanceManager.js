@@ -45,10 +45,12 @@ class AttendanceManager {
      */
     async newAdvancedAttendance(client, server, member, channel) {
         const embed = new Discord.MessageEmbed();
+        await channel.startTyping(60);
         embed.setColor('RED');
         if (server.getTierManager().tiers.size === 0) {
             return new Promise(async (resolve, reject) => {
                 embed.setAuthor(`You do not have any tiers! Please create a tier using ${server.prefix}addtier`);
+                channel.stopTyping(true);
                 await channel.send(embed);
                 resolve(undefined);
             });
@@ -72,7 +74,6 @@ class AttendanceManager {
             const dateformat = "DD/MM/YYYY hh:mm TMZE";
 
             embed.setAuthor(questions[counter++]);
-            embed.setColor('RED');
             const dm = await member.user.send(embed);
             const filter = m => m.author.id === member.id;
             const collector = dm.channel.createMessageCollector(filter, {
@@ -112,16 +113,19 @@ class AttendanceManager {
                 if (!title || !description || !date || !tier) {
                     replyEmbed.setAuthor("Ran out of time!");
                     await member.user.send(replyEmbed);
+                    channel.stopTyping(true);
                     resolve(undefined);
                 } else if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
                     replyEmbed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY hh:mm TMZE)");
                     replyEmbed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
                     await member.user.send(embed);
+                    channel.stopTyping(true);
                     resolve(undefined);
                 } else if (!server.getTierManager().getTier(tier.toLowerCase())) {
                     replyEmbed.setAuthor("Tier is invalid! Did not match any tier of:");
                     replyEmbed.setDescription(tierNames.join('\n'));
                     await member.user.send(replyEmbed);
+                    channel.stopTyping(true);
                     resolve(undefined);
                 } else {
                     const t = server.getTierManager().getTier(tier.toLowerCase());
@@ -178,10 +182,11 @@ class AttendanceManager {
                                 this.advancedEvents.set(attendance.id, attendance);
                                 try {
                                     await attendance.save();
-                                    //server.log(`${member.user.tag} has created advancedattendance ${attendance.embed.title}`);
+                                    channel.stopTyping(true);
                                     resolve(attendance);
                                 } catch (err) {
                                     console.log(err);
+                                    channel.stopTyping(true);
                                     resolve(attendance);
                                 }
                             });
@@ -189,7 +194,7 @@ class AttendanceManager {
                     }).catch(async (dateo) => {
                         replyEmbed.setAuthor(`There was an error while making an attendance! Perhaps there are no drivers in this tier?`);
                         await member.user.send(replyEmbed);
-                        console.log(dateo);
+                        channel.stopTyping(true);
                         resolve(undefined);
                     });
                 }
@@ -205,6 +210,7 @@ class AttendanceManager {
      */
     async newAttendance(member, channel) {
         const embed = new Discord.MessageEmbed();
+        channel.startTyping(60);
         return new Promise(async (resolve, reject) => {
             let counter = 0;
             const questions = [
@@ -250,12 +256,14 @@ class AttendanceManager {
                     const date = answers[2];
                     if (!title || !description || !date) {
                         embed.setAuthor("Ran out of time!");
-                        member.user.send(embed);
+                        await member.user.send(embed);
+                        channel.stopTyping(true);
                         resolve(undefined);
                     } else if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
                         embed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY hh:mm TMZE)");
                         embed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
-                        member.user.send(embed);
+                        await member.user.send(embed);
+                        channel.stopTyping(true);
                         resolve(undefined);
                     } else {
                         const attendanceembed = new Discord.MessageEmbed();
@@ -266,6 +274,7 @@ class AttendanceManager {
                                 embed.setAuthor("Invalid date! Date cannot be in the past!");
                                 embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
                                 member.user.send(embed);
+                                channel.stopTyping(true);
                                 resolve();
                             } else {
                                 const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(date.substring(date.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
@@ -299,10 +308,11 @@ class AttendanceManager {
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
                                         console.log(`[UPDATE] Saved attendance ${attendance.title} of id ${attendance.id}`);
-                                        //server.log(`${member.user.tag} has created attendance ${attendance.title}`);
+                                        channel.stopTyping(true);
                                         resolve(attendance);
                                     } catch (err) {
                                         console.log(err);
+                                        channel.stopTyping(true);
                                         resolve(attendance);
                                     }
                                 });
@@ -310,6 +320,7 @@ class AttendanceManager {
                         }).catch((err) => {
                             embed.setAuthor(`There was an error while making an attendance!`);
                             member.user.send(embed);
+                            channel.stopTyping(true);
                             console.log(err);
                             resolve(undefined);
                         });

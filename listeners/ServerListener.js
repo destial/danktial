@@ -13,9 +13,16 @@ module.exports = {
             try {
                 const exists = await servers.fetch(guild.id);
                 if (!exists) {
-                    const server = new Server(client, guild, undefined, "-", 0, servers);
+                    const guildMember = guild.member(client.user);
+                    if (!guildMember.hasPermission('ADMINISTRATOR') || !guildMember.hasPermission('MANAGE_GUILD')) {
+                        const embed = new Discord.MessageEmbed();
+                        embed.setColor('RED');
+                        embed.setAuthor('I do not have enough permissions to function normally! Please allow me to manage the server and/or set me as administrator!');
+                        await guild.systemChannel.send(embed);
+                    }
+                    const server = new Server(client, guild, undefined, '-', 0, servers);
                     servers.addServer(server);
-                    server.save();
+                    await server.save();
                     console.log(`[SERVER] Joined server ${guild.name}`);
                     await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
                 }
@@ -31,7 +38,7 @@ module.exports = {
                 console.log(`[SERVER] Left server ${guild.name}`);
                 await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
             } catch (err) {
-                console.log('[ERROR] Something happened while trying to add a server!', err);
+                console.log('[ERROR] Something happened while trying to remove a server!', err);
             }
         });
     }

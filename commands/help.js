@@ -20,8 +20,10 @@ module.exports = {
         client.commands.forEach(k => {
             const has = list.find(c => c === k);
             if (!has) {
-                list.set(k.name, k);
-                desc.push(k.description);
+                if (k.name !== 'announce') {
+                    list.set(k.name, k);
+                    desc.push(k.description);
+                }
             } 
         });
         const commands = list.keyArray();

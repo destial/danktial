@@ -12,34 +12,31 @@ module.exports = {
             client.on('guildMemberRemove', async (member) => {
                 const server = await servers.fetch(member.guild.id);
                 if (server) {
-                    server.getTierManager().tiers.every(async tier => {
+                    server.getTierManager().tiers.forEach(async tier => {
                         const driver = tier.getDriver(member.id);
                         if (driver) {
+                            await driver.delete();
                             tier.removeDriver(member.id);
                             driver.team.removeDriver(member.id);
                             driver.setTeam(undefined);
                             driver.setTier(undefined);
-                            await driver.delete();
                             server.getAttendanceManager().getAdvancedEvents().forEach(async attendance => {
                                 if (attendance.tier === driver.tier) {
                                     await attendance.fix();
                                 }
                             });
-                            return false;
                         }
                         const reserve = tier.getReserve(member.id);
                         if (reserve) {
+                            await reserve.delete();
                             tier.removeReserve(member.id);
                             reserve.setTier(undefined);
-                            await reserve.delete();
                             server.getAttendanceManager().getAdvancedEvents().forEach(async attendance => {
                                 if (attendance.tier === reserve.tier) {
                                     await attendance.fix();
                                 }
                             });
-                            return false;
                         }
-                        return true;
                     });
                 }
             });

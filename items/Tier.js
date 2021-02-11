@@ -63,6 +63,39 @@ class Tier {
         console.log(`[TIER] Deleted tier ${this.name} from ${this.server.guild.name}`);
     }
 
+    async clear() {
+        const promise = new Promise((resolve, reject) => {
+            this.teams.forEach(team => {
+                const deleteDrivers = new Promise((resolve1, reject1) => {
+                    team.drivers.forEach(async (driver, id) => {
+                        await driver.delete();
+                        driver.setTeam(undefined);
+                        driver.setTier(undefined);
+                        team.removeDriver(driver.id);
+                        if (id === team.drivers.lastKey()) resolve1();
+                    });
+                    if (team.drivers.size === 0) resolve1();
+                });
+                deleteDrivers.then(() => {
+                    this.drivers.clear();
+                });
+            });
+            const deleteReserves = new Promise((resolve1, reject1) => {
+                this.reserves.forEach(async (reserve, id) => {
+                    await reserve.delete();
+                    reserve.setTier(undefined);
+                    if (id === this.reserves.lastKey()) resolve1();
+                });
+                if (this.reserves.size === 0) resolve1();
+            });
+            deleteReserves.then(() => {
+                this.reserves.clear();
+                resolve();
+            });
+        });
+        return promise;
+    }
+
     /**
      * 
      * @param {Driver} driver 

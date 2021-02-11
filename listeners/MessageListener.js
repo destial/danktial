@@ -9,39 +9,34 @@ module.exports = {
      */
     async run(client, servers) {
         client.on('messageDelete', async (message) => {
-            if (!message.author) return;
-            if (message.author.bot) return;
-            if (!message.content) return;
-            const server = await servers.fetch(message.guild.id);
-            if (server) {
-                if (server.modlog) {
-                    await server.log(`Message deleted from user ${message.member.user.tag}`, message.content);
+            try {
+                if (!message.author) return;
+                if (message.author.bot) return;
+                if (!message.content) return;
+                const server = await servers.fetch(message.guild.id);
+                if (server) {
+                    if (server.modlog) {
+                        await server.log(`Message deleted from ${message.member.user.tag}`, message.content);
+                    }
                 }
-            }
+            } catch(err) {}
         });
 
         client.on('messageUpdate', async (oldMessage, newMessage) => {
-            if (oldMessage.partial || newMessage.partial) {
-                try {
-                    oldMessage = await oldMessage.fetch();
-                    newMessage = await newMessage.fetch();
-                } catch (err) {
-                    console.log('[ERROR] Something happened while fetching uncached edited messages!', err);
-                }
-            }
-            if (!newMessage.author) return;
-            if (newMessage.author.bot) return;
-            if (oldMessage.content === newMessage.content) return;
-            const server = await servers.fetch(newMessage.id);
-            if (server) {
-                if (server.modlog) {
-                    const fields = [
+            try {
+                if (!newMessage.author) return;
+                if (newMessage.author.bot) return;
+                if (oldMessage.content === newMessage.content) return;
+                if (oldMessage.partial) return;
+                const server = await servers.fetch(newMessage.guild.id);
+                if (server) {
+                    await server.log(`Message edited from ${newMessage.member.user.tag}`, `[Jump to message](${newMessage.url})`, 
+                    [
                         { name: 'Old Message', value: oldMessage.content, inline: false },
                         { name: 'New Message', value: newMessage.content, inline: false }
-                    ];
-                    await server.log(`Message updated from user ${newMessage.member.user.tag}`, undefined, fields);
+                    ]);
                 }
-            }
+            } catch(err) {}
         });
     }
 };

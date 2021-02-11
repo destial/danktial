@@ -11,7 +11,8 @@ const Driver = require('./items/Driver');
 const Team = require('./items/Team');
 const Reserve = require('./items/Reserve');
 const { Logger } = require('./utils/Utils');
-const nodemon = require('nodemon');
+const formatDiscordRegion = require('./utils/formatDiscordRegion');
+//const nodemon = require('nodemon');
 
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
@@ -302,10 +303,12 @@ client.once('ready', () => {
                                 }
                             });
                             Logger.log('danktial is now online!');
-                            const date = new Date();
-                            Manager.servers.forEach(server => {
+                            Manager.servers.forEach(async server => {
                                 if (server.modlog) {
-                                    server.modlog.setTopic(`danktial has been online since ${date.toString()}`);
+                                    const locale = formatDiscordRegion(server.guild.region);
+                                    const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                                    const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
+                                    await server.modlog.setTopic(`danktial has been online since ${date} ${(time.startsWith('0') ? time.substring(1) : time)} ${server.guild.region.toLocaleUpperCase()}`);
                                 }
                             });
                         });
