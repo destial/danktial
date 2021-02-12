@@ -7,7 +7,7 @@ const isStaff = require('../utils/isStaff');
 
 module.exports = {
     name: 'addtier',
-    aliases: ['newtier'],
+    aliases: ['newtier', 'createtier'],
     usage: '[ name ]',
     description: 'Creates a new tier',
     /**
@@ -56,7 +56,7 @@ module.exports = {
                     driverList += (`- ${reserve.member}\n`);
                     reserve.save();
                 });
-                embed.setDescription(`${driverList}\nNext step is using` + server.prefix + `setdriver`);
+                embed.setDescription(`${driverList}\nNext step is using ` + server.prefix + `setdriver`);
                 await message.channel.send(embed);
                 server.log(`${message.member.user.tag} has added tier ${tier.name}`);
                 await Database.run(Database.tierSaveQuery, [server.id, name]);

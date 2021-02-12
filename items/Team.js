@@ -75,6 +75,19 @@ class Team {
         await Database.run(Database.teamUpdateNameQuery, [this.name, this.server.id, oldName, this.tier.name]);
         console.log(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
+
+    toJSON() {
+        return {
+            name: this.name,
+            guild: this.server.id,
+            drivers: this.drivers.keyArray(),
+            tier: this.tier.name,
+        };
+    }
+
+    toString() {
+        return this.name;
+    }
 }
 
 module.exports = Team;

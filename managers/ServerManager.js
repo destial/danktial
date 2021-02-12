@@ -134,6 +134,7 @@ class ServerManager {
             await Database.run(Database.teamDeleteGuildQuery, [server.id]);
             await Database.run(Database.triggerDeleteGuildQuery, [server.id]);
             await Database.run(Database.reactionRoleDeleteGuildQuery, [server.id]);
+            await Database.run(Database.serverEmbedDeleteQuery, [server.id]);
 
             await Database.run(Database.serverDeleteQuery, [server.id]);
             console.log(`[DELETED SERVER] Deleted server ${server.guild.name}`);

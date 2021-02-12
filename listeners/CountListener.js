@@ -31,7 +31,7 @@ module.exports = {
                             });
                         }
                     }
-                    server.log(`Deleted a channel!`, `${channel.name}`);
+                    server.log(`Channel deleted!`, `#${channel.name}`);
                 }
             });
 
@@ -44,7 +44,7 @@ module.exports = {
                             name: `Channel Count: ${server.guild.channels.cache.size}`
                         });
                     }
-                    await server.log('Created a channel!', `${channel} - ${channel.name}`);
+                    await server.log('Channel created!', `${channel} - #${channel.name}`);
                 }
             });
 
@@ -56,7 +56,7 @@ module.exports = {
                             name: `Role Count: ${server.guild.roles.cache.size}`
                         });
                     }
-                    await server.log('Created a role!', `${role} - ${role.name}`);
+                    await server.log('Role created!', `${role} - @${role.name}`);
                 }
             });
 
@@ -68,7 +68,7 @@ module.exports = {
                             name: `Role Count: ${server.guild.roles.cache.size}`
                         });
                     }
-                    await server.log('Deleted a role!', `${role.name}`);
+                    await server.log('Role deleted!', `@${role.name}`);
                 }
             });
 
@@ -80,7 +80,9 @@ module.exports = {
                             name: `Member Count: ${server.guild.memberCount}`
                         });
                     }
-                    await server.log(`Member joined!`, `${member} - ${member.user.tag}`, [{ name: `Account Age`, value: `${formatAccountAge(member.user.createdAt)} old`, inline: false}]);
+                    await server.log(`Member joined!`, `${member} - ${member.user.tag}`, (member.user.createdAt ? [{ name: `Account Age`, value: `${formatAccountAge(member.user.createdAt)} old`, inline: false}] : undefined));
+                    if (server.joinEmbed)
+                        member.user.send(server.joinEmbed);
                 }
             });
 
@@ -92,7 +94,7 @@ module.exports = {
                             name: `Member Count: ${server.guild.memberCount}`
                         });
                     }
-                    await server.log('Member left!', `${member} - ${member.user.tag}`, [{ name: `Joined Since`, value: `${formatAccountAge(member.joinedAt)} ago`, inline: false}]);
+                    await server.log('Member left!', `${member.user.tag}`, (member.joinedAt ? [{ name: `Joined Since`, value: `${formatAccountAge(member.joinedAt)} ago`, inline: false}] : undefined));
                 }
             });
         } catch(err) {

@@ -21,9 +21,26 @@ class Database {
             database.run('CREATE TABLE IF NOT EXISTS triggers (guild VARCHAR(32), trigger VARCHAR(255), response VARCHAR(255))');
             database.run('CREATE TABLE IF NOT EXISTS reactionrolepanels (id VARCHAR(32) PRIMARY KEY, channel VARCHAR(32))');
             database.run('CREATE TABLE IF NOT EXISTS reactionroles (guild VARCHAR(32), panel VARCHAR(32), emoji VARCHAR(32), role VARCHAR(32))');
+
+            database.run('CREATE TABLE IF NOT EXISTS serverembeds (id VARCHAR(32) PRIMARY KEY, data VARCHAR(2024))');
         });
         return database;
     }
+
+    /**
+     * `DELETE FROM serverembeds WHERE id=(?)`
+     */
+    static get serverEmbedDeleteQuery() { return "DELETE FROM serverembeds WHERE id=(?)"; }
+
+    /**
+     * `REPLACE INTO serverembeds (id,data) VALUES (?,?)`
+     */
+    static get serverEmbedSaveQuery() { return "REPLACE INTO serverembeds (id,data) VALUES (?,?)"; }
+
+    /**
+     * `SELECT * FROM serverembeds`
+     */
+    static get serverEmbedQuery() { return "SELECT * FROM serverembeds"; }
 
     /**
      * `DELETE FROM reactionrolepanels WHERE id=(?)`

@@ -107,12 +107,12 @@ class AdvancedAttendance {
             }
         });
 
-        const fiveMinBefore = this.date.getTime() - 300000;
+        const fiveMinBefore = this.date.getTime() - 600000;
         if (fiveMinBefore > new Date().getTime()) {
             this.schedule = schedule.scheduleJob(this.embed.title, new Date(fiveMinBefore), () => {
                 this.accepted.forEach((participant) => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`You have an event scheduled in 5 minutes!`);
+                    embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                     embed.setDescription(this.embed.title);
                     participant.member.user.send(embed);
                 });
@@ -359,11 +359,11 @@ class AdvancedAttendance {
         this.date = date;
         this.embed.setTimestamp(date);
         this.schedule.cancel();
-        const fiveMinBefore = this.date.getTime() - 300000;
+        const fiveMinBefore = this.date.getTime() - 600000;
         this.schedule = schedule.scheduleJob(this.embed.title, new Date(fiveMinBefore), () => {
             this.accepted.forEach((participant) => {
                 const embed = new Discord.MessageEmbed();
-                embed.setAuthor(`You have an event scheduled in 5 minutes!`);
+                embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                 embed.setDescription(this.embed.title);
                 participant.member.user.send(embed);
             });
@@ -374,6 +374,18 @@ class AdvancedAttendance {
             name: "Date & Time", value: (dateString), inline: false
         }));
         this.update();
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            guild: this.guild.id,
+            date: this.date.toISOString(),
+            accepted: this.accepted.keyArray(),
+            rejected: this.rejected.keyArray(),
+            tentative: this.tentative.keyArray(),
+            tier: this.tier.name
+        };
     }
 }
 

@@ -83,6 +83,25 @@ client.once('ready', () => {
                 });
             });
 
+            Database.all(Database.serverEmbedQuery).then(serverEmbed => {
+                serverEmbed.forEach(async row => {
+                    try {
+                        client.guilds.fetch(row.id).then(guild => {
+                            Manager.fetch(guild.id).then(async server => {
+                                if (guild && server) {
+                                    const joinEmbed = new Discord.MessageEmbed(JSON.parse(row.data));
+                                    server.loadEmbed(joinEmbed);
+                                } else if (!guild) {
+                                    Database.run(Database.serverEmbedDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
+                                }
+                            });
+                        });
+                    } catch(err) {
+                        console.log(`[BOOT] Error loading server embed ${row.id}`);
+                    }
+                });
+            });
+
             Database.all(Database.attendanceQuery).then(attendanceRows => {
                 attendanceRows.forEach(async row => {
                     try {

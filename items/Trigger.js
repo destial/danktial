@@ -44,6 +44,14 @@ class Trigger {
         await Database.run(Database.triggerDeleteQuery, [this.server.id, this.trigger, this.response]);
         console.log(`[TRIGGERS] Deleted trigger ${this.trigger} with ${this.response}`);
     }
+
+    toJSON() {
+        return {
+            guild: this.server.id,
+            trigger: this.trigger,
+            response: this.response
+        };
+    }
 }
 
 module.exports = Trigger;

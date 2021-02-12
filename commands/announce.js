@@ -18,26 +18,30 @@ module.exports = {
                 message.channel.send(`Usage is ${server.prefix}${this.name} ${this.usage}`);
                 return;
             }
-            server.serverManager.servers.forEach(server => {
+            const joined = args.join(' ');
+            const titleDesc = joined.split('|');
+            const title = titleDesc[0];
+            const desc = titleDesc[1];
+
+            server.serverManager.servers.forEach(async server => {
                 if (server.modlog) {
-                    const joined = args.join(' ');
-                    const titleDesc = joined.split('|');
-                    const title = titleDesc[0];
-                    const desc = titleDesc[1];
                     const embed = new Discord.MessageEmbed();
-                    const locale = formatDiscordRegion(server.guild.region);
-                    const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-                    const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
-                    embed.setAuthor(message.member.user.username, message.member.user.avatarURL(), 'http://danktial.destial.xyz');
+
+                    embed.setAuthor(message.member.user.username);
                     embed.setTitle(title)
-                        .setColor('RED')
-                        .setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${server.guild.region.toLocaleUpperCase()}`);
+                        .setColor('RED');
                     if (desc) {
                         embed.setDescription(desc);
                     }
-                    server.modlog.send(embed);
+                    const locale = formatDiscordRegion(server.guild.region);
+                    const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                    const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
+                    embed.setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${server.guild.region.toLocaleUpperCase()}`);
+                    await server.modlog.send(embed);
+                    console.log(`[ANNOUNCEMENT] Sent announcement to ${server.guild.name}`);
                 }
             });
+            await message.channel.send(embed);
         }
     }
 };

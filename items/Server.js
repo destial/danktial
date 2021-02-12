@@ -8,6 +8,7 @@ const TierManager = require('../managers/TierManager');
 const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
 const formatDiscordRegion = require('../utils/formatDiscordRegion');
+const { isThisTypeNode } = require('typescript');
 //const serverSchema = require('../database/schemas/server-schema');
 
 class Server {
@@ -25,6 +26,7 @@ class Server {
         this.guild = guild;
         this.modlog = modlog;
         this.prefix = prefix || "-";
+        this.joinEmbed = undefined;
         this.serverManager = serverManager;
         /**
          * @constant
@@ -151,6 +153,30 @@ class Server {
         this.ticketManager.totaltickets = tickets;
 
         console.log(`[SERVER] Loaded server ${this.guild.name}`);
+    }
+
+    /**
+     * 
+     * @param {Discord.MessageEmbed} joinEmbed 
+     */
+    loadEmbed(joinEmbed) {
+        this.joinEmbed = joinEmbed;
+
+        console.log(`[SERVER] Loaded embed from server ${this.guild.name}`);
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            prefix: this.prefix,
+            tickets: this.ticketManager.totaltickets,
+            log: (this.modlog ? this.modlog.id : null),
+            embed: (this.joinEmbed ? this.joinEmbed.toJSON() : null)
+        };
+    }
+
+    toString() {
+        return `${this.guild}`;
     }
 
     getTicketManager() { return this.ticketManager; }

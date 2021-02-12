@@ -111,7 +111,7 @@ class AttendanceManager {
                 const replyEmbed = new Discord.MessageEmbed();
                 replyEmbed.setColor('RED');
                 if (!title || !description || !date || !tier) {
-                    replyEmbed.setAuthor("Ran out of time!");
+                    replyEmbed.setAuthor("Ran out of time or no valid inputs!");
                     await member.user.send(replyEmbed);
                     channel.stopTyping(true);
                     resolve(undefined);

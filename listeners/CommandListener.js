@@ -32,7 +32,8 @@ module.exports = {
                     const args = msg.slice(server.prefix.length).split(' ');
                     const command = args.shift().toLowerCase();
                     try {
-                        await client.commands.get(command).run(client, server, command, args, message);
+                        if (client.commands.get(command))
+                            await client.commands.get(command).run(client, server, command, args, message);
                     } catch (err) {}
                 }
             }

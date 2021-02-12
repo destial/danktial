@@ -16,6 +16,13 @@ class TicketPanel {
         this.panel = embed;
         this.channel = channel;
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            channel: this.channel.id
+        };
+    }
 }
 
 module.exports = TicketPanel;

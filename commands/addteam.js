@@ -6,7 +6,7 @@ const isStaff = require('../utils/isStaff');
 
 module.exports = {
     name: 'addteam',
-    aliases: ['newteam', 'team'],
+    aliases: ['newteam', 'createteam'],
     usage: '[ name ]',
     description: 'Creates a new team',
     /**

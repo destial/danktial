@@ -107,6 +107,21 @@ class Driver {
         await this.update();
         return this;
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            guild: this.guild.id,
+            number: this.number,
+            team: this.team.name,
+            tier: this.tier.name,
+            reserved: false
+        };
+    }
+
+    toString() {
+        return `${this.member}`;
+    }
 }
 
 module.exports = Driver;

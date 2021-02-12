@@ -164,6 +164,19 @@ class Ticket {
         await Database.run(Database.ticketSaveQuery, this.id, this.member.id, this.number, this.base.id);
         console.log(`[TICKET] Created new ticket ${this.number}`);
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            member: this.member.id,
+            number: this.number,
+            base: this.base.id
+        };
+    }
+
+    toString() {
+        return `${this.channel}`;
+    }
 }
 
 module.exports = Ticket;

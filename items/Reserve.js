@@ -81,6 +81,21 @@ class Reserve extends Driver {
         await this.update();
         return this;
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            guild: this.guild.id,
+            number: this.number,
+            team: null,
+            tier: this.tier.name,
+            reserved: true
+        };
+    }
+
+    toString() {
+        return `${this.member}`;
+    }
 }
 
 module.exports = Reserve;

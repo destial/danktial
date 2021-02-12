@@ -47,6 +47,16 @@ class ReactionRole {
         await Database.run(Database.reactionRoleDeleteQuery, [this.server.id, this.message.id, this.emoji.id, this.role.id]);
         console.log(`[REACTIONROLE] Deleted reactionrole ${this.emoji.name} with ${this.role.name}`);
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            role: this.role.id,
+            emoji: this.emoji.id,
+            guild: this.server.id,
+            panel: this.message.id,
+        };
+    }
 }
 
 module.exports = ReactionRole;

@@ -190,6 +190,20 @@ class Tier {
     getReserve(id) {
         return this.reserves.get(id);
     }
+
+    toJSON() {
+        return {
+            name: this.name,
+            guild: this.server.id,
+            drivers: this.drivers.keyArray(),
+            reserves: this.reserves.keyArray(),
+            teams: this.teams.keyArray(),
+        };
+    }
+
+    toString() {
+        return this.name;
+    }
 }
 
 module.exports = Tier;

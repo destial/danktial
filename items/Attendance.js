@@ -61,7 +61,7 @@ class Attendance {
                 this.tentative.set(us.id, us.user.username);
             }
         });
-        const fiveMinBefore = this.date.getTime() - 300000;
+        const fiveMinBefore = this.date.getTime() - 600000;
         if (fiveMinBefore > new Date().getTime()) {
             this.schedule = schedule.scheduleJob(this.title, fiveMinBefore, () => {
                 const participants = [""];
@@ -73,7 +73,7 @@ class Attendance {
                     const mem = this.guild.members.cache.find((member) => member.id === participant);
                     if (mem) {
                         const embed = new Discord.MessageEmbed();
-                        embed.setAuthor(`You have an event scheduled in 5 minutes!`);
+                        embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                         embed.setDescription(this.title);
                         mem.user.send(embed);
                     }
@@ -203,7 +203,7 @@ class Attendance {
         this.date = date;
         this.embed.setTimestamp(date);
         this.schedule.cancel();
-        this.schedule = schedule.scheduleJob(this.title, date.getTime()-300000, () => {
+        this.schedule = schedule.scheduleJob(this.title, date.getTime()-600000, () => {
             /**
              * @type {string[]}
              */
@@ -215,7 +215,7 @@ class Attendance {
                 const mem = this.guild.members.cache.find((member) => member.id === participant);
                 if (mem) {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`You have an event scheduled in 5 minutes!`);
+                    embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                     embed.setDescription(this.title);
                     mem.user.send(embed);
                 }
@@ -226,6 +226,17 @@ class Attendance {
         return this.embed.spliceFields(0, 1, {
             name: "Date & Time", value: (dateString), inline: false
         });
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            guild: this.guild.id,
+            date: this.date.toISOString(),
+            accepted: this.accepted.keyArray(),
+            rejected: this.rejected.keyArray(),
+            tentative: this.tentative.keyArray()
+        };
     }
 }
 
