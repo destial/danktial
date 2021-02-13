@@ -19,7 +19,7 @@ async function formatDate(date) {
    const key = timezones.keyArray().find(t => d.toUpperCase().endsWith(t.substring(0, 4).trim()));
    difference = timezones.get(key);
    if (!difference) difference = "+00";
-   const promise = new Promise(async function(resolve, reject) {
+   const promise = new Promise((resolve, reject) => {
        const dateObject = new Date(`${month} ${day}, ${year} ${hour}:${minute}:00 UTC ${difference}`);
        if (Object.prototype.toString.call(dateObject) === "[object Date]") {
            if (isNaN(dateObject.getTime())) {
