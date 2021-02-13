@@ -231,15 +231,10 @@ class AdvancedAttendance {
     }
 
     async fix() {
-        if (this.embed.fields[0].name !== "Date & Time") {
-            this.embed.fields[0].name = "Date & Time";
-            const dateString = `${this.date.toDateString()} ${formatFormalTime(this.date, 'AEDT')}`;
-            this.embed.fields[0].value = dateString;
-        }
         var hasReserves = false;
         this.embed.fields.forEach(field => {
             const team = this.tier.getTeam(field.name);
-            if (team && !field.name.toLowerCase().includes('reserves')) {
+            if (team) {
                 const driverArray = field.value.split('\n');
                 if (!driverArray.length) {
                     driverArray.push(field.value);
