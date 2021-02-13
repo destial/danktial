@@ -76,11 +76,31 @@ class Team {
         console.log(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
+    async loadJSON(object) {
+        this.server = await this.client.manager.fetch(object.guild);
+        if (this.server) {
+            this.name = object.name;
+            this.tier = this.server.getTierManager().getTier(object.tier);
+            if (this.tier) {
+                object.drivers.forEach(id => {
+                    const driver = this.tier.getDriver(id);
+                    if (driver) {
+                        this.drivers.set(driver.id, driver);
+                    }
+                });
+            }
+        }
+    }
+
     toJSON() {
+        const driverArray = [];
+        this.drivers.forEach(driver => {
+            driverArray.push(driver.toJSON());
+        }); 
         return {
             name: this.name,
             guild: this.server.id,
-            drivers: this.drivers.keyArray(),
+            drivers: driverArray,
             tier: this.tier.name,
         };
     }

@@ -16,6 +16,7 @@ class Ticket {
     constructor(member, number, channel, base, ticketManager) {
         this.ticketManager = ticketManager;
         this.id = channel.id;
+        this.guild = channel.guild;
         this.member = member;
         this.number = number;
         this.channel = channel;
@@ -165,9 +166,14 @@ class Ticket {
         console.log(`[TICKET] Created new ticket ${this.number}`);
     }
 
+    async loadJSON(object) {
+        
+    }
+
     toJSON() {
         return {
             id: this.id,
+            guild: this.channel.guild.id,
             member: this.member.id,
             number: this.number,
             base: this.base.id

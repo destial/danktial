@@ -123,7 +123,7 @@ module.exports = {
                                                         colorCollector.once('end', async (colorCollection) => {
                                                             if (colorCollection.size !== 0 && colorCollection.first().content) {
                                                                 const colorNumber = parseInt(colorCollection.first().content);
-                                                                if (colorNumber) {
+                                                                if (colorNumber && (colorNumber >= 1 && colorNumber <= colors.length)) {
                                                                     createdEmbed.setColor(colors[colorNumber-1].replace(' ', '_'));
                                                                 }
 
@@ -180,7 +180,7 @@ async function askFields(member, channel, amount) {
          */
         const answers = [];
         const questions = [
-            `Enter field name`,
+            `Enter field title`,
             `Enter value name`,
             `Inline or not? Answer with (Y/N)`
         ];

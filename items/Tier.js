@@ -191,13 +191,63 @@ class Tier {
         return this.reserves.get(id);
     }
 
+    async loadJSON(object) {
+        this.server = await this.client.manager.fetch(object.guild);
+        if (this.server) {
+            this.name = object.name;
+            this.teams.clear();
+            this.drivers.clear();
+            this.reserves.clear();
+
+            object.teams.forEach(teamJSON => {
+                const team = new Team(this.client, this.server, teamJSON.name, this);
+                this.addTeam(team);
+                teamJSON.drivers.forEach(async driverJSON => {
+                    try {
+                        const member = await this.server.guild.members.fetch(driverJSON.id);
+                        if (member) {
+                            const driver = new Driver(this.client, member, this.server, team, driverJSON.number, this);
+                            this.addDriver(driver);
+                            team.setDriver(driver);
+                        }
+                    } catch(err) {
+                        console.log(`[TIER] Missing driver ${driverJSON.id}`);
+                    }
+                });
+            });
+
+            object.reserves.forEach(async reserveJSON => {
+                try {
+                    const member = await this.server.guild.members.fetch(reserveJSON.id);
+                    if (member) {
+                        const reserve = new Reserve(this.client, member, this.server, reserveJSON.number, this);
+                        this.addReserve(reserve);
+                    }
+                } catch(err) {
+                    console.log(`[TIER] Missing reserve ${reserveJSON.id}`);
+                }
+            });
+        }
+    }
+
     toJSON() {
+        const driverArray = [];
+        this.drivers.forEach(driver => {
+            driverArray.push(driver.toJSON());
+        });
+        const reservesArray = [];
+        this.reserves.forEach(reserve => {
+            reservesArray.push(reserve.toJSON());
+        });
+        const teamArray = [];
+        this.teams.forEach(team => {
+            teamArray.push(team.toJSON());
+        });
         return {
             name: this.name,
             guild: this.server.id,
-            drivers: this.drivers.keyArray(),
-            reserves: this.reserves.keyArray(),
-            teams: this.teams.keyArray(),
+            reserves: reservesArray,
+            teams: teamArray,
         };
     }
 

@@ -165,6 +165,22 @@ class Server {
         console.log(`[SERVER] Loaded embed from server ${this.guild.name}`);
     }
 
+    async loadJSON(object) {
+        try {
+            const guild = await this.client.guilds.fetch(object.id);
+            if (guild) {
+                this.id = guild.id;
+                this.guild = guild;
+                this.prefix = object.prefix;
+                this.ticketManager.totaltickets = Number(object.tickets);
+                this.embed = new Discord.MessageEmbed(object.embed);
+                this.modlog = guild.channels.cache.get(object.log);
+            }
+        } catch(err) {
+            console.log(`[SERVER] Missing server ${object.id}`);
+        }
+    }
+
     toJSON() {
         return {
             id: this.id,

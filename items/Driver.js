@@ -122,6 +122,10 @@ class Driver {
     toString() {
         return `${this.member}`;
     }
+
+    async DM(object) {
+        await this.member.user.send(object);
+    }
 }
 
 module.exports = Driver;

@@ -373,10 +373,87 @@ class AdvancedAttendance {
         this.update();
     }
 
+    async loadJSON(object) {
+        this.server = await this.client.manager.fetch(object.guild);
+        if (this.server) {
+            const channel = this.server.guild.channels.cache.get(object.channel);
+            if (channel && channel.isText()) {
+                this.message = await channel.messages.fetch(object.id);
+                if (this.message) {
+                    this.embed = this.message.embeds[0];
+                    this.date = new Date(object.date);
+                    this.accepted.clear();
+                    this.rejected.clear();
+                    this.tentative.clear();
+                    this.unknown.clear();
+
+                    this.tier = this.server.getTierManager().getTier(object.tier);
+
+                    object.accepted.forEach(id => {
+                        const driver = this.server.getTierManager().getTier(object.tier).getDriver(id);
+                        const reserve = this.server.getTierManager().getTier(object.tier).getReserve(id);
+                        if (driver) {
+                            this.accepted.set(id, driver);
+                        } else if (reserve) {
+                            this.accepted.set(id, reserve);
+                        }
+                    });
+                    object.rejected.forEach(id => {
+                        const driver = this.server.getTierManager().getTier(object.tier).getDriver(id);
+                        const reserve = this.server.getTierManager().getTier(object.tier).getReserve(id);
+                        if (driver) {
+                            this.rejected.set(id, driver);
+                        } else if (reserve) {
+                            this.rejected.set(id, reserve);
+                        }
+                    });
+                    object.tentative.forEach(id => {
+                        const driver = this.server.getTierManager().getTier(object.tier).getDriver(id);
+                        const reserve = this.server.getTierManager().getTier(object.tier).getReserve(id);
+                        if (driver) {
+                            this.tentative.set(id, driver);
+                        } else if (reserve) {
+                            this.tentative.set(id, reserve);
+                        }
+                    });
+                    object.unknown.forEach(id => {
+                        const driver = this.server.getTierManager().getTier(object.tier).getDriver(id);
+                        const reserve = this.server.getTierManager().getTier(object.tier).getReserve(id);
+                        if (driver) {
+                            this.unknown.set(id, driver);
+                        } else if (reserve) {
+                            this.unknown.set(id, reserve);
+                        }
+                    });
+                    if (this.schedule) {
+                        this.schedule.cancel();
+                    }
+                    const fiveMinBefore = this.date.getTime() - 600000;
+                    this.schedule = schedule.scheduleJob(this.embed.title, new Date(fiveMinBefore), () => {
+                        this.accepted.forEach((participant) => {
+                            const embed = new Discord.MessageEmbed();
+                            embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                            embed.setColor('RED');
+                            embed.setDescription(this.embed.title);
+                            participant.member.user.send(embed);
+                        });
+                        this.schedule.cancel();
+                    });
+                    console.log(`[ADATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
+                }
+            }
+        }
+    }
+
+    toString() {
+        return `[Message](${this.message.url})`;
+    }
+
     toJSON() {
         return {
             id: this.id,
             guild: this.guild.id,
+            channel: this.message.channel.id,
             date: this.date.toISOString(),
             accepted: this.accepted.keyArray(),
             rejected: this.rejected.keyArray(),

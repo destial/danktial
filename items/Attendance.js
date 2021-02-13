@@ -10,8 +10,9 @@ class Attendance {
      * @param {Date} date
      * @param {Discord.Guild} guild
      * @param {Discord.Message} message
+     * @param {Discord.Client} client
      */
-    constructor(embed, id, date, guild, message) {
+    constructor(embed, id, date, guild, message, client) {
         /**
          * @constant
          */
@@ -20,6 +21,7 @@ class Attendance {
          * @constant
          */
         this.id = id;
+        this.client = client;
         this.embed = embed;
         this.title = embed.title;
         this.description = embed.description;
@@ -218,10 +220,90 @@ class Attendance {
         });
     }
 
+    async loadJSON(object) {
+        try {
+            this.guild = await this.client.guilds.fetch(object.guild);
+        } catch(err) {
+            console.log(`[ATTENDANCE] Missing guild ${object.id}`);
+        }
+        if (this.guild) {
+            const channel = this.guild.channels.cache.get(object.channel);
+            if (channel && channel.isText()) {
+                this.message = await channel.messages.fetch(object.id);
+                if (this.message) {
+                    this.embed = this.message.embeds[0];
+                    this.title = this.embed.title;
+                    this.description = this.embed.description;
+                    this.date = new Date(object.date);
+                    this.accepted.clear();
+                    this.rejected.clear();
+                    this.tentative.clear();
+
+                    object.accepted.forEach(async id => {
+                        try {
+                            const member = await this.guild.members.fetch(id);
+                            if (member) {
+                                this.accepted.set(member.id, member.user.username);
+                            }
+                        } catch(err) {
+                            console.log(`[ATTENDANCE] Missing member ${id}`);
+                        }
+                    });
+
+                    object.rejected.forEach(async id => {
+                        try {
+                            const member = await this.guild.members.fetch(id);
+                            if (member) {
+                                this.rejected.set(member.id, member.user.username);
+                            }
+                        } catch(err) {
+                            console.log(`[ATTENDANCE] Missing member ${id}`);
+                        }
+                    });
+
+                    object.tentative.forEach(async id => {
+                        try {
+                            const member = await this.guild.members.fetch(id);
+                            if (member) {
+                                this.tentative.set(member.id, member.user.username);
+                            }
+                        } catch(err) {
+                            console.log(`[ATTENDANCE] Missing member ${id}`);
+                        }
+                    });
+
+                    if (this.schedule) {
+                        this.schedule.cancel();
+                    }
+                    const fiveMinBefore = this.date.getTime() - 600000;
+                    this.schedule = schedule.scheduleJob(this.title, new Date(fiveMinBefore), () => {
+                        this.accepted.forEach((nil, participant) => {
+                            const mem = this.guild.members.cache.find((member) => member.id === participant);
+                            if (mem) {
+                                const embed = new Discord.MessageEmbed();
+                                embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                                embed.setColor('RED');
+                                embed.setDescription(this.title);
+                                mem.user.send(embed);
+                            }
+                        });
+                        this.schedule.cancel();
+                    });
+                    console.log(`[ATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
+                }
+            }
+        }
+    }
+
+    toString() {
+        return `[Message](${this.message.url})`;
+    }
+
     toJSON() {
         return {
             id: this.id,
             guild: this.guild.id,
+            channel: this.message.channel.id,
             date: this.date.toISOString(),
             accepted: this.accepted.keyArray(),
             rejected: this.rejected.keyArray(),

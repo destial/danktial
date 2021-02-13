@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Server = require('../items/Server');
+const formatDiscordRegion = require('../utils/formatDiscordRegion');
 
 module.exports = {
     name: 'announce',
@@ -22,17 +23,15 @@ module.exports = {
             const titleDesc = joined.split('|');
             const title = titleDesc[0];
             const desc = titleDesc[1];
-
+            const embed = new Discord.MessageEmbed();
+            embed.setAuthor(message.member.user.username, message.member.user.avatarURL(), 'http://danktial.destial.xyz');
+            embed.setTitle(title)
+                .setColor('RED');
+            if (desc) {
+                embed.setDescription(desc);
+            }
             server.serverManager.servers.forEach(async server => {
                 if (server.modlog) {
-                    const embed = new Discord.MessageEmbed();
-
-                    embed.setAuthor(message.member.user.username);
-                    embed.setTitle(title)
-                        .setColor('RED');
-                    if (desc) {
-                        embed.setDescription(desc);
-                    }
                     const locale = formatDiscordRegion(server.guild.region);
                     const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
                     const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();

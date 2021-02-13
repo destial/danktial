@@ -12,7 +12,6 @@ const Team = require('./items/Team');
 const Reserve = require('./items/Reserve');
 const { Logger } = require('./utils/Utils');
 const formatDiscordRegion = require('./utils/formatDiscordRegion');
-//const nodemon = require('nodemon');
 
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
@@ -20,16 +19,16 @@ const client = new Discord.Client({
 
 client.login(process.env.DISCORD_TOKEN);
 client.setMaxListeners(15);
-const Manager = new ServerManager(client);
+client.manager = new ServerManager(client);
 client.once('ready', () => {
     console.log('REEEEEEEEEEEEEADDDDDDDDDDDDDDDYYYYYYYYYYYYYYYYYY');
     try {
         const loadServer = new Promise((resolve, reject) => {
             client.guilds.cache.forEach((guild) => {
-                Manager.fetch(guild.id).then(server => {
+                client.manager.fetch(guild.id).then(server => {
                     if (!server) {
-                        const server = new Server(client, guild, undefined, '-', 0, Manager);
-                        Manager.addServer(server).then(() => {}).catch((err) => console.log(err));
+                        const server = new Server(client, guild, undefined, '-', 0, client.manager);
+                        client.manager.addServer(server).then(() => {}).catch((err) => console.log(err));
                     }
                 });
                 guild.channels.cache.forEach(async channel => {
@@ -50,7 +49,7 @@ client.once('ready', () => {
                 serverRows.forEach((row) => {
                     try {
                         client.guilds.fetch(row.id).then(guild => {
-                            Manager.fetch(guild.id).then(async server => {
+                            client.manager.fetch(guild.id).then(async server => {
                                 if (guild && server) {
                                     const modlog = guild.channels.cache.find(c => c.id === row.log);
                                     server.load(guild, modlog, row.prefix, row.tickets);
@@ -65,7 +64,7 @@ client.once('ready', () => {
                         //     if (serverRows.length < servers) {
                         //         client.guilds.cache.forEach(async guild => {
                         //             try {
-                        //                 const exist = await Manager.fetch(guild.id);
+                        //                 const exist = await client.manager.fetch(guild.id);
                         //                 if (!exist) {
                         //                     await Database.run(Database.serverSaveQuery, [guild.id, '-', 0, 0]);
                         //                     console.log(`[SERVER] Saved ${server.guild.name} to database`);
@@ -87,7 +86,7 @@ client.once('ready', () => {
                 serverEmbed.forEach(async row => {
                     try {
                         client.guilds.fetch(row.id).then(guild => {
-                            Manager.fetch(guild.id).then(async server => {
+                            client.manager.fetch(guild.id).then(async server => {
                                 if (guild && server) {
                                     const joinEmbed = new Discord.MessageEmbed(JSON.parse(row.data));
                                     server.loadEmbed(joinEmbed);
@@ -109,7 +108,7 @@ client.once('ready', () => {
                         if (channel && channel.isText()) {
                             const message = await channel.messages.fetch(row.id);
                             if (message) {
-                                const server = await Manager.fetch(message.guild.id);
+                                const server = await client.manager.fetch(message.guild.id);
                                 const date = new Date().setTime(row.date);
                                 server.getAttendanceManager().loadAttendance(message, date);
                             } else {
@@ -132,7 +131,7 @@ client.once('ready', () => {
                         if (channel && channel.isText()) {
                             const base = await channel.messages.fetch(row.base);
                             if (base) {
-                                const server = await Manager.fetch(base.guild.id);
+                                const server = await client.manager.fetch(base.guild.id);
                                 const member = await server.guild.members.fetch(row.member);
                                 if (member) {
                                     const ticket = new Ticket(member, row.number, channel, base, server.getTicketManager());
@@ -153,7 +152,7 @@ client.once('ready', () => {
                     try {
                         const channel = await client.channels.fetch(row.id);
                         if (channel && channel.type === "voice") {
-                            const server = await Manager.fetch(channel.guild.id);
+                            const server = await client.manager.fetch(channel.guild.id);
                             if (server) {
                                 if (row.name === "membercount") {
                                     await server.getCountManager().setCount('member', channel);
@@ -192,7 +191,7 @@ client.once('ready', () => {
                         if (channel && channel.isText()) {
                             const panel = await channel.messages.fetch(row.id);
                             if (panel) {
-                                const server = await Manager.fetch(channel.guild.id);
+                                const server = await client.manager.fetch(channel.guild.id);
                                 const ticketPanel = new TicketPanel(client, server.getTicketManager(), panel.id, panel.embeds[0], channel);
                                 await server.getTicketManager().loadTicketPanel(ticketPanel);
                             } else {
@@ -212,7 +211,7 @@ client.once('ready', () => {
                 Database.all(Database.tierQuery).then(tierRows => {
                     tierRows.forEach(async (row, index) => {
                         try {
-                            const server = await Manager.fetch(row.guild);
+                            const server = await client.manager.fetch(row.guild);
                             if (server) {
                                 const tier = new Tier(client, server, row.name);
                                 server.getTierManager().addTier(tier);
@@ -233,7 +232,7 @@ client.once('ready', () => {
                     Database.all(Database.teamQuery).then(teamRows => {
                         teamRows.forEach(async (row, index) => {
                             try {
-                                const server = await Manager.fetch(row.guild);
+                                const server = await client.manager.fetch(row.guild);
                                 if (server) {
                                     const tier = server.getTierManager().getTier(row.tier.toLowerCase());
                                     if (tier) {
@@ -257,7 +256,7 @@ client.once('ready', () => {
                         Database.all(Database.driverQuery).then(driverRows => {
                             driverRows.forEach(async (row, index) => {
                                 try {
-                                    const server = await Manager.fetch(row.guild);
+                                    const server = await client.manager.fetch(row.guild);
                                     if (server) {
                                         const member = await server.guild.members.fetch(row.id);
                                         if (member) {
@@ -302,12 +301,11 @@ client.once('ready', () => {
                                     if (channel && channel.isText()) {
                                         const message = await channel.messages.fetch(row.id);
                                         if (message) {
-                                            const server = await Manager.fetch(message.guild.id);
+                                            const server = await client.manager.fetch(message.guild.id);
                                             const date = new Date().setTime(row.date);
                                             const tier = server.getTierManager().getTier(row.tier.toLowerCase());
                                             if (tier) {
                                                 await server.getAttendanceManager().loadAdvancedAttendance(message, tier, date);
-                                                //await channel.messages.fetch({after: message.id});
                                             } else {
                                                 Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                                             }
@@ -322,7 +320,7 @@ client.once('ready', () => {
                                 }
                             });
                             Logger.log('danktial is now online!');
-                            Manager.servers.forEach(async server => {
+                            client.manager.servers.forEach(async server => {
                                 if (server.modlog) {
                                     const locale = formatDiscordRegion(server.guild.region);
                                     const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
@@ -331,7 +329,7 @@ client.once('ready', () => {
                                 }
                             });
                         });
-                        await client.user.setActivity(`${Manager.servers.size} leagues`, { type: 'COMPETING' });
+                        await client.user.setActivity(`${client.manager.servers.size} leagues`, { type: 'COMPETING' });
                     });
                 });
             });
@@ -339,7 +337,7 @@ client.once('ready', () => {
             const listenerFiles = fs.readdirSync('./listeners').filter(file => file.endsWith('.js'));
             for (const file of listenerFiles) {
                 const listener = require(`./listeners/${file}`);
-                await listener.run(client, Manager);
+                await listener.run(client, client.manager);
                 console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
             }
         });
@@ -347,34 +345,3 @@ client.once('ready', () => {
         console.log(err);
     } 
 });
-
-// try {
-//     nodemon({script: 'index.js'}).on('restart', () => {
-//         Manager.servers.forEach(async server => {
-//             if (server.modlog) {
-//                 await server.modlog.setTopic(`danktial is restarting!`);
-//             }
-//         });
-//     }).on('exit', () => {
-//         Manager.servers.forEach(async server => {
-//             if (server.modlog) {
-//                 await server.modlog.setTopic(`danktial is offline!`);
-//             }
-//         });
-//     }).on('crash', () => {
-//         Manager.servers.forEach(async server => {
-//             await server.log(`danktial has crashed!`);
-//             if (server.modlog) {
-//                 await server.modlog.setTopic(`danktial is offline!`);
-//             }
-//         });
-//     }).on('quit', () => {
-//         Manager.servers.forEach(async server => {
-//             if (server.modlog) {
-//                 await server.modlog.setTopic(`danktial is offline!`);
-//             }
-//         });
-//     });
-// } catch(err) {
-
-// }
