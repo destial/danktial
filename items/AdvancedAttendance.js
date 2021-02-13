@@ -113,6 +113,7 @@ class AdvancedAttendance {
                 this.accepted.forEach((participant) => {
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                    embed.setColor('RED');
                     embed.setDescription(this.embed.title);
                     participant.member.user.send(embed);
                 });
@@ -364,6 +365,7 @@ class AdvancedAttendance {
             this.accepted.forEach((participant) => {
                 const embed = new Discord.MessageEmbed();
                 embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                embed.setColor('RED');
                 embed.setDescription(this.embed.title);
                 participant.member.user.send(embed);
             });
@@ -384,6 +386,7 @@ class AdvancedAttendance {
             accepted: this.accepted.keyArray(),
             rejected: this.rejected.keyArray(),
             tentative: this.tentative.keyArray(),
+            unknown: this.unknown.keyArray(),
             tier: this.tier.name
         };
     }

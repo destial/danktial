@@ -64,16 +64,12 @@ class Attendance {
         const fiveMinBefore = this.date.getTime() - 600000;
         if (fiveMinBefore > new Date().getTime()) {
             this.schedule = schedule.scheduleJob(this.title, fiveMinBefore, () => {
-                const participants = [""];
-                participants.shift();
-                this.accepted.keyArray().forEach(k => {
-                    participants.push(k);
-                });
-                participants.forEach(async (participant) => {
+                this.accepted.forEach((nil, participant) => {
                     const mem = this.guild.members.cache.find((member) => member.id === participant);
                     if (mem) {
                         const embed = new Discord.MessageEmbed();
                         embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                        embed.setColor('RED');
                         embed.setDescription(this.title);
                         mem.user.send(embed);
                     }
@@ -204,18 +200,12 @@ class Attendance {
         this.embed.setTimestamp(date);
         this.schedule.cancel();
         this.schedule = schedule.scheduleJob(this.title, date.getTime()-600000, () => {
-            /**
-             * @type {string[]}
-             */
-            const participants = [];
-            this.accepted.keyArray().forEach(k => {
-                participants.push(k);
-            });
-            participants.forEach(async (participant) => {
+            this.accepted.forEach((nil, participant) => {
                 const mem = this.guild.members.cache.find((member) => member.id === participant);
                 if (mem) {
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                    embed.setColor('RED');
                     embed.setDescription(this.title);
                     mem.user.send(embed);
                 }
