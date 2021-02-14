@@ -25,7 +25,7 @@ module.exports = {
             console.log(`[MODLOG] Set mod-log for server ${message.guild.name} to ${server.modlog.id}`);
         } else {
             embed.setAuthor(`Usage is:`);
-            embed.setDescription(`${server.prefix}${this.name} ${this.usage}`); 
+            embed.setDescription(`${server.prefix}${command} ${this.usage}`); 
         }
         await message.channel.send(embed);
     }

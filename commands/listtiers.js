@@ -3,7 +3,7 @@ const Server = require('../items/Server');
 
 module.exports = {
     name: 'tiers',
-    aliases: ['listtier', 'alltiers'],
+    aliases: ['listtier', 'alltiers', 'listtiers'],
     usage: '< name >',
     description: 'Lists all the tiers',
     /**
@@ -16,9 +16,10 @@ module.exports = {
     async run(client, server, command, args, message) {
         const embed = new Discord.MessageEmbed();
         embed.setColor('RED');
+        message.channel.startTyping();
         try {
             if (!args.length) {
-                embed.setAuthor('This is all the tiers:');
+                embed.setAuthor('These are all the tiers:');
                 var tierList = '';
                 if (server.getTierManager().tiers.size === 0) {
                     tierList = '-';
@@ -27,6 +28,7 @@ module.exports = {
                     tierList += `- ${tier.name}\n`;
                 });
                 embed.setDescription(tierList);
+                embed.setFooter(`For more details on a tier, use ${server.prefix}${command} [name]`);
                 await message.channel.send(embed);
             } else {
                 const tierName = args.join(' ');
@@ -59,5 +61,6 @@ module.exports = {
         } catch (err) {
             console.log(err);
         }
+        message.channel.stopTyping(true);
     }
 };

@@ -21,7 +21,7 @@ module.exports = {
             if (command === this.name) {
                 if (!args.length) {
                     embed.setAuthor('Usage is:');
-                    embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
+                    embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     message.channel.send(embed);
                     return;
                 }
@@ -39,7 +39,7 @@ module.exports = {
             } else if (command === this.aliases[0]) {
                 if (!args.length) {
                     embed.setAuthor('Usage is:');
-                    embed.setDescription(`${server.prefix}${this.alias[0]} ${this.usage}`);
+                    embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     message.channel.send(embed);
                     return;
                 }

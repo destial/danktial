@@ -21,6 +21,7 @@ module.exports = {
             if (attendance) {
                 server.log(`${message.member.user.tag} has created attendance ${attendance.title}`);
             }
+            message.channel.stopTyping(true);
         }
     }
 };

@@ -115,6 +115,7 @@ class Server {
                 if (fields) {
                     embed.addFields(fields);
                 }
+                this.modlog.stopTyping(true);
                 return await this.modlog.send(embed);
             } catch (err) {
                 console.log(err);

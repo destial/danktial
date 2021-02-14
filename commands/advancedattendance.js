@@ -21,6 +21,7 @@ module.exports = {
             if (attendance) {
                 server.log(`${message.member.user.tag} has created advancedattendance ${attendance.embed.title}`);
             }
+            message.channel.stopTyping(true);
         }
     }
 };

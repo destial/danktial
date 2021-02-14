@@ -27,7 +27,7 @@ module.exports = {
             } 
         });
         const commands = list.keyArray();
-
+        message.channel.startTyping();
         if (!args.length) {
             embed.setAuthor('Here are the available commands:');
             var help = "";
@@ -50,5 +50,6 @@ module.exports = {
                 await message.channel.send(embed);
             }
         }
+        message.channel.stopTyping(true);
     }
 };

@@ -34,7 +34,7 @@ client.once('ready', () => {
                 guild.channels.cache.forEach(async channel => {
                     if (channel.isText() && channel.manageable && channel.viewable) {
                         try {
-                            await channel.messages.fetch({limit: 100}, true, true);
+                            await channel.messages.fetch({limit: 100}, true);
                         } catch(err) {
                             Logger.boot(`Error loading channel messages of ${channel.name} under ${channel.guild.name}`);
                         }
@@ -128,7 +128,7 @@ client.once('ready', () => {
                 ticketRows.forEach(async row => {
                     try {
                         const channel = await client.channels.fetch(row.id);
-                        if (channel && channel.isText()) {
+                        if (channel && channel.isText() && channel.manageable && channel.viewable) {
                             const base = await channel.messages.fetch(row.base);
                             if (base) {
                                 const server = await client.manager.fetch(base.guild.id);

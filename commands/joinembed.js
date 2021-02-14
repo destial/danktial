@@ -113,7 +113,7 @@ module.exports = {
                                                         var colorList = '';
                                                         var colorCounter = 1;
                                                         colors.forEach(color => {
-                                                            colorList += `(${colorCounter++}) ${color}\n`;
+                                                            colorList += `**(${colorCounter++})** ${"`" + color + "`"}\n`;
                                                         });
                                                         embed.setAuthor('You are almost done! The last one is the color! Choose what color should the embed be (Enter the number not the color!):');
                                                         embed.setDescription(colorList);

@@ -22,7 +22,7 @@ module.exports = {
             embed.setColor('RED');
             if (!args.length) {
                 embed.setAuthor('Usage is:');
-                embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
+                embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 message.channel.send(embed);
                 return;
             }

@@ -16,6 +16,7 @@ module.exports = {
      */
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
+            message.channel.startTyping(1);
             const embed = new Discord.MessageEmbed()
                 .setAuthor(`Settings for ${server.guild.name}:`)
                 .addFields([
@@ -39,12 +40,11 @@ module.exports = {
                 { name: 'Total Reserves', value: totalReserves, inline: true },
                 { name: 'Total Teams', value: totalTeams, inline: true }
             ]);
-            client.shard.fetchClientValues('guilds.cache.size').then(results => {
-                const servers = results.reduce((acc, guildCount) => acc + guildCount, 0);
-                embed.setFooter(`Serving ${servers} guilds! • Built by destiall#9640`)
+            const servers = client.manager.servers.size;
+                embed.setFooter(`Competing in ${servers} leagues! • Built by destiall#9640`)
                 .setColor('RED');
-                message.channel.send(embed);
-            });
+            message.channel.stopTyping(true);
+            await message.channel.send(embed);
         }
     }
 };

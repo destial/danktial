@@ -6,6 +6,7 @@ const parseQuotations = require('../utils/parseQuotations');
 
 module.exports = {
     name: 'poll',
+    aliases: ['vote'],
     usage: `"What's Your Favorite Color?" "Blue" "Red" "Yellow"`,
     description: 'Creates a poll',
     /**
@@ -23,8 +24,9 @@ module.exports = {
             const { channel } = message;
             const embed = new Discord.MessageEmbed();
             embed.setColor('RED');
+            message.channel.startTyping(1);
             if (!args.length) {
-                embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${this.name} ${this.usage}\n**Yes / No**\n${server.prefix}${this.name} "Do you like this bot?"`);
+                embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${command} ${this.usage}\n**Yes / No**\n${server.prefix}${command} "Do you like this bot?"`);
                 channel.send(embed);
                 reject();
             } else {
@@ -32,7 +34,7 @@ module.exports = {
                 var str = args.join(" ");
                 var arguments = parseQuotations(str);
                 if (!arguments.length) {
-                    embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}poll "What's Your Favorite Color?" "Blue" "Red" "Yellow"\n**Yes / No**\n${server.prefix}poll "Do you like this bot?"`);
+                    embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${command} "What's Your Favorite Color?" "Blue" "Red" "Yellow"\n**Yes / No**\n${server.prefix}poll "Do you like this bot?"`);
                     channel.send(embed);
                     reject();
                 } else {
@@ -46,13 +48,14 @@ module.exports = {
                             });
                             message.delete({ timeout: 1000 });
                             server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, question);
+                            message.channel.stopTyping();
                             resolve();
                         });
                     } else {
                         if (arguments.length > 20) {
                             embed.setDescription('You cannot have more than 20 options!');
                             channel.send(embed);
-                            reject();
+                            resolve();
                         } else if (arguments.length <= 10) {
                             for (var counter = 0; counter < arguments.length; counter++) {
                                 arguments[counter] = `${reactions[counter]} ${arguments[counter].trim()}`;
@@ -65,6 +68,7 @@ module.exports = {
                                 }
                                 message.delete({ timeout: 1000 });
                                 server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, question);
+                                message.channel.stopTyping();
                                 resolve();
                             });
                         } else if (arguments.length > 10) {
@@ -90,6 +94,7 @@ module.exports = {
                                     }
                                     message.delete({ timeout: 1000 });
                                     server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, question);
+                                    message.channel.stopTyping(true);
                                     resolve();
                                 });
                             });

@@ -25,7 +25,7 @@ module.exports = {
                 embed.setColor('RED');
                 if (!args.length) {
                     embed.setAuthor('Usage is:');
-                    embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);
+                    embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                     await message.channel.send(embed);
                     return;
                 }
@@ -37,7 +37,7 @@ module.exports = {
                     var arguments = parseQuotations(str);
                     if (arguments.length < 3) {
                         embed.setAuthor('Usage is:');
-                        embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);
+                        embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                         await message.channel.send(embed);
                         return;
                     }
@@ -125,25 +125,25 @@ module.exports = {
                                 });
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);
-                                embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);
+                                embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                                 await message.channel.send(embed);
                                 return;
                             }
                         } else {
                             embed.setAuthor(`${driverNumber} is not a valid number! Usage is:`);
-                            embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);
+                            embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                             await message.channel.send(embed);
                             return;
                         }
                     } else {
                         embed.setAuthor(`${tierName} is not a valid tier! Usage is:`);
-                        embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);
+                        embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                         await message.channel.send(embed);
                         return;
                     }
                 } else {
                     embed.setAuthor(`${arg1} is not a valid member! Usage is:`);
-                    embed.setDescription(`${server.prefix}${this.name} ${this.usage}\nE.g. ${server.prefix}${this.name} ${this.example}`);
+                    embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                     await message.channel.send(embed);
                     return;
                 }

@@ -30,6 +30,7 @@ module.exports = {
             if (desc) {
                 embed.setDescription(desc);
             }
+            message.channel.startTyping();
             server.serverManager.servers.forEach(async server => {
                 if (server.modlog) {
                     const locale = formatDiscordRegion(server.guild.region);
@@ -40,6 +41,7 @@ module.exports = {
                     console.log(`[ANNOUNCEMENT] Sent announcement to ${server.guild.name}`);
                 }
             });
+            message.channel.stopTyping();
             await message.channel.send(embed);
         }
     }

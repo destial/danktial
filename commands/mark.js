@@ -18,15 +18,18 @@ module.exports = {
         if (isStaff(message.member)) {
             const embed = new Discord.MessageEmbed();
             embed.setColor('RED');
+            message.channel.startTyping();
             if (!args.length) {
                 embed.setAuthor('Usage is:');
-                embed.setDescription(`${server.prefix}${this.name} ${this.usage}`);
-                message.channel.send(embed);
+                embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                await message.channel.send(embed);
+                message.channel.stopTyping(true);
                 return;
             }
             if (message.mentions.members.size !== 1) {
                 embed.setAuthor(`Please only mention 1 driver!`);
-                message.channel.send(embed);
+                await message.channel.send(embed);
+                message.channel.stopTyping(true);
                 return;
             }
             const member = message.mentions.members.first();
@@ -49,10 +52,10 @@ module.exports = {
                             embed.setAuthor(`Marked ${driver.member.user.username} as maybe!`);
                             break;
                         default:
-                            embed.setAuthor(`Unknown mark ${args[1]}! Use in / out / maybe!`);
+                            embed.setAuthor(`Unknown mark ${args[1]}! Use 'in' / 'out' / 'maybe'`);
                             break;
                     }
-                    message.channel.send(embed);
+                    await message.channel.send(embed);
                 } else if (reserve) {
                     switch (args[1].toLowerCase()) {
                         case 'in':
@@ -68,18 +71,19 @@ module.exports = {
                             embed.setAuthor(`Marked ${reserve.member.user.username} as maybe!`);
                             break;
                         default:
-                            embed.setAuthor(`Unknown mark ${args[1]}! Use in / out / maybe!`);
+                            embed.setAuthor(`Unknown mark ${args[1]}! Use 'in' / 'out' / 'maybe'`);
                             break;
                     }
-                    message.channel.send(embed);
+                    await message.channel.send(embed);
                 } else {
                     embed.setAuthor(`Unknown driver/reserve ${member.user.username}!`);
-                    message.channel.send(embed);
+                    await message.channel.send(embed);
                 }
             } else {
                 embed.setAuthor(`Unknown attendance of id ${args[2]}!`);
-                message.channel.send(embed);
+                await message.channel.send(embed);
             }
+            message.channel.stopTyping(true);
         }
     }
 };
