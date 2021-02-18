@@ -44,9 +44,11 @@ module.exports = {
         client.on('guildDelete', async (guild) => {
             try {
                 const server = await servers.fetch(guild.id);
-                await servers.removeServer(server);
-                console.log(`[SERVER] Left server ${guild.name}`);
-                await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
+                if (server) {
+                    await servers.removeServer(server);
+                    console.log(`[SERVER] Left server ${guild.name}`);
+                    await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
+                }
             } catch (err) {
                 console.log('[ERROR] Something happened while trying to remove a server!', err);
             }

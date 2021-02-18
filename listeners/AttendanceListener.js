@@ -13,7 +13,7 @@ module.exports = {
         client.on('messageReactionAdd', async (reaction, user) => {
             if (reaction.partial) {
                 try {
-                    reaction = await reaction.fetch();
+                    await reaction.fetch();
                 } catch (err) {
                     console.log(`[ATTENDANCE] Something happened while trying to cache uncached message reactions!`);
                 }
@@ -69,7 +69,7 @@ module.exports = {
         client.on('messageReactionRemoveAll', async (message) => {
             if (message.partial) {
                 try {
-                    message = await message.fetch();
+                    await message.fetch();
                 } catch(err) {
                     console.log(`[ATTENDANCE] Something happened while trying to cache uncached message reactions!`);
                 }

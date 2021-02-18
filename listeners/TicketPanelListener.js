@@ -12,7 +12,7 @@ module.exports = {
         client.on('messageReactionAdd', async (reaction, user) => {
             if (reaction.partial) {
                 try {
-                    reaction = await reaction.fetch();
+                    await reaction.fetch();
                 } catch (err) {
                     console.log('[TICKETPANEL] Something happened while fetching uncached message reactions!');
                 }
@@ -20,19 +20,23 @@ module.exports = {
             if (user.bot) return;
             if (!reaction.message.guild || reaction.emoji.name !== TicketManager.emoji) return;
             const server = await servers.fetch(reaction.message.guild.id);
-            const panel = server.getTicketManager().ticketpanels.get(reaction.message.id);
-            if (panel) {
-                const member = await reaction.message.guild.members.fetch(user.id);
-                if (member) {
-                    await server.getTicketManager().newTicket(member, undefined, client.user);
+            if (server) {
+                const panel = server.getTicketManager().ticketpanels.get(reaction.message.id);
+                if (panel) {
+                    const member = await reaction.message.guild.members.fetch(user.id);
+                    if (member) {
+                        await server.getTicketManager().newTicket(member, undefined, client.user);
+                        await reaction.users.remove(user);
+                    }
                 }
             }
-            await reaction.users.remove(user);
         });
 
         client.on('messageDelete', async message => {
             const server = await servers.fetch(message.guild.id);
-            await server.getTicketManager().removeTicketPanel(message.id);
+            if (server) {
+                await server.getTicketManager().removeTicketPanel(message.id);
+            }
         });
     }
 };

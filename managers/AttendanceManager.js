@@ -45,7 +45,6 @@ class AttendanceManager {
      */
     async newAdvancedAttendance(client, server, member, channel) {
         const embed = new Discord.MessageEmbed();
-        await channel.startTyping(60);
         embed.setColor('RED');
         if (server.getTierManager().tiers.size === 0) {
             return new Promise(async (resolve, reject) => {
@@ -210,7 +209,6 @@ class AttendanceManager {
      */
     async newAttendance(member, channel) {
         const embed = new Discord.MessageEmbed();
-        channel.startTyping(60);
         return new Promise(async (resolve, reject) => {
             let counter = 0;
             const questions = [
@@ -709,15 +707,6 @@ class AttendanceManager {
                 if (!message.deleted) {
                     await message.delete({ timeout: 1000 });
                 }
-                // attendanceevent.message.channel.messages.cache.forEach(async message => {
-                //     if (!message.deleted) {
-                //         if (message.createdAt.getTime() > attendanceevent.message.createdAt.getTime()) {
-                //             if (!this.fetchAdvanced(message.id) && !this.fetch(message.id)) {
-                //                  await message.delete();
-                //              }
-                //         }
-                //     }
-                // });
                 await attendanceevent.delete();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);

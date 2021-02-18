@@ -12,7 +12,7 @@ module.exports = {
         client.on('messageReactionAdd', async (reaction, user) => {
             if (reaction.partial) {
                 try {
-                    reaction = await reaction.fetch();
+                    await reaction.fetch();
                 } catch(err) {
                     console.log(`[REACTIONROLE] Something wrong while caching uncached message reactions addition!`);
                 }
@@ -38,7 +38,7 @@ module.exports = {
         client.on('messageReactionRemove', async (reaction, user) => {
             if (reaction.partial) {
                 try {
-                    reaction = await reaction.fetch();
+                    await reaction.fetch();
                 } catch(err) {
                     console.log(`[REACTIONROLE] Something wrong while caching uncached message reactions removal!`);
                 }

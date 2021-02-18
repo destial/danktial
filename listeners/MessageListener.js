@@ -16,7 +16,10 @@ module.exports = {
                 const server = await servers.fetch(message.guild.id);
                 if (server) {
                     if (server.modlog) {
-                        await server.log(`Message deleted from ${message.member.user.tag} under #${message.channel.name}`, message.content);
+                        await server.log(`Message deleted from ${message.member.user.tag} under #${message.channel.name}`, `Jump to ${message.channel}`,
+                        [
+                            { name: 'Deleted Message', value: (message.content.length > 512 ? `${message.content.substring(0, 512)}...` : message.content), inline: false }
+                        ]);
                     }
                 }
             } catch(err) {}
