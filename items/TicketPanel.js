@@ -20,6 +20,7 @@ class TicketPanel {
     toJSON() {
         return {
             id: this.id,
+            guild: this.channel.guild.id,
             channel: this.channel.id
         };
     }

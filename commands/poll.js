@@ -47,7 +47,7 @@ module.exports = {
                                 messag.react(AttendanceManager.reject);
                             });
                             message.delete({ timeout: 1000 });
-                            server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, question);
+                            server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                             message.channel.stopTyping();
                             resolve();
                         });
@@ -67,7 +67,7 @@ module.exports = {
                                     await messag.react(reactions[i]);
                                 }
                                 message.delete({ timeout: 1000 });
-                                server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `(Jump to poll)[${messag.url}]\n${question}`);
+                                server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                                 message.channel.stopTyping();
                                 resolve();
                             });
@@ -93,7 +93,7 @@ module.exports = {
                                         await mes.react(reactions[iiii]);
                                     }
                                     message.delete({ timeout: 1000 });
-                                    server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `(Jump to poll)[${messag.url}]\n${question}`);
+                                    server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                                     message.channel.stopTyping(true);
                                     resolve();
                                 });

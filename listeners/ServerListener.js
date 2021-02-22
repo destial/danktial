@@ -13,13 +13,15 @@ module.exports = {
             try {
                 const exists = await servers.fetch(guild.id);
                 if (!exists) {
-                    const guildMember = guild.member(client.user);
+                    const guildMember = await guild.members.fetch(client.user.id);
                     if (!guildMember.hasPermission('ADMINISTRATOR') || !guildMember.hasPermission('MANAGE_GUILD')) {
                         if (guild.systemChannel) {
                             const embed = new Discord.MessageEmbed();
                             embed.setColor('RED');
                             embed.setAuthor('I do not have enough permissions to function normally! Please allow me to manage the server and/or set me as administrator!');
-                            await guild.systemChannel.send(embed);
+                            try {
+                                await guild.systemChannel.send(embed);
+                            } catch(err) {}
                         }
                     }
                     const server = new Server(client, guild, undefined, '-', 0, servers);
