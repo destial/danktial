@@ -100,6 +100,25 @@ client.once('ready', () => {
                 });
             });
 
+            Database.all(Database.serverDataQuery).then(serverData => {
+                serverData.forEach(row => {
+                    try {
+                        client.guilds.fetch(row.id).then(guild => {
+                            client.manager.fetch(guild.id).then(async server => {
+                                if (guild && server) {
+                                    const data = JSON.parse(row.data);
+                                    server.loadData(data);
+                                } else if (!guild) {
+                                    Database.run(Database.serverDataDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
+                                }
+                            });
+                        });
+                    } catch(err) {
+                        console.log(`[BOOT] Error loading server data ${row.id}`);
+                    }
+                });
+            });
+
             Database.all(Database.attendanceQuery).then(attendanceRows => {
                 attendanceRows.forEach(async row => {
                     try {

@@ -9,6 +9,8 @@ const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
 const formatDiscordRegion = require('../utils/formatDiscordRegion');
 const TwitchRequest = require('twitchrequest');
+//const serverSchema = require('../database/schemas/server-schema');
+
 class Server {
     /**
      * @param {Discord.Client} client
@@ -28,6 +30,8 @@ class Server {
         this.prefix = prefix || "-";
         this.joinEmbed = undefined;
         this.serverManager = serverManager;
+        this.enableTickets = true;
+        
         /**
          * @constant
          * @private
@@ -76,7 +80,7 @@ class Server {
         this.alerts.on('live', data => {
             if (this.alertChannel) {
                 const embed = new Discord.MessageEmbed();
-                embed.setAuthor(`${data.name} is now livestreaming ${data.game}`, data.profile, `https://www.twitch.tv/${data.name}`);
+                embed.setAuthor(`${data.name} is now live! Playing ${data.game}`, data.profile, `https://www.twitch.tv/${data.name}`);
                 embed.setTitle(data.title);
                 embed.setURL(`https://www.twitch.tv/${data.name}`);
                 embed.addFields([
@@ -98,6 +102,14 @@ class Server {
             subscribedChannels: this.alerts.allChannels(),
             alertChannel: (this.alertChannel ? this.alertChannel.id : null)
         };
+    }
+
+    loadData(data) {
+        this.enableTickets = data.enableTickets;
+        this.alertChannel = this.guild.channels.cache.get(data.alertChannel);
+        data.subscribedChannels.forEach(channel => {
+            this.alerts.addChannel(channel);
+        });
     }
 
     /**
@@ -233,6 +245,7 @@ class Server {
                 this.ticketManager.totaltickets = Number(object.tickets);
                 this.embed = new Discord.MessageEmbed(object.embed);
                 this.modlog = guild.channels.cache.get(object.log);
+                this.enableTickets = object.enableTickets;
             }
         } catch(err) {
             console.log(`[SERVER] Missing server ${object.id}`);
@@ -245,7 +258,8 @@ class Server {
             prefix: this.prefix,
             tickets: this.ticketManager.totaltickets,
             log: (this.modlog ? this.modlog.id : null),
-            embed: (this.joinEmbed ? this.joinEmbed.toJSON() : null)
+            embed: (this.joinEmbed ? this.joinEmbed.toJSON() : null),
+            enableTickets: this.enableTickets,
         };
     }
 

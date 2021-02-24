@@ -21,12 +21,14 @@ module.exports = {
             if (!reaction.message.guild || reaction.emoji.name !== TicketManager.emoji) return;
             const server = await servers.fetch(reaction.message.guild.id);
             if (server) {
-                const panel = server.getTicketManager().ticketpanels.get(reaction.message.id);
-                if (panel) {
-                    const member = await reaction.message.guild.members.fetch(user.id);
-                    if (member) {
-                        await server.getTicketManager().newTicket(member, undefined, client.user);
-                        await reaction.users.remove(user);
+                if (server.enableTickets) {
+                    const panel = server.getTicketManager().ticketpanels.get(reaction.message.id);
+                    if (panel) {
+                        const member = await reaction.message.guild.members.fetch(user.id);
+                        if (member) {
+                            await server.getTicketManager().newTicket(member, undefined, client.user);
+                            await reaction.users.remove(user);
+                        }
                     }
                 }
             }

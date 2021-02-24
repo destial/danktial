@@ -14,6 +14,8 @@ module.exports = {
      * @param {Discord.Message} message
      */
     async run(client, server, command, args, message) {
-        await server.getTicketManager().newTicket(message.member, args.join(' '), client.user);
+        if (server.enableTickets) {
+            await server.getTicketManager().newTicket(message.member, args.join(' '), client.user);
+        }
     }
 };
