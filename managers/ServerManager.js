@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const Server = require('../items/Server');
 const Database = require("../database/Database");
-const { tierDeleteQuery, teamDeleteQuery, driversDeleteGuildQuery } = require('../database/Database');
 const QueueWorker = require('../database/QueueWorker');
 
 class ServerManager {

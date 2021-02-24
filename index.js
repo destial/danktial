@@ -21,7 +21,6 @@ client.login(process.env.DISCORD_TOKEN);
 client.setMaxListeners(15);
 client.manager = new ServerManager(client);
 client.once('ready', () => {
-    console.log('REEEEEEEEEEEEEADDDDDDDDDDDDDDDYYYYYYYYYYYYYYYYYY');
     try {
         const loadServer = new Promise((resolve, reject) => {
             client.guilds.cache.forEach((guild) => {
