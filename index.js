@@ -57,24 +57,6 @@ client.once('ready', () => {
                                 }
                             });
                         });
-
-                        // client.shard.fetchClientValues('guilds.cache.size').then(results => {
-                        //     const servers = results.reduce((acc, guildCount) => acc + guildCount, 0);
-                        //     if (serverRows.length < servers) {
-                        //         client.guilds.cache.forEach(async guild => {
-                        //             try {
-                        //                 const exist = await client.manager.fetch(guild.id);
-                        //                 if (!exist) {
-                        //                     await Database.run(Database.serverSaveQuery, [guild.id, '-', 0, 0]);
-                        //                     console.log(`[SERVER] Saved ${server.guild.name} to database`);
-                        //                 }
-                        //             } catch(err) {
-                        //                 console.log(`[BOOT] Error loading server ${row.id}`);
-                        //             }
-                        //         });
-                        //     }
-                        // });
-
                     } catch(err) {
                         console.log(`[BOOT] Error loading server ${row.id}`);
                     }
