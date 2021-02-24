@@ -8,6 +8,7 @@ const TierManager = require('../managers/TierManager');
 const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
 const formatDiscordRegion = require('../utils/formatDiscordRegion');
+const TwitchRequest = require('twitchrequest');
 //const serverSchema = require('../database/schemas/server-schema');
 
 class Server {
@@ -18,12 +19,14 @@ class Server {
      * @param {string} prefix
      * @param {number} tickets
      * @param {ServerManager} serverManager
+     * @param {Discord.TextChannel} alertChannel
      */
-    constructor(client, guild, modlog, prefix, tickets, serverManager) {
+    constructor(client, guild, modlog, prefix, tickets, serverManager, alertChannel) {
         this.client = client;
         this.id = guild.id;
         this.guild = guild;
         this.modlog = modlog;
+        this.alertChannel = alertChannel;
         this.prefix = prefix || "-";
         this.joinEmbed = undefined;
         this.serverManager = serverManager;
@@ -66,6 +69,47 @@ class Server {
          * @private
          */
         this.reactionRoleManager = new ReactionRoleManager(client, this);
+
+        this.alerts = new TwitchRequest.Client({
+            channels: [],
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
+            interval: 15
+        });
+
+        this.alerts.on('live', data => {
+            if (this.alertChannel) {
+                const embed = new Discord.MessageEmbed();
+                embed.setAuthor(`${data.name} is now live! Playing ${data.game}`, data.profile, `https://www.twitch.tv/${data.name}`);
+                embed.setTitle(data.title);
+                embed.setURL(`https://www.twitch.tv/${data.name}`);
+                embed.addFields([
+                    { name: 'Topic', value: data.game, inline: true },
+                    { name: 'Viewers', value: data.viewers, inline: true }
+                ]);
+                embed.setImage(data.thumbnail);
+                embed.setColor("DARK_PURPLE");
+                embed.setThumbnail(data.profile);
+                embed.setTimestamp(data.date);
+                this.alertChannel.send(embed);
+            }
+        });
+    }
+
+    toData() {
+        return {
+            enableTickets: this.enableTickets,
+            subscribedChannels: this.alerts.allChannels(),
+            alertChannel: (this.alertChannel ? this.alertChannel.id : null)
+        };
+    }
+
+    loadData(data) {
+        this.enableTickets = data.enableTickets;
+        this.alertChannel = this.guild.channels.cache.get(data.alertChannel);
+        data.subscribedChannels.forEach(channel => {
+            this.alerts.addChannel(channel);
+        });
     }
 
     /**
@@ -92,6 +136,30 @@ class Server {
         } catch (err) {
             console.log(err);
         }
+    }
+
+    /**
+     * 
+     * @param {string} string 
+     */
+    addChannel(string) {
+        this.alerts.addChannel(string);
+    }
+
+    /**
+     * 
+     * @param {string} string 
+     */
+    removeChannel(string) {
+        this.alerts.removeChannel(string);
+    }
+
+    /**
+     * 
+     * @param {Discord.TextChannel} channel 
+     */
+    setAlerts(channel) {
+        this.alertChannel = channel;
     }
 
     /**
@@ -165,10 +233,6 @@ class Server {
         this.joinEmbed = joinEmbed;
 
         console.log(`[SERVER] Loaded embed from server ${this.guild.name}`);
-    }
-
-    loadData(data) {
-        this.enableTickets = data.enableTickets;
     }
 
     async loadJSON(object) {

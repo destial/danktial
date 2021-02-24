@@ -4,8 +4,8 @@ const Server = require('../items/Server');
 const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'settings',
-    usage: '[ ticket ] [ true/false ] ',
-    example: 'settings ticket false',
+    usage: '[ ticket | twitchalerts | addchannel | removechannel ] [ true/false | #channel | twitch_channel_name] ',
+    example: 'settings ticket false OR settings twitchalerts #media OR settings addchannel destiall',
     description: 'Sets the server settings',
     /**
      * @param {Discord.Client} client 
@@ -33,18 +33,12 @@ module.exports = {
                 }
                 if (args[1].toLowerCase() === 'true') {
                     server.enableTickets = true;
-                    const data = {
-                        enableTickets: true
-                    };
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(data)]);
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
                     embed.setAuthor('Enabled tickets!');
                     message.channel.send(embed);
                 } else if (args[1].toLowerCase() === 'false') {
                     server.enableTickets = false;
-                    const data = {
-                        enableTickets: false
-                    };
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(data)]);
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
                     embed.setAuthor('Disabled tickets!');
                     message.channel.send(embed);
                 } else {
@@ -53,7 +47,43 @@ module.exports = {
                     message.channel.send(embed);
                     return;
                 }
-            }
+            } else if (args[0].toLowerCase() === 'twitchalerts') {
+                const channel = message.mentions.channels.first();
+                if (channel) {
+                    server.alertChannel = channel;
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
+                    embed.setAuthor(`Set #${channel.name} as the Twitch Alerts channel!`);
+                    message.channel.send(embed);
+                    return;
+                }
+                server.alertChannel = undefined;
+                embed.setAuthor(`Removed Twitch Alerts channel!`);
+                message.channel.send(embed);
+                return;
+            } else if (args[0].toLowerCase() === 'addchannel') {
+                server.addChannel(args[1].toLowerCase());
+                await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
+                embed.setAuthor(`Added channel ${args[1].toLowerCase()} to the Twitch Alerts!`);
+                message.channel.send(embed);
+                return;
+            } else if (args[0].toLowerCase() === 'removechannel') {
+                const twitchChannel = server.alerts.allChannels().find(ch => ch.name.toLowerCase() === args[1].toLowerCase());
+                if (twitchChannel) {
+                    server.removeChannel(args[1].toLowerCase());
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
+                    embed.setAuthor(`Removed channel ${args[1].toLowerCase()} from the Twitch Alerts!`);
+                    message.channel.send(embed);
+                    return;
+                }
+                embed.setAuthor('No channels with that name can be found! Here is the list of subscribed channels:');
+                var channelList = '';
+                server.alerts.allChannels().forEach(tc => {
+                    channelList += `${tc.name}\n`;
+                });
+                embed.setDescription(channelList);
+                message.channel.send(embed);
+                return;
+            } 
         }
     }
 };
