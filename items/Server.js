@@ -8,7 +8,6 @@ const TierManager = require('../managers/TierManager');
 const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
 const formatDiscordRegion = require('../utils/formatDiscordRegion');
-const { isThisTypeNode } = require('typescript');
 //const serverSchema = require('../database/schemas/server-schema');
 
 class Server {
@@ -28,6 +27,8 @@ class Server {
         this.prefix = prefix || "-";
         this.joinEmbed = undefined;
         this.serverManager = serverManager;
+        this.enableTickets = true;
+        
         /**
          * @constant
          * @private
@@ -166,6 +167,10 @@ class Server {
         console.log(`[SERVER] Loaded embed from server ${this.guild.name}`);
     }
 
+    loadData(data) {
+        this.enableTickets = data.enableTickets;
+    }
+
     async loadJSON(object) {
         try {
             const guild = await this.client.guilds.fetch(object.id);
@@ -176,6 +181,7 @@ class Server {
                 this.ticketManager.totaltickets = Number(object.tickets);
                 this.embed = new Discord.MessageEmbed(object.embed);
                 this.modlog = guild.channels.cache.get(object.log);
+                this.enableTickets = object.enableTickets;
             }
         } catch(err) {
             console.log(`[SERVER] Missing server ${object.id}`);
@@ -188,7 +194,8 @@ class Server {
             prefix: this.prefix,
             tickets: this.ticketManager.totaltickets,
             log: (this.modlog ? this.modlog.id : null),
-            embed: (this.joinEmbed ? this.joinEmbed.toJSON() : null)
+            embed: (this.joinEmbed ? this.joinEmbed.toJSON() : null),
+            enableTickets: this.enableTickets,
         };
     }
 

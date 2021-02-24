@@ -1,12 +1,12 @@
 const Discord = require('discord.js');
+const Database = require('../database/Database');
 const Server = require('../items/Server');
 const isStaff = require('../utils/isStaff');
-
 module.exports = {
     name: 'settings',
-    aliases: ['stats'],
-    usage: '',
-    description: 'Displays the server settings and bot stats',
+    usage: '[ ticket ] [ true/false ] ',
+    example: 'settings ticket false',
+    description: 'Sets the server settings',
     /**
      * @param {Discord.Client} client 
      * @param {Server} server 
@@ -16,35 +16,44 @@ module.exports = {
      */
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
-            message.channel.startTyping(1);
-            const embed = new Discord.MessageEmbed()
-                .setAuthor(`Settings for ${server.guild.name}:`)
-                .addFields([
-                    { name: 'Prefix', value: server.prefix, inline: true },
-                    { name: 'Mod-Log', value: (server.modlog ? server.modlog : "None"), inline: true },
-                    { name: 'Total Tickets', value: server.getTicketManager().totaltickets, inline: true }
-                ])
-                .addFields([
-                    { name: 'Open Tickets', value: server.getTicketManager().opentickets.size, inline: true },
-                    { name: 'Active Events', value: server.getAttendanceManager().getEvents().size + server.getAttendanceManager().getAdvancedEvents().size, inline: true },
-                    { name: 'Total Tiers', value: server.getTierManager().tiers.size, inline: true }
-                ]);
-            var totalDrivers = 0; var totalReserves = 0; var totalTeams = 0;
-            server.getTierManager().tiers.forEach(tier => {
-                totalDrivers += tier.drivers.size;
-                totalReserves += tier.reserves.size;
-                totalTeams += tier.teams.size;
-            });
-            embed.addFields([
-                { name: 'Total Drivers', value: totalDrivers, inline: true },
-                { name: 'Total Reserves', value: totalReserves, inline: true },
-                { name: 'Total Teams', value: totalTeams, inline: true }
-            ]);
-            const servers = client.manager.servers.size;
-                embed.setFooter(`Competing in ${servers} leagues! • Built by destiall#9640`)
-                .setColor('RED');
-            message.channel.stopTyping(true);
-            await message.channel.send(embed);
+            const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
+            if (!args.length) {
+                embed.setAuthor('Usage is:');
+                embed.setDescription(`${server.prefix}${command} ${this.usage} \n E.g ${server.prefix}${this.example}`);
+                message.channel.send(embed);
+                return;
+            }
+            if (args[0].toLowerCase() === 'ticket') {
+                if (!args[1]) {
+                    embed.setAuthor('Usage is:');
+                    embed.setDescription(`${server.prefix}${command} ${this.usage} \n E.g ${server.prefix}${this.example}`);
+                    message.channel.send(embed);
+                    return;
+                }
+                if (args[1].toLowerCase() === 'true') {
+                    server.enableTickets = true;
+                    const data = {
+                        enableTickets: true
+                    };
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(data)]);
+                    embed.setAuthor('Enabled tickets!');
+                    message.channel.send(embed);
+                } else if (args[1].toLowerCase() === 'false') {
+                    server.enableTickets = false;
+                    const data = {
+                        enableTickets: false
+                    };
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(data)]);
+                    embed.setAuthor('Disabled tickets!');
+                    message.channel.send(embed);
+                } else {
+                    embed.setAuthor('Usage is:');
+                    embed.setDescription(`${server.prefix}${command} ${this.usage} \n E.g ${server.prefix}${this.example}`);
+                    message.channel.send(embed);
+                    return;
+                }
+            }
         }
     }
 };
