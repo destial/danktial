@@ -74,7 +74,7 @@ class Server {
             channels: [],
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
-            interval: 15
+            interval: 3
         });
 
         this.alerts.on('live', data => {
@@ -94,14 +94,6 @@ class Server {
                 this.alertChannel.send(embed);
             }
         });
-    }
-
-    toData() {
-        return {
-            enableTickets: this.enableTickets,
-            subscribedChannels: this.alerts.allChannels(),
-            alertChannel: (this.alertChannel ? this.alertChannel.id : null)
-        };
     }
 
     loadData(data) {
@@ -194,18 +186,21 @@ class Server {
 
     async save() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
+        await Database.run(Database.serverDataUpdateQuery, [this.id, this.toJSON()]);
         //await serverSchema.create({ id: this.id, prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
         console.log(`[SERVER] Saved server ${this.guild.name}`);
     }
 
     async update() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
+        await Database.run(Database.serverDataUpdateQuery, [this.id, this.toJSON()]);
         //await serverSchema.findOneAndUpdate({ id: this.id }, { prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
         console.log(`[SERVER] Updated server ${this.guild.name}`);
     }
 
     async delete() {
         await Database.run(Database.serverDeleteQuery, [this.id]);
+        await Database.run(Database.serverDataDeleteQuery, [this.id]);
         //await serverSchema.deleteOne({ id: this.id });
         console.log(`[SERVER] Deleted server ${this.guild.name}`);
     }
@@ -220,8 +215,7 @@ class Server {
         this.id = guild.id;
         this.modlog = modlog;
         this.prefix = prefix;
-        this.ticketManager.totaltickets = tickets;
-
+        this.ticketManager.totaltickets = Number(tickets);
         console.log(`[SERVER] Loaded server ${this.guild.name}`);
     }
 
@@ -231,7 +225,6 @@ class Server {
      */
     loadEmbed(joinEmbed) {
         this.joinEmbed = joinEmbed;
-
         console.log(`[SERVER] Loaded embed from server ${this.guild.name}`);
     }
 
@@ -239,13 +232,17 @@ class Server {
         try {
             const guild = await this.client.guilds.fetch(object.id);
             if (guild) {
-                this.id = guild.id;
-                this.guild = guild;
-                this.prefix = object.prefix;
-                this.ticketManager.totaltickets = Number(object.tickets);
-                this.embed = new Discord.MessageEmbed(object.embed);
-                this.modlog = guild.channels.cache.get(object.log);
+                // this.id = guild.id;
+                // this.guild = guild;
+                // this.prefix = object.prefix;
+                // this.ticketManager.totaltickets = Number(object.tickets);
+                // this.embed = new Discord.MessageEmbed(object.embed);
+                // this.modlog = guild.channels.cache.get(object.log);
                 this.enableTickets = object.enableTickets;
+                this.alertChannel = this.guild.channels.cache.get(object.alertChannel);
+                object.subscribedChannels.forEach(channel => {
+                    this.alerts.addChannel(channel);
+                });
             }
         } catch(err) {
             console.log(`[SERVER] Missing server ${object.id}`);
@@ -253,13 +250,48 @@ class Server {
     }
 
     toJSON() {
+        const channels = [];
+        this.alerts.allChannels().forEach(tc => {
+            channels.push(tc.name);
+        });
+        const tiersData = [];
+        this.getTierManager().tiers.forEach(tier => {
+            tiersData.push(tier.toJSON());
+        });
+        const attendanceData = [];
+        this.getAttendanceManager().getEvents().forEach(attendance => {
+            attendanceData.push(attendance.toJSON());
+        });
+        const advancedAttendanceData = [];
+        this.getAttendanceManager().getAdvancedEvents().forEach(attendance => {
+            advancedAttendanceData.push(attendance.toJSON());
+        })
+        const openTicketData = [];
+        this.getTicketManager().opentickets.forEach(ticket => {
+            openTicketData.push(ticket.toJSON());
+        });
         return {
             id: this.id,
             prefix: this.prefix,
-            tickets: this.ticketManager.totaltickets,
             log: (this.modlog ? this.modlog.id : null),
             embed: (this.joinEmbed ? this.joinEmbed.toJSON() : null),
-            enableTickets: this.enableTickets,
+            tickets: {
+                enabled: this.enableTickets,
+                total: this.ticketManager.totaltickets,
+                open: openTicketData,
+            },
+            twitch: {
+                subscribedChannels: channels,
+                alertChannel: (this.alertChannel ? this.alertChannel.id : null),
+            },
+            count: {
+                member: (this.getCountManager().getCount('member') ? this.getCountManager().getCount('member').id : null),
+                role: (this.getCountManager().getCount('role') ? this.getCountManager().getCount('role').id : null),
+                channel: (this.getCountManager().getCount('channel') ? this.getCountManager().getCount('channel').id : null),
+            },
+            tiers: tiersData,
+            attendances: attendanceData,
+            advancedAttendances: advancedAttendanceData,
         };
     }
 

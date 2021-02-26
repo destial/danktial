@@ -56,6 +56,8 @@ client.once('ready', () => {
                                     Database.run(Database.serverDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                                 }
                             });
+                        }).catch(err => {
+                            Database.run(Database.serverDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                         });
                     } catch(err) {
                         console.log(`[BOOT] Error loading server ${row.id}`);
@@ -75,6 +77,8 @@ client.once('ready', () => {
                                     Database.run(Database.serverEmbedDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                                 }
                             });
+                        }).catch(err => {
+                            Database.run(Database.serverEmbedDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                         });
                     } catch(err) {
                         console.log(`[BOOT] Error loading server embed ${row.id}`);
@@ -89,11 +93,13 @@ client.once('ready', () => {
                             client.manager.fetch(guild.id).then(async server => {
                                 if (guild && server) {
                                     const data = JSON.parse(row.data);
-                                    server.loadData(data);
+                                    server.loadJSON(data);
                                 } else if (!guild) {
                                     Database.run(Database.serverDataDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                                 }
                             });
+                        }).catch(err => {
+                            Database.run(Database.serverDataDeleteQuery, [row.id]).then(() => {}).catch((err) => console.log(err));
                         });
                     } catch(err) {
                         console.log(`[BOOT] Error loading server data ${row.id}`);
@@ -119,7 +125,7 @@ client.once('ready', () => {
                         }
                     } catch (err) {
                         console.log(`[BOOT] Error loading attendance ${row.id}`);
-                        //Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                        Database.run(Database.attendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
             });
@@ -143,6 +149,7 @@ client.once('ready', () => {
                         }
                     } catch (err) {
                         console.log(`[BOOT] Error loading ticket ${row.id}`);
+                        Database.run(Database.ticketDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
             });
@@ -179,7 +186,7 @@ client.once('ready', () => {
                         }
                     } catch (err) {
                         console.log(`[BOOT] Error loading count ${row.id}`);
-                        //Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                        Database.run(Database.countDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
             });
@@ -202,7 +209,7 @@ client.once('ready', () => {
                         }
                     } catch (err) {
                         console.log(`[BOOT] Error loading ticketpanel ${row.id}`);
-                        //Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
+                        Database.run(Database.ticketPanelDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                     }
                 });
             });
@@ -317,6 +324,7 @@ client.once('ready', () => {
                                     }
                                 } catch (err) {
                                     console.log(`[BOOT] Error loading advancedattendance ${row.id}`);
+                                    Database.run(Database.advancedAttendanceDeleteQuery, [row.id]).then(() => {}).catch(err => console.log(err));
                                 }
                             });
                             Logger.log('danktial is now online!');

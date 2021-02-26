@@ -452,7 +452,7 @@ class AdvancedAttendance {
     toJSON() {
         return {
             id: this.id,
-            guild: this.guild.id,
+            guild: this.server.id,
             channel: this.message.channel.id,
             date: this.date.toISOString(),
             accepted: this.accepted.keyArray(),

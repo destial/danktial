@@ -231,10 +231,6 @@ class Tier {
     }
 
     toJSON() {
-        const driverArray = [];
-        this.drivers.forEach(driver => {
-            driverArray.push(driver.toJSON());
-        });
         const reservesArray = [];
         this.reserves.forEach(reserve => {
             reservesArray.push(reserve.toJSON());

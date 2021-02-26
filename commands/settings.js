@@ -33,12 +33,12 @@ module.exports = {
                 }
                 if (args[1].toLowerCase() === 'true') {
                     server.enableTickets = true;
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                     embed.setAuthor('Enabled tickets!');
                     message.channel.send(embed);
                 } else if (args[1].toLowerCase() === 'false') {
                     server.enableTickets = false;
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                     embed.setAuthor('Disabled tickets!');
                     message.channel.send(embed);
                 } else {
@@ -51,7 +51,7 @@ module.exports = {
                 const channel = message.mentions.channels.first();
                 if (channel) {
                     server.alertChannel = channel;
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                     embed.setAuthor(`Set #${channel.name} as the Twitch Alerts channel!`);
                     message.channel.send(embed);
                     return;
@@ -62,7 +62,7 @@ module.exports = {
                 return;
             } else if (args[0].toLowerCase() === 'addchannel') {
                 server.addChannel(args[1].toLowerCase());
-                await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
+                await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                 embed.setAuthor(`Added channel ${args[1].toLowerCase()} to the Twitch Alerts!`);
                 message.channel.send(embed);
                 return;
@@ -70,7 +70,7 @@ module.exports = {
                 const twitchChannel = server.alerts.allChannels().find(ch => ch.name.toLowerCase() === args[1].toLowerCase());
                 if (twitchChannel) {
                     server.removeChannel(args[1].toLowerCase());
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toData())]);
+                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                     embed.setAuthor(`Removed channel ${args[1].toLowerCase()} from the Twitch Alerts!`);
                     message.channel.send(embed);
                     return;

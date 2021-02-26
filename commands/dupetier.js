@@ -58,7 +58,7 @@ module.exports = {
                         });
                         promise.then(() => {
                             newTier.saveTeams();
-
+                            server.getTierManager().addTier(newTier);
                             embed.setAuthor(`Successfully duplicated tier ${newTier.name} from ${existingTier.name}. Here are the teams:`);
                             var teamList = '';
                             newTier.teams.forEach(team => {

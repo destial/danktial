@@ -3,30 +3,57 @@ const Query = require('./Query');
 const { Collection } = require('discord.js');
 
 class Database {
+
+    /**
+     * @type {sql.Database}
+     */
+    static connection = undefined;
+
+    /**
+     * @type {sql.Database}
+     */
+    static newConnection = undefined;
+
     static db() {
-        let database = new sql.Database('./bot.db', (err) => {
-            if (err) {
-              console.log(err.message);
-            }
-            database.run('CREATE TABLE IF NOT EXISTS servers (id VARCHAR(32) PRIMARY KEY, prefix VARCHAR(3), tickets INT, log VARCHAR(32))');
-            database.run('CREATE TABLE IF NOT EXISTS tickets (id VARCHAR(32) PRIMARY KEY, member VARCHAR(32), number INT, base VARCHAR(32))');
-            database.run('CREATE TABLE IF NOT EXISTS ticketpanel (id VARCHAR(32) PRIMARY KEY, channel VARCHAR(32))');
-            database.run('CREATE TABLE IF NOT EXISTS attendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32))');
-            database.run('CREATE TABLE IF NOT EXISTS count (id VARCHAR(32) PRIMARY KEY, name VARCHAR(16))');
+        if (Database.connection == null || Database.connection == undefined) {
+            Database.connection = new sql.Database('./bot.db', (err) => {
+                if (err) {
+                console.log(err.message);
+                }
+                Database.connection.run('CREATE TABLE IF NOT EXISTS servers (id VARCHAR(32) PRIMARY KEY, prefix VARCHAR(3), tickets INT, log VARCHAR(32))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS tickets (id VARCHAR(32) PRIMARY KEY, member VARCHAR(32), number INT, base VARCHAR(32))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS ticketpanel (id VARCHAR(32) PRIMARY KEY, channel VARCHAR(32))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS attendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS count (id VARCHAR(32) PRIMARY KEY, name VARCHAR(16))');
 
-            database.run('CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(32), guild VARCHAR(32), number VARCHAR(3), reserved INT, team VARCHAR(32), tier VARCHAR(255))');
-            database.run('CREATE TABLE IF NOT EXISTS advancedattendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32), tier VARCHAR(255))');
-            database.run('CREATE TABLE IF NOT EXISTS tiers (guild VARCHAR(32), name VARCHAR(255))');
-            database.run('CREATE TABLE IF NOT EXISTS teams (guild VARCHAR(32), name VARCHAR(255), tier VARCHAR(255))');
-            database.run('CREATE TABLE IF NOT EXISTS triggers (guild VARCHAR(32), trigger VARCHAR(255), response VARCHAR(255))');
-            database.run('CREATE TABLE IF NOT EXISTS reactionrolepanels (id VARCHAR(32) PRIMARY KEY, channel VARCHAR(32))');
-            database.run('CREATE TABLE IF NOT EXISTS reactionroles (guild VARCHAR(32), panel VARCHAR(32), emoji VARCHAR(32), role VARCHAR(32))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(32), guild VARCHAR(32), number VARCHAR(3), reserved INT, team VARCHAR(32), tier VARCHAR(255))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS advancedattendance (id VARCHAR(32) PRIMARY KEY, date VARCHAR(20), channel VARCHAR(32), tier VARCHAR(255))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS tiers (guild VARCHAR(32), name VARCHAR(255))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS teams (guild VARCHAR(32), name VARCHAR(255), tier VARCHAR(255))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS triggers (guild VARCHAR(32), trigger VARCHAR(255), response VARCHAR(255))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS reactionrolepanels (id VARCHAR(32) PRIMARY KEY, channel VARCHAR(32))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS reactionroles (guild VARCHAR(32), panel VARCHAR(32), emoji VARCHAR(32), role VARCHAR(32))');
 
-            database.run('CREATE TABLE IF NOT EXISTS serverembeds (id VARCHAR(32) PRIMARY KEY, data VARCHAR(2024))');
+                Database.connection.run('CREATE TABLE IF NOT EXISTS serverembeds (id VARCHAR(32) PRIMARY KEY, data VARCHAR(2024))');
 
-            database.run('CREATE TABLE IF NOT EXISTS serverdata (id VARCHAR(32) PRIMARY KEY, data VARCHAR(2048))');
-        });
-        return database;
+                Database.connection.run('CREATE TABLE IF NOT EXISTS serverdata (id VARCHAR(32) PRIMARY KEY, data VARCHAR(2048))');
+            });
+            return Database.connection;
+        }
+        return Database.connection;
+    }
+
+    static newDB() {
+        if (Database.newConnection == null || Database.newConnection == undefined) {
+            Database.newConnection = new sql.Database('./database.db', (err) => {
+                if (err) {
+                    console.log(err.message);
+                }
+                Database.newConnection.run('CREATE TABLE IF NOT EXISTS servers (id VARCHAR(32) PRIMARY KEY, data VARCHAR(2048))');
+            });
+            return Database.newConnection;
+        }
+        return Database.newConnection;
     }
 
     /**
@@ -334,13 +361,27 @@ class Database {
         return new Promise((resolve, reject) => {
             Database.db().run(query, ...args, err => {
                 if (err) {
-                    Database.db().close(er => {
-                        reject(err);
-                    });
+                    reject(err);
                 } else {
-                    Database.db().close(err => {
-                        resolve();
-                    });
+                    resolve();
+                }
+            });
+        });
+    }
+
+    /**
+     * 
+     * @param {string} query 
+     * @param  {...string} args 
+     * @return {Promise<boolean>}
+     */
+    static runNewDB(query, ...args) {
+        return new Promise((resolve, reject) => {
+            Database.newDB().run(query, ...args, err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
                 }
             });
         });
@@ -355,13 +396,26 @@ class Database {
         return new Promise((resolve, reject) => {
             Database.db().all(query, [], (err, rows) => {
                 if (!err) {
-                    Database.db().close(err => {
-                        resolve(rows);
-                    });
+                    resolve(rows);
                 } else {
-                    Database.db().close(er => {
-                        reject(err);
-                    });
+                    reject(err);
+                }
+            });
+        });
+    }
+
+    /**
+     * 
+     * @param {string} query
+     * @returns {Promise<any[]>} 
+     */
+    static allNewDB(query) {
+        return new Promise((resolve, reject) => {
+            Database.newDB().all(query, [], (err, rows) => {
+                if (!err) {
+                    resolve(rows);
+                } else {
+                    reject(err);
                 }
             });
         });
@@ -382,9 +436,26 @@ class Database {
                     console.log(`[DB] Ran ${query.query}`);
                 });
             });
-            Database.db().close(err => {
-                resolve();
+            resolve();
+        });
+    }
+
+    /**
+     * 
+     * @param  {Query[]} queries
+     */
+    static multipleRunNewDB(queries) {
+        return new Promise((resolve, reject) => {
+            queries.forEach(query => {
+                Database.newDB().run(query.query, query.args, err => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    }
+                    console.log(`[New DB] Ran ${query.query}`);
+                });
             });
+            resolve();
         });
     }
 
@@ -410,9 +481,33 @@ class Database {
                     }
                 });
             });
-            Database.db().close(err => {
-                resolve(collection);
+            resolve(collection);
+        });
+    }
+
+    /**
+     * 
+     * @param  {Query[]} queries
+     * @returns {Promise<Collection<Query, any[]>}
+     */
+    static multipleAllNewDB(queries) {
+        /**
+         * @type {Collection<Query, any[]>}
+         */
+        const collection = new Collection();
+        return new Promise(async (resolve, reject) => {
+            queries.forEach(query => {
+                Database.newDB().all(query.query, query.args, (err, rows) => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    } else {
+                        console.log(`[DB] All ${query.query}`);
+                        collection.set(query, rows);
+                    }
+                });
             });
+            resolve(collection);
         });
     }
 }

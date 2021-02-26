@@ -1,23 +1,33 @@
 {
-    "name": "danktial",
-    "author": {
-        "name": "Rance Andres"
-    },
-    "module": "modules",
-    "scripts": {
-        "start": "nodemon --delay 10"
-    },
-    "dependencies": {
-        "discord.js": "^12.5.1",
-        "dotenv": "^8.2.0",
-        "jshint": "^2.12.0",
-        "mongoose": "^5.11.14",
-        "mysql": "^2.18.1",
-        "node-schedule": "^1.3.2",
-        "nodemon": "^2.0.7",
-        "sqlite": "^4.0.19",
-        "sqlite3": "^5.0.0",
-        "twitchrequest": "^1.4.1",
-        "typescript": "^4.1.3"
-    }
+  "name": "danktial",
+  "author": "Rance Andres",
+  "module": "modules",
+  "scripts": {
+    "start": "nodemon --delay 10"
+  },
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "mongoose": "^5.11.14",
+    "mysql": "^2.18.1",
+    "node-schedule": "^1.3.2",
+    "nodemon": "^2.0.7",
+    "sqlite": "^4.0.19",
+    "sqlite3": "^5.0.0",
+    "twitchrequest": "^1.4.1",
+    "typescript": "^4.1.3"
+  },
+  "description": "Handles racing league administration, moderation and creation.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/destial/danktial.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/destial/danktial/issues"
+  },
+  "homepage": "https://github.com/destial/danktial#readme"
 }
