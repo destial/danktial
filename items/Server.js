@@ -238,9 +238,9 @@ class Server {
                 // this.ticketManager.totaltickets = Number(object.tickets);
                 // this.embed = new Discord.MessageEmbed(object.embed);
                 // this.modlog = guild.channels.cache.get(object.log);
-                this.enableTickets = object.enableTickets;
-                this.alertChannel = this.guild.channels.cache.get(object.alertChannel);
-                object.subscribedChannels.forEach(channel => {
+                this.enableTickets = object.tickets.enabled;
+                this.alertChannel = this.guild.channels.cache.get(object.twitch.alertChannel);
+                object.twitch.subscribedChannels.forEach(channel => {
                     this.alerts.addChannel(channel);
                 });
             }
@@ -270,6 +270,10 @@ class Server {
         this.getTicketManager().opentickets.forEach(ticket => {
             openTicketData.push(ticket.toJSON());
         });
+        const ticketPanelsData = [];
+        this.getTicketManager().ticketpanels.forEach(panel => {
+            ticketPanelsData.push(panel.toJSON());
+        });
         return {
             id: this.id,
             prefix: this.prefix,
@@ -279,6 +283,7 @@ class Server {
                 enabled: this.enableTickets,
                 total: this.ticketManager.totaltickets,
                 open: openTicketData,
+                panels: ticketPanelsData
             },
             twitch: {
                 subscribedChannels: channels,
