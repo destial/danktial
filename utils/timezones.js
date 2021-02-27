@@ -25,7 +25,7 @@ timezones.set('SAST (South African Standard Time UTC+2)', '+02:00');
  */
 const timezoneNames = new Collection();
 timezoneNames.set('AEDT', 'Etc/GMT-11');
-timezoneNames.set('SGT', 'Etc/GMT+8');
+timezoneNames.set('SGT', 'Asia/Singapore');
 timezoneNames.set('AEST', 'Australia/Canberra');
 timezoneNames.set('NZST', 'Antarctica/South_Pole');
 timezoneNames.set('UTC', 'Etc/GMT');

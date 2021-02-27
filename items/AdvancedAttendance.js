@@ -21,13 +21,19 @@ class AdvancedAttendance {
     constructor(client, message, server, tier, date, attendanceManager) {
         this.client = client;
         this.message = message;
-        this.embed = message.embeds[0];
+        if (this.message) {
+            this.embed = message.embeds[0];
+        }
         this.server = server;
-        this.id = message.id;
+        if (this.message) {
+            this.id = message.id;
+        }
         this.date = new Date(date);
         this.attendanceManager = attendanceManager;
-        this.tier = tier;
-        this.drivers = tier.drivers;
+        if (tier) {
+            this.tier = tier;
+            this.drivers = tier.drivers;
+        }
 
         /**
          * @type {Discord.Collection<string, Driver>}
@@ -385,6 +391,7 @@ class AdvancedAttendance {
             if (channel && channel.isText()) {
                 this.message = await channel.messages.fetch(object.id);
                 if (this.message) {
+                    this.id = this.message.id;
                     this.embed = this.message.embeds[0];
                     this.date = new Date(object.date);
                     this.accepted.clear();
@@ -433,18 +440,21 @@ class AdvancedAttendance {
                     if (this.schedule) {
                         this.schedule.cancel();
                     }
-                    this.server.getAttendanceManager().getAdvancedEvents().set(this.id, this);
                     const fiveMinBefore = this.date.getTime() - 600000;
-                    this.schedule = schedule.scheduleJob(this.embed.title, new Date(fiveMinBefore), () => {
-                        this.accepted.forEach((participant) => {
-                            const embed = new Discord.MessageEmbed();
-                            embed.setAuthor(`You have an event scheduled in 10 minutes!`);
-                            embed.setColor('RED');
-                            embed.setDescription(this.embed.title);
-                            participant.member.user.send(embed);
+                    if (fiveMinBefore > Date.now()) {
+                        this.schedule = schedule.scheduleJob(this.embed.title, new Date(fiveMinBefore), () => {
+                            this.accepted.forEach((participant) => {
+                                const embed = new Discord.MessageEmbed();
+                                embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                                embed.setColor('RED');
+                                embed.setDescription(this.embed.title);
+                                participant.member.user.send(embed);
+                            });
+                            this.schedule.cancel();
                         });
-                        this.schedule.cancel();
-                    });
+                        console.log(`[ADATTENDANCE] Created schedule for ${this.embed.title}`);
+                    }
+                    this.server.getAttendanceManager().getAdvancedEvents().set(this.id, this);
                     console.log(`[ADATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
                 }
             }

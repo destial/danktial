@@ -13,7 +13,7 @@ function formatDiscordRegion(region) {
         case 'brazil':
             timezone = 'America/Campo_Grande';
             break;
-        case 'eruope':
+        case 'europe':
             timezone = 'Etc/GMT';
             break;
         case 'india':
@@ -29,8 +29,10 @@ function formatDiscordRegion(region) {
             timezone = 'Africa/Lubumbashi';
             break;
         case 'hongkong':
+            timezone = 'Asia/Singapore';
             break;
         case 'singapore':
+            timezone = 'Asia/Singapore';
             break;
         default:
             timezone = 'Etc/GMT+5';

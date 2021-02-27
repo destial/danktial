@@ -106,6 +106,7 @@ class AttendanceManager {
                 const description = answers[1];
                 const date = answers[2];
                 const tier = answers[3];
+                console.log(date);
                 const replyEmbed = new Discord.MessageEmbed();
                 replyEmbed.setColor('RED');
                 if (!title || !description || !date || !tier) {
@@ -125,10 +126,10 @@ class AttendanceManager {
                 } else {
                     const t = server.getTierManager().getTier(tier.toLowerCase());
                     const attendanceembed = new Discord.MessageEmbed();
-                    formatDate(`${date.toUpperCase()}`).then((dateObject) => {
-                        const dateNow = new Date();
-                        if (dateObject.getTime() < dateNow.getTime()) {
-                            const difference = dateNow.getTime()-dateObject.getTime();
+                    formatDate(date.toUpperCase()).then((dateObject) => {
+                        if (dateObject < Date.now()) {
+                            const dateNow = new Date();
+                            const difference = dateNow.getTime() - dateObject.getTime();
                             replyEmbed.setAuthor("Invalid date! Date cannot be in the past!");
                             replyEmbed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
                             member.user.send(replyEmbed);
@@ -172,6 +173,7 @@ class AttendanceManager {
                                 await m.react(AttendanceManager.delete);
                                 await m.react(AdvancedAttendance.editEmoji);
                                 replyEmbed.setAuthor(`Successfully created attendance ${title}`);
+                                replyEmbed.setDescription(`[Click here to view the attendance](${m.url})`);
                                 await member.user.send(replyEmbed);
                                 const attendance = new AdvancedAttendance(client, m, server, t, dateObject, this);
                                 this.advancedEvents.set(attendance.id, attendance);
@@ -246,6 +248,7 @@ class AttendanceManager {
                     const title = answers[0];
                     const description = answers[1];
                     const date = answers[2];
+                    console.log(date);
                     if (!title || !description || !date) {
                         embed.setAuthor("Ran out of time!");
                         await member.user.send(embed);
@@ -257,16 +260,17 @@ class AttendanceManager {
                         resolve(undefined);
                     } else {
                         const attendanceembed = new Discord.MessageEmbed();
-                        formatDate(`${date.toUpperCase()}}`).then((dateObject) => {
-                            const dateNow = new Date();
-                            if (dateObject.getTime() < dateNow.getTime()) {
+                        formatDate(date.toUpperCase()).then((dateObject) => {
+                            if (dateObject < Date.now()) {
+                                const dateNow = new Date();
                                 const difference = dateNow.getTime()-dateObject.getTime();
                                 embed.setAuthor("Invalid date! Date cannot be in the past!");
                                 embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
                                 member.user.send(embed);
                                 resolve();
                             } else {
-                                const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(date.substring(date.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
+                                const timeZoneName = timezoneNames.get(date.substring(date.length-4).trim().toUpperCase());
+                                const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timeZoneName, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
                                 attendanceembed.setTitle(title);
                                 attendanceembed.setDescription(description);
                                 if (formatTrack(title)) {
@@ -290,6 +294,7 @@ class AttendanceManager {
                                     await m.react(AttendanceManager.delete);
                                     const embed3 = new Discord.MessageEmbed();
                                     embed3.setAuthor(`Successfully created event ${title}`);
+                                    embed3.setDescription(`[Click here to view the attendance](${m.url})`);
                                     embed3.setColor('RED');
                                     member.user.send(embed3);
                                     const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server, m);

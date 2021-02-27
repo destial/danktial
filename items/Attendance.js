@@ -243,6 +243,7 @@ class Attendance {
                     console.log(`[ATTENDANCE] Missing message ${object.id}`);
                 }
                 if (this.message) {
+                    this.id = this.message.id;
                     this.embed = this.message.embeds[0];
                     this.title = this.embed.title;
                     this.description = this.embed.description;

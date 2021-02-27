@@ -132,7 +132,7 @@ class Server {
 
     async loadData(data) {
         this.prefix = data.prefix;
-        this.log = this.guild.channels.cache.get(data.log);
+        this.modlog = this.guild.channels.cache.get(data.log);
         this.joinEmbed = (data.embed != null ? new Discord.MessageEmbed(data.embed) : undefined);
         
         this.enableTickets = data.tickets.enabled;
