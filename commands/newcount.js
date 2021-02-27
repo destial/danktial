@@ -16,7 +16,6 @@ module.exports = {
      */
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
-            //var category = server.guild.channels.cache.find((c) => c.name.toLowerCase().includes('count') && c.type === 'category');
             try {
                 const category = server.guild.channels.cache.find((c) => c.name.toLowerCase().includes('count') && c.type === 'category');
                 if (args[0] === "all") {
@@ -39,9 +38,9 @@ module.exports = {
                                     }
                                 ],
                                 parent: cat
-                            }).then(membercount => {
+                            }).then(async membercount => {
                                 server.getCountManager().setCount('member', membercount);
-                                server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
+                                await server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                                 
                                 server.guild.channels.create(`Channel Count: ${server.guild.channels.cache.size}`, {
                                     type: 'voice',
@@ -52,9 +51,9 @@ module.exports = {
                                         }
                                     ],
                                     parent: cat
-                                }).then(channelcount => {
+                                }).then(async channelcount => {
                                     server.getCountManager().setCount('channel', channelcount);
-                                    server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
+                                    await server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
 
                                     server.guild.channels.create(`Role Count: ${server.guild.roles.cache.size}`, {
                                         type: 'voice',
@@ -65,9 +64,9 @@ module.exports = {
                                             }
                                         ],
                                         parent: cat
-                                    }).then(rolecount => {
+                                    }).then(async rolecount => {
                                         server.getCountManager().setCount('role', rolecount);
-                                        server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
+                                        await server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                 
                                         const embed = new Discord.MessageEmbed()
                                             .setAuthor('Created All Counts!')
@@ -87,9 +86,9 @@ module.exports = {
                                 }
                             ],
                             parent: category
-                        }).then(membercount => {
+                        }).then(async membercount => {
                             server.getCountManager().setCount('member', membercount);
-                            server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
+                            await server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
 
                             server.guild.channels.create(`Channel Count: ${server.guild.channels.cache.size}`, {
                                 type: 'voice',
@@ -100,9 +99,9 @@ module.exports = {
                                     }
                                 ],
                                 parent: category
-                            }).then(channelcount => {
+                            }).then(async channelcount => {
                                 server.getCountManager().setCount('channel', channelcount);
-                                server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
+                                await server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
 
                                 server.guild.channels.create(`Role Count: ${server.guild.roles.cache.size}`, {
                                     type: 'voice',
@@ -146,13 +145,13 @@ module.exports = {
                                         }
                                     ],
                                     parent: cat
-                                }).then(membercount => {
+                                }).then(async membercount => {
                                     server.getCountManager().setCount('member', membercount);
                                     const embed = new Discord.MessageEmbed()
                                         .setAuthor('Created Member Count!')
                                         .setColor('RED');
                                     message.channel.send(embed);
-                                    server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
+                                    await server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                                 });
                             });
                         } else {
@@ -165,13 +164,13 @@ module.exports = {
                                     }
                                 ],
                                 parent: category
-                            }).then(membercount => {
+                            }).then(async membercount => {
                                 server.getCountManager().setCount('member', membercount);
                                 const embed = new Discord.MessageEmbed()
                                     .setAuthor('Created Member Count!')
                                     .setColor('RED');
                                 message.channel.send(embed);
-                                server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
+                                await server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                             });
                         }
                     }
@@ -196,13 +195,13 @@ module.exports = {
                                         }
                                     ],
                                     parent: cat
-                                }).then(rolecount => {
+                                }).then(async rolecount => {
                                     server.getCountManager().setCount('role', rolecount);
                                     const embed = new Discord.MessageEmbed()
                                         .setAuthor('Created Role Count!')
                                         .setColor('RED');
                                     message.channel.send(embed);
-                                    server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
+                                    await server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                                 });
                             });
                         } else {
@@ -215,13 +214,13 @@ module.exports = {
                                     }
                                 ],
                                 parent: category
-                            }).then(rolecount => {
+                            }).then(async rolecount => {
                                 server.getCountManager().setCount('role', rolecount);
                                 const embed = new Discord.MessageEmbed()
                                     .setAuthor('Created Role Count!')
                                     .setColor('RED');
                                 message.channel.send(embed);
-                                server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
+                                await server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                             });
                         }
                     }
@@ -246,13 +245,13 @@ module.exports = {
                                         }
                                     ],
                                     parent: cat
-                                }).then(channelcount => {
+                                }).then(async channelcount => {
                                     server.getCountManager().setCount('channel', channelcount);
                                     const embed = new Discord.MessageEmbed()
                                         .setAuthor('Created Channel Count!')
                                         .setColor('RED');
                                     message.channel.send(embed);
-                                    server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
+                                    await server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                                 });
                             });
                         } else {
@@ -265,13 +264,13 @@ module.exports = {
                                     }
                                 ],
                                 parent: category
-                            }).then(channelcount => {
+                            }).then(async channelcount => {
                                 server.getCountManager().setCount('channel', channelcount);
                                 const embed = new Discord.MessageEmbed()
                                     .setAuthor('Created Channel Count!')
                                     .setColor('RED');
                                 message.channel.send(embed);
-                                server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
+                                await server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                             });
                         }
                     } else {

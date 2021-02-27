@@ -29,16 +29,19 @@ class Driver {
 
     async save() {
         await Database.run(Database.driverSaveQuery, [this.id, this.guild.id, this.number, 0, (this.team ? this.team.name : ""), this.tier.name]);
+        await this.server.update();
         console.log(`[DRIVER] Saved driver ${this.name} from ${this.guild.name}`);
     }
 
     async update() {
         await Database.run(Database.driverUpdateQuery, [(this.team ? 0 : 1), (this.team ? this.team.name : ""), this.id, this.guild.id, this.number, this.tier.name]);
+        await this.server.update();
         console.log(`[DRIVER] Updated ${this.team ? "driver" : "reserve"} ${this.name} from ${this.guild.name}`);
     }
 
     async updateReserve() {
         await Database.run(Database.driverUpdateQuery, [1, "", this.id, this.guild.id, this.number, this.tier.name]);
+        await this.server.update();
         console.log(`[DRIVER] Updated reserve ${this.name} from ${this.guild.name}`);
     }
 

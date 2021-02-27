@@ -46,7 +46,7 @@ module.exports = {
                         tier.removeDriver(member.id);
                         await driver.delete();
                         embed2.setAuthor(`Removed driver ${driver.member.user.tag} from tier ${tier.name}`);
-                        server.log(`${message.member.user.username} has removed driver ${driver.member.user.tag} from tier ${tier.name}`);
+                        await server.log(`${message.member.user.username} has removed driver ${driver.member.user.tag} from tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                             if (advanced.tier.name === tier.name)
                                 await advanced.fix();
@@ -55,7 +55,7 @@ module.exports = {
                         tier.removeReserve(member.id);
                         await reserve.delete();
                         embed2.setAuthor(`Removed reserve ${reserve.member.user.tag} from tier ${tier.name}`);
-                        server.log(`${message.member.user.username} has removed driver ${reserve.member.user.tag} from tier ${tier.name}`);
+                        await server.log(`${message.member.user.username} has removed driver ${reserve.member.user.tag} from tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                             if (advanced.tier.name === tier.name)
                                 await advanced.fix();

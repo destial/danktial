@@ -117,7 +117,7 @@ module.exports = {
                                     await team.updateName(oldName);
                                     embed.setDescription(driverList1);
                                     await message.channel.send(embed);
-                                    server.log(`${message.member.user.tag} has edited the name of team ${oldName} to ${team.name}`);
+                                    await server.log(`${message.member.user.tag} has edited the name of team ${oldName} to ${team.name}`);
                                 });
                             } else if (messageReaction.emoji.name === "🏎️") {
                                 team.drivers.clear();
@@ -154,7 +154,7 @@ module.exports = {
                                     });
                                     embed.setDescription(driverList);
                                     await message.channel.send(embed);
-                                    server.log(`${message.member.user.tag} has added drivers to team ${team.name}`, driverList);
+                                    await server.log(`${message.member.user.tag} has added drivers to team ${team.name}`, driverList);
                                 });
                             }
                         });

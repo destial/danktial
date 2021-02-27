@@ -26,11 +26,13 @@ class Reserve extends Driver {
 
     async save() {
         await Database.run(Database.driverSaveQuery, [this.id, this.guild.id, this.number, 1, "", this.tier.name]);
+        await this.server.update();
         console.log(`[DRIVER] Saved reserve ${this.name} from ${this.guild.name}`);
     }
 
     async updateReserve() {
         await Database.run(Database.driverUpdateQuery, [1, "", this.id, this.guild.id, this.number, this.tier.name]);
+        await this.server.update();
         console.log(`[DRIVER] Updated reserve ${this.name} from ${this.guild.name}`);
     }
 

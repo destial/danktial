@@ -34,7 +34,6 @@ module.exports = {
                 if (desc) {
                     embed.setDescription(desc);
                 }
-                message.channel.startTyping();
                 server.serverManager.servers.forEach(async server => {
                     if (server.modlog) {
                         const locale = formatDiscordRegion(server.guild.region);

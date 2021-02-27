@@ -22,19 +22,16 @@ module.exports = {
             const embed = new Discord.MessageEmbed();
             embed.setColor('RED');
             embed.setFooter(`*WARINING* This command is deprecated and should be avoided! Use ${server.prefix}dupetier instead!`);
-            message.channel.startTyping(1);
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 await message.channel.send(embed);
-                message.channel.stopTyping(true);
                 return;
             }
             const name = args.join(' ');
             if (name.length >= 256) {
                 const embed6 = new Discord.MessageEmbed().setAuthor(`Tier name cannot be longer than 256 characters!`);
                 await message.channel.send(embed6);
-                message.channel.stopTyping(true);
                 return;
             }
             const tier = new Tier(client, server, name);
@@ -61,7 +58,7 @@ module.exports = {
                 });
                 embed.setDescription(`${driverList}\nNext step is using ` + server.prefix + `setdriver`);
                 await message.channel.send(embed);
-                server.log(`${message.member.user.tag} has added tier ${tier.name}`);
+                await server.log(`${message.member.user.tag} has added tier ${tier.name}`);
                 await Database.run(Database.tierSaveQuery, [server.id, name]);
                 message.channel.stopTyping(true);
             });

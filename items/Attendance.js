@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const schedule = require('node-schedule');
 const Database = require('../database/Database');
+const Server = require('./Server');
 
 class Attendance {
     /**
@@ -8,11 +9,11 @@ class Attendance {
      * @param {Discord.MessageEmbed} embed 
      * @param {string} id
      * @param {Date} date
-     * @param {Discord.Guild} guild
+     * @param {Server} server
      * @param {Discord.Message} message
      * @param {Discord.Client} client
      */
-    constructor(embed, id, date, guild, message, client) {
+    constructor(embed, id, date, server, message, client) {
         /**
          * @constant
          */
@@ -23,49 +24,55 @@ class Attendance {
         this.id = id;
         this.client = client;
         this.embed = embed;
-        this.title = embed.title;
-        this.description = embed.description;
-        this.guild = guild;
+        if (embed) {
+            this.title = embed.title;
+            this.description = embed.description;
+        }
+        this.server = server;
+        this.guild = this.server.guild;
         this.date = new Date(date);
         /**
          * @type {Discord.Collection<string, string>}
          */
         this.accepted = new Discord.Collection();
-        const acceptedP = embed.fields.find((emb) => emb.name.toLowerCase().includes('accept')).value.split('\n');
-        acceptedP.forEach((user) => {
-            const p = user.replace(">>> ", "");
-            const us = guild.members.cache.find(u => u.user.username === p);
-            if (us) {
-                this.accepted.set(us.id, us.user.username);
-            }
-        });
-         /**
+        /**
          * @type {Discord.Collection<string, string>}
          */
         this.rejected = new Discord.Collection();
-        const rejectedP = embed.fields.find((emb) => emb.name.toLowerCase().includes('reject')).value.split('\n');
-        rejectedP.forEach((user) => {
-            const p = user.replace(">>> ", "");
-            const us = guild.members.cache.find(u => u.user.username === p);
-            if (us) {
-                this.rejected.set(us.id, us.user.username);
-            }
-        });
-         /**
+        /**
          * @type {Discord.Collection<string, string>}
          */
         this.tentative = new Discord.Collection();
-        const tentativeP = embed.fields.find((emb) => emb.name.toLowerCase().includes('tentative')).value.split('\n');
-        tentativeP.forEach((user) => {
-            const p = user.replace(">>> ", "");
-            const us = guild.members.cache.find(u => u.user.username === p);
-            if (us) {
-                this.tentative.set(us.id, us.user.username);
-            }
-        });
+        if (embed) {
+            const acceptedP = embed.fields.find((emb) => emb.name.toLowerCase().includes('accept')).value.split('\n');
+            acceptedP.forEach((user) => {
+                const p = user.replace(">>> ", "");
+                const us = this.guild.members.cache.find(u => u.user.username === p);
+                if (us) {
+                    this.accepted.set(us.id, us.user.username);
+                }
+            });
+            const rejectedP = embed.fields.find((emb) => emb.name.toLowerCase().includes('reject')).value.split('\n');
+            rejectedP.forEach((user) => {
+                const p = user.replace(">>> ", "");
+                const us = this.guild.members.cache.find(u => u.user.username === p);
+                if (us) {
+                    this.rejected.set(us.id, us.user.username);
+                }
+            });
+            const tentativeP = embed.fields.find((emb) => emb.name.toLowerCase().includes('tentative')).value.split('\n');
+            tentativeP.forEach((user) => {
+                const p = user.replace(">>> ", "");
+                const us = this.guild.members.cache.find(u => u.user.username === p);
+                if (us) {
+                    this.tentative.set(us.id, us.user.username);
+                }
+            });
+            this.updateList();
+        }
         const fiveMinBefore = this.date.getTime() - 600000;
         if (fiveMinBefore > new Date().getTime()) {
-            this.schedule = schedule.scheduleJob(this.title, fiveMinBefore, () => {
+            this.schedule = schedule.scheduleJob('attendance', fiveMinBefore, () => {
                 this.accepted.forEach((nil, participant) => {
                     const mem = this.guild.members.cache.find((member) => member.id === participant);
                     if (mem) {
@@ -80,8 +87,6 @@ class Attendance {
             });
             console.log(`[ATTENDANCE] Created schedule for ${this.schedule.name}`);
         }
-
-        this.updateList();
     }
 
     static get accept() { return "✅"; }
@@ -91,11 +96,13 @@ class Attendance {
 
     async delete() {
         await Database.run(Database.attendanceDeleteQuery, [this.id]);
+        await this.server.update();
         console.log(`[ATTENDANCE] Deleted attendance ${this.title} from ${this.guild.name}`);
     }
 
     async save() {
         await Database.run(Database.attendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id]);
+        await this.server.update();
         console.log(`[ATTENDANCE] Saved attendance ${this.title} from ${this.guild.name}`);
     }
 
@@ -223,13 +230,18 @@ class Attendance {
     async loadJSON(object) {
         try {
             this.guild = await this.client.guilds.fetch(object.guild);
+            this.server = await this.client.manager.fetch(object.guild);
         } catch(err) {
-            console.log(`[ATTENDANCE] Missing guild ${object.id}`);
+            console.log(`[ATTENDANCE] Missing guild ${object.guild}`);
         }
         if (this.guild) {
             const channel = this.guild.channels.cache.get(object.channel);
             if (channel && channel.isText()) {
-                this.message = await channel.messages.fetch(object.id);
+                try {
+                    this.message = await channel.messages.fetch(object.id);
+                } catch(err) {
+                    console.log(`[ATTENDANCE] Missing message ${object.id}`);
+                }
                 if (this.message) {
                     this.embed = this.message.embeds[0];
                     this.title = this.embed.title;
@@ -271,6 +283,7 @@ class Attendance {
                             console.log(`[ATTENDANCE] Missing member ${id}`);
                         }
                     });
+                    this.server.getAttendanceManager().getEvents().set(this.id, this);
 
                     if (this.schedule) {
                         this.schedule.cancel();
@@ -289,7 +302,7 @@ class Attendance {
                         });
                         this.schedule.cancel();
                     });
-                    console.log(`[ATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
+                    console.log(`[ATTENDANCE] Loaded ${this.embed.title} from ${this.guild.name}`);
                 }
             }
         }

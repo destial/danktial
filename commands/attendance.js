@@ -19,7 +19,7 @@ module.exports = {
             await message.delete({ timeout: 1000 });
             const attendance = await server.getAttendanceManager().newAttendance(message.member, message.channel);
             if (attendance) {
-                server.log(`${message.member.user.tag} has created attendance ${attendance.title}`);
+                await server.log(`${message.member.user.tag} has created attendance ${attendance.title}`);
             }
         }
     }

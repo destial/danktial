@@ -16,7 +16,6 @@ module.exports = {
     async run(client, server, command, args, message) {
         const embed = new Discord.MessageEmbed();
         embed.setColor('RED');
-        message.channel.startTyping();
         try {
             if (!args.length) {
                 embed.setAuthor('These are all the tiers:');
@@ -61,6 +60,5 @@ module.exports = {
         } catch (err) {
             console.log(err);
         }
-        message.channel.stopTyping(true);
     }
 };

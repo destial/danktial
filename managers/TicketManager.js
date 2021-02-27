@@ -46,6 +46,7 @@ class TicketManager {
             const ticketPanel = new TicketPanel(client, this, panelMessage.id, embed, channel);
             this.ticketpanels.set(ticketPanel.id, ticketPanel);
             await Database.run(Database.ticketPanelSaveQuery, [panelMessage.id, channel.id]);
+            await this.server.update();
             console.log(`[UPDATE] Added ticket panel ${ticketPanel.id}`);
         } catch (err) {
             console.log(`[ERROR] Something happened while creating a ticket panel!`, err);
@@ -143,7 +144,7 @@ class TicketManager {
                 const ticket = new Ticket(member, this.totaltickets, ticketChannel, baseMessage, this);
                 this.opentickets.set(ticket.id, ticket);
                 await ticket.save();
-                await Database.run(Database.serverSaveQuery, [this.server.guild.id, this.server.prefix, this.totaltickets, (this.server.modlog ? this.server.modlog.id : 0)]);
+                await this.server.update();
                 console.log(`[UPDATE] Created ${ticket.channel.name} by ${ticket.member.displayName}`);
                 resolve(ticket);
             } catch (err) {

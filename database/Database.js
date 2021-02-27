@@ -55,11 +55,26 @@ class Database {
         }
         return Database.newConnection;
     }
+    
+    /**
+     * 
+     * @param {"update" | "delete"} code 
+     */
+    static getStatement(code) {
+        switch (code.toLowerCase()) {
+            case 'update':
+                return 'REPLACE INTO servers (id,data) VALUES (?,?)';
+            case 'delete':
+                return 'DELETE FROM servers WHERE id=(?)';
+            default:
+                return 'SELECT * FROM servers';
+        }
+    }
 
     /**
      * `REPLACE INTO serverdata (id,data) VALUES (?,?)`
      */
-    static get serverDataUpdateQuery() { return "REPLACE INTO serverdata (id,data) VALUES (?,?)"; }
+    static get serverDataUpdateQuery() { return 'REPLACE INTO serverdata (id,data) VALUES (?,?)'; }
 
     /**
      * `DELETE FROM serverdata WHERE id=(?)`

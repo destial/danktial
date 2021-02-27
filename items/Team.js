@@ -54,16 +54,19 @@ class Team {
 
     async save() {
         await Database.run(Database.teamSaveQuery, [this.server.id, this.name, this.tier.name]);
+        await this.server.update();
         console.log(`[TEAM] Saved team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async delete() {
         await Database.run(Database.teamDeleteQuery, [this.server.id, this.name, this.tier.name]);
+        await this.server.update();
         console.log(`[TEAM] Deleted team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async update() {
         await Database.run(Database.teamUpdateQuery, [this.server.id, this.name, this.tier.name, this.server.id, this.name, this.tier.name]);
+        await this.server.update();
         console.log(`[TEAM] Updated team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 

@@ -24,7 +24,6 @@ module.exports = {
             const { channel } = message;
             const embed = new Discord.MessageEmbed();
             embed.setColor('RED');
-            message.channel.startTyping(1);
             if (!args.length) {
                 embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${command} ${this.usage}\n**Yes / No**\n${server.prefix}${command} "Do you like this bot?"`);
                 channel.send(embed);
@@ -42,13 +41,12 @@ module.exports = {
                     if (!arguments.length) {
                         embed.setDescription(`${AttendanceManager.accept} Yes\n${AttendanceManager.reject} No`);
                         embed.setTimestamp(new Date());
-                        channel.send(`❔ **${question}**`, embed).then((messag) => {
+                        channel.send(`❔ **${question}**`, embed).then(async (messag) => {
                             messag.react(AttendanceManager.accept).then(() => {
                                 messag.react(AttendanceManager.reject);
                             });
                             message.delete({ timeout: 1000 });
-                            server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
-                            message.channel.stopTyping();
+                            await server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                             resolve();
                         });
                     } else {
@@ -67,8 +65,7 @@ module.exports = {
                                     await messag.react(reactions[i]);
                                 }
                                 message.delete({ timeout: 1000 });
-                                server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
-                                message.channel.stopTyping();
+                                await server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                                 resolve();
                             });
                         } else if (arguments.length > 10) {
@@ -93,8 +90,7 @@ module.exports = {
                                         await mes.react(reactions[iiii]);
                                     }
                                     message.delete({ timeout: 1000 });
-                                    server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
-                                    message.channel.stopTyping(true);
+                                    await server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                                     resolve();
                                 });
                             });

@@ -80,7 +80,7 @@ module.exports = {
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
                                 message.channel.send(embed);
-                                server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
+                                await server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                                     await advanced.fix();
                                 });
@@ -118,7 +118,7 @@ module.exports = {
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 message.channel.send(embed);
-                                server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
+                                await server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                                     if (advanced.tier.name === tier.name)
                                         await advanced.fix();

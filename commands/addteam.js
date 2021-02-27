@@ -103,7 +103,7 @@ module.exports = {
                                 embed.setDescription(driverList);
                                 await team.save();
                                 await message.channel.send(embed);
-                                server.log(`${message.member.user.tag} has created team ${team.name} under ${tier.name}`, driverList);
+                                await server.log(`${message.member.user.tag} has created team ${team.name} under ${tier.name}`, driverList);
                             });
                         });
                     }

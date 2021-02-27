@@ -18,7 +18,7 @@ module.exports = {
      */
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
-            message.channel.startTyping(1);
+            console.log(server);
             const embed = new Discord.MessageEmbed();
             embed.setColor('RED');
             if (server.getTierManager().tiers.size !== 0) {
@@ -129,11 +129,10 @@ module.exports = {
                                                 teamNames.set('Scuderia Alpha Tauri', 'https://cdn.discordapp.com/emojis/801293860411932683.png');
                                                 teamNames.set('Alfa Romeo Sauber F1', 'https://cdn.discordapp.com/emojis/801293861648465991.png');
                                                 teamNames.set('Williams Racing', 'https://cdn.discordapp.com/emojis/801293860470521856.png');
-                                                message.channel.startTyping(5);
                                                 for (var i = 1; i <= tierAmount; i++) {
                                                     const tierPromise = new Promise(async (resolve2, reject) => {
                                                         const tier = new Tier(client, server, tierName.replace('{number}', String(i)).replace('{letter}', letters[i]));
-                                                        server.log(`${message.member.user.tag} has created tier ${tier.name}`);
+                                                        await server.log(`${message.member.user.tag} has created tier ${tier.name}`);
                                                         const teamPromise = new Promise(async (resolve3, reject) => {
                                                             var addEmoji = false;
                                                             var numOfEmoji = 50;

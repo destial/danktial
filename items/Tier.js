@@ -215,6 +215,7 @@ class Tier {
                     }
                 });
             });
+            this.server.getTierManager().addTier(this);
 
             object.reserves.forEach(async reserveJSON => {
                 try {

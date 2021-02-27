@@ -6,7 +6,8 @@ const { timezoneNames } = require("./timezones");
  * @param {string} timezone 
  */
 function formatFormalTime(date, timezone) {
-    var timezoneName = timezoneNames.get(timezone.toUpperCase());
+    var timezoneName = timezoneNames.get(timezone.toUpperCase().trim());
+    console.log(timezone.toUpperCase().trim());
     if (!timezoneName) timezoneName = 'Etc/GMT';
     const time = date.toLocaleTimeString('en-US', {
         hour12: true,

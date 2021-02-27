@@ -31,7 +31,7 @@ module.exports = {
                             });
                         }
                     }
-                    server.log(`Channel deleted!`, `#${channel.name}`);
+                    await server.log(`Channel deleted!`, `#${channel.name}`);
                 }
             });
 

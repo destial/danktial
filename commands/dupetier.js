@@ -56,7 +56,7 @@ module.exports = {
                                 if (team.name === existingTier.teams.last().name) resolve();
                             });
                         });
-                        promise.then(() => {
+                        promise.then(async () => {
                             newTier.saveTeams();
                             server.getTierManager().addTier(newTier);
                             embed.setAuthor(`Successfully duplicated tier ${newTier.name} from ${existingTier.name}. Here are the teams:`);
@@ -66,7 +66,7 @@ module.exports = {
                             });
                             embed.setDescription(teamList);
                             message.channel.send(embed);
-                            server.log(`${message.member.user.tag} has duplicated tier duplicated tier ${newTier.name} from ${existingTier.name}`);
+                            await server.log(`${message.member.user.tag} has duplicated tier duplicated tier ${newTier.name} from ${existingTier.name}`);
                         });
                     } else {
                         embed.setAuthor('Ran out of time!');

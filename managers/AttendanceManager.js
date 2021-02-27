@@ -175,6 +175,7 @@ class AttendanceManager {
                                 await member.user.send(replyEmbed);
                                 const attendance = new AdvancedAttendance(client, m, server, t, dateObject, this);
                                 this.advancedEvents.set(attendance.id, attendance);
+                                this.server.update();
                                 try {
                                     await attendance.save();
                                     resolve(attendance);
@@ -291,10 +292,11 @@ class AttendanceManager {
                                     embed3.setAuthor(`Successfully created event ${title}`);
                                     embed3.setColor('RED');
                                     member.user.send(embed3);
-                                    const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server.guild, m);
+                                    const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server, m);
                                     this.events.set(attendance.id, attendance);
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
+                                        this.server.update();
                                         console.log(`[UPDATE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                                         resolve(attendance);
                                     } catch (err) {
@@ -426,10 +428,11 @@ class AttendanceManager {
                                             const embed3 = new Discord.MessageEmbed();
                                             embed3.setColor('RED');
                                             await Database.run(Database.attendanceSaveQuery, [attendanceevent.id, String(attendanceevent.date.getTime()), attendanceevent.message.channel.id]);
+                                            this.server.update();
                                             console.log(`[UPDATE] Edited attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
                                             embed3.setAuthor("Successfully edited event!");
                                             member.user.send(embed3);
-                                            attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
+                                            await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
                                         } catch (err) {
                                             console.log(err);
                                         }
@@ -499,7 +502,7 @@ class AttendanceManager {
                                             await attendanceevent.update();
                                             embed3.setAuthor(`Successfully edited attendance!`);
                                             member.user.send(embed3);
-                                            attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
+                                            await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
                                             console.log(err);
@@ -512,7 +515,7 @@ class AttendanceManager {
                                             await attendanceevent.update();
                                             embed3.setAuthor(`Successfully edited attendance!`);
                                             member.user.send(embed3);
-                                            attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
+                                            await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
                                             console.log(err);
@@ -534,9 +537,10 @@ class AttendanceManager {
                                         attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                             try {
                                                 await attendanceevent.update();
+                                                this.server.update();
                                                 embed3.setAuthor(`Successfully edited attendance!`);
                                                 member.user.send(embed3);
-                                                attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
+                                                await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                                 return;
                                             } catch (err) {
                                                 console.log(err);
@@ -673,6 +677,7 @@ class AttendanceManager {
                     await message.delete({ timeout: 1000 });
                 }
                 await attendanceevent.delete();
+                this.server.update();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
@@ -695,6 +700,7 @@ class AttendanceManager {
                     await message.delete({ timeout: 1000 });
                 }
                 await attendanceevent.delete();
+                this.server.update();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }

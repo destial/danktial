@@ -9,7 +9,11 @@ const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
 const formatDiscordRegion = require('../utils/formatDiscordRegion');
 const TwitchRequest = require('twitchrequest');
-//const serverSchema = require('../database/schemas/server-schema');
+const Ticket = require('./Ticket');
+const Tier = require('./Tier');
+const Attendance = require('./Attendance');
+const AdvancedAttendance = require('./AdvancedAttendance');
+const TicketPanel = require('./TicketPanel');
 
 class Server {
     /**
@@ -96,10 +100,93 @@ class Server {
         });
     }
 
-    loadData(data) {
-        this.enableTickets = data.enableTickets;
-        this.alertChannel = this.guild.channels.cache.get(data.alertChannel);
-        data.subscribedChannels.forEach(channel => {
+    /**
+     * 
+     * @param {string} title 
+     * @param {string} description 
+     * @param {Discord.EmbedFieldData[]} fields
+     */
+    async log(title, description, fields) {
+        if (this.modlog) {
+            try {
+                const locale = formatDiscordRegion(this.guild.region);
+                const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
+                const embed = new Discord.MessageEmbed()
+                    .setAuthor(title)
+                    .setColor('ORANGE')
+                    .setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${this.guild.region.toLocaleUpperCase()}`);
+                if (description) {
+                    embed.setDescription(description);
+                }
+                if (fields) {
+                    embed.addFields(fields);
+                }
+                this.modlog.stopTyping(true);
+                return await this.modlog.send(embed);
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    }
+
+    async loadData(data) {
+        this.prefix = data.prefix;
+        this.log = this.guild.channels.cache.get(data.log);
+        this.joinEmbed = (data.embed != null ? new Discord.MessageEmbed(data.embed) : undefined);
+        
+        this.enableTickets = data.tickets.enabled;
+        this.getTicketManager().totaltickets = data.tickets.total;
+        data.tickets.open.forEach(async ticket => {
+            const member = await this.guild.members.fetch(ticket.member);
+            const channel = this.guild.channels.cache.get(ticket.id);
+            if (channel && member && channel.isText()) {
+                const base = await channel.messages.fetch(ticket.base);
+                const t = new Ticket(member, ticket.number, channel, base, this.getTicketManager());
+                this.getTicketManager().loadTicket(t);
+                console.log(`[LOAD] Loaded ticket ${t.number}`);
+            }
+        });
+        data.tickets.panels.forEach(async panel => {
+            const channel = this.guild.channels.cache.get(panel.channel);
+            if (channel && channel.isText()) {
+                const message = await channel.messages.fetch(panel.id);
+                if (message) {
+                    const p = new TicketPanel(this.client, this.getTicketManager(), message.id, message.embeds[0], channel);
+                    this.getTicketManager().loadTicketPanel(p);
+                }
+            }
+        });
+        if (data.count.member != null) {
+            const count = this.guild.channels.cache.get(data.count.member);
+            this.getCountManager().setCount('member', count);
+        }
+        if (data.count.role != null) {
+            const count = this.guild.channels.cache.get(data.count.role);
+            this.getCountManager().setCount('role', count);
+        }
+        if (data.count.channel != null) {
+            const membercount = this.guild.channels.cache.get(data.count.channel);
+            this.getCountManager().setCount('channel', membercount);
+        }
+
+        data.tiers.forEach(tier => {
+            const t = new Tier(this.client, this, tier.name);
+            t.loadJSON(tier);
+        });
+
+        data.attendances.forEach(attendance => {
+            const a = new Attendance(undefined, attendance.id, new Date(attendance.date), this.guild, undefined, this.client);
+            a.loadJSON(attendance);
+        });
+
+        data.advancedAttendances.forEach(attendance => {
+            const a = new AdvancedAttendance(this.client, undefined, this, undefined, new Date(attendance.date), this.getAttendanceManager());
+            a.loadJSON(attendance);
+        });
+        this.alertChannel = this.guild.channels.cache.get(data.twitch.alertChannel);
+
+        data.twitch.subscribedChannels.forEach(channel => {
             this.alerts.addChannel(channel);
         });
     }
@@ -154,56 +241,32 @@ class Server {
         this.alertChannel = channel;
     }
 
-    /**
-     * 
-     * @param {string} title 
-     * @param {string} description 
-     * @param {Discord.EmbedFieldData[]} fields
-     */
-    async log(title, description, fields) {
-        if (this.modlog) {
-            try {
-                const locale = formatDiscordRegion(this.guild.region);
-                const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-                const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
-                const embed = new Discord.MessageEmbed()
-                    .setAuthor(title)
-                    .setColor('ORANGE')
-                    .setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${this.guild.region.toLocaleUpperCase()}`);
-                if (description) {
-                    embed.setDescription(description);
-                }
-                if (fields) {
-                    embed.addFields(fields);
-                }
-                this.modlog.stopTyping(true);
-                return await this.modlog.send(embed);
-            } catch (err) {
-                console.log(err);
-            }
-        }
-    }
-
     async save() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
-        await Database.run(Database.serverDataUpdateQuery, [this.id, this.toJSON()]);
-        //await serverSchema.create({ id: this.id, prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
+        await Database.run(Database.serverDataUpdateQuery, [this.id, JSON.stringify(this.toJSON())]);
+        await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
         console.log(`[SERVER] Saved server ${this.guild.name}`);
     }
 
     async update() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
-        await Database.run(Database.serverDataUpdateQuery, [this.id, this.toJSON()]);
-        //await serverSchema.findOneAndUpdate({ id: this.id }, { prefix: this.prefix, tickets: String(this.ticketManager.totaltickets), log: (this.modlog ? this.modlog.id : '0') });
+        await Database.run(Database.serverDataUpdateQuery, [this.id, JSON.stringify(this.toJSON())]);
+        await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
         console.log(`[SERVER] Updated server ${this.guild.name}`);
     }
 
     async delete() {
         await Database.run(Database.serverDeleteQuery, [this.id]);
         await Database.run(Database.serverDataDeleteQuery, [this.id]);
-        //await serverSchema.deleteOne({ id: this.id });
+        await Database.runNewDB(Database.getStatement('delete'), [this.id]);
         console.log(`[SERVER] Deleted server ${this.guild.name}`);
     }
+
+    async backup() {
+        await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
+        console.log(`[BACKUP] Backed up server ${this.guild.name}`);
+    }
+
     /**
      * @param {Discord.Guild} guild 
      * @param {Discord.TextChannel} modlog
@@ -232,12 +295,6 @@ class Server {
         try {
             const guild = await this.client.guilds.fetch(object.id);
             if (guild) {
-                // this.id = guild.id;
-                // this.guild = guild;
-                // this.prefix = object.prefix;
-                // this.ticketManager.totaltickets = Number(object.tickets);
-                // this.embed = new Discord.MessageEmbed(object.embed);
-                // this.modlog = guild.channels.cache.get(object.log);
                 this.enableTickets = object.enableTickets;
                 this.alertChannel = this.guild.channels.cache.get(object.alertChannel);
                 object.subscribedChannels.forEach(channel => {
@@ -270,6 +327,10 @@ class Server {
         this.getTicketManager().opentickets.forEach(ticket => {
             openTicketData.push(ticket.toJSON());
         });
+        const ticketPanelsData = [];
+        this.getTicketManager().ticketpanels.forEach(panel => {
+            ticketPanelsData.push(panel.toJSON());
+        });
         return {
             id: this.id,
             prefix: this.prefix,
@@ -279,6 +340,7 @@ class Server {
                 enabled: this.enableTickets,
                 total: this.ticketManager.totaltickets,
                 open: openTicketData,
+                panels: ticketPanelsData
             },
             twitch: {
                 subscribedChannels: channels,

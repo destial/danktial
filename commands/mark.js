@@ -18,18 +18,15 @@ module.exports = {
         if (isStaff(message.member)) {
             const embed = new Discord.MessageEmbed();
             embed.setColor('RED');
-            message.channel.startTyping();
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 await message.channel.send(embed);
-                message.channel.stopTyping(true);
                 return;
             }
             if (message.mentions.members.size !== 1) {
                 embed.setAuthor(`Please only mention 1 driver!`);
                 await message.channel.send(embed);
-                message.channel.stopTyping(true);
                 return;
             }
             const member = message.mentions.members.first();
@@ -83,7 +80,6 @@ module.exports = {
                 embed.setAuthor(`Unknown attendance of id ${args[2]}!`);
                 await message.channel.send(embed);
             }
-            message.channel.stopTyping(true);
         }
     }
 };
