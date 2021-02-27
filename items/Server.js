@@ -295,9 +295,9 @@ class Server {
         try {
             const guild = await this.client.guilds.fetch(object.id);
             if (guild) {
-                this.enableTickets = object.enableTickets;
-                this.alertChannel = this.guild.channels.cache.get(object.alertChannel);
-                object.subscribedChannels.forEach(channel => {
+                this.enableTickets = object.tickets.enabled;
+                this.alertChannel = this.guild.channels.cache.get(object.twitch.alertChannel);
+                object.twitch.subscribedChannels.forEach(channel => {
                     this.alerts.addChannel(channel);
                 });
             }
