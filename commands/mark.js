@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'mark',
     aliases: ['check'],
-    usage: '[ @driver ] [ "in" | "out" | "maybe" ] [ attendance-id ]',
+    usage: '[ @driver ] [ in | out | maybe ] [ attendance-id ]',
     description: `Forcefully mark a driver's attendance`,
     /**
      * @param {Discord.Client} client 

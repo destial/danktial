@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const Server = require('../items/Server');
 const isStaff = require('../utils/isStaff');
+
 module.exports = {
     name: 'setprefix',
     aliases: ['prefix'],

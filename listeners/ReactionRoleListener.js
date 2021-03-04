@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const Server = require('../items/Server');
 const ServerManager = require('../managers/ServerManager');
 
 module.exports = {

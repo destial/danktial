@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const Server = require('../items/Server');
 const Database = require("../database/Database");
 const QueueWorker = require('../database/QueueWorker');
-const Query = require('../database/Query');
 
 class ServerManager {
     /**

@@ -40,19 +40,26 @@ module.exports = {
                             case AttendanceManager.tentative:
                                 await attendance.maybe(driver);
                                 break;
-                            case AttendanceManager.delete:
-                                if (isStaff(driver.member)) {
-                                    await server.getAttendanceManager().awaitDeleteAdvancedAttendance(reaction, user);
-                                }
-                                break;
-                            case AdvancedAttendance.editEmoji:
-                                if (isStaff(driver.member)) {
-                                    await server.getAttendanceManager().editAdvancedAttendance(driver.member, attendance);
-                                }
-                                break;
                             default:
                                 break;
                         }
+                    }
+                    try {
+                        const member = await reaction.message.guild.members.fetch(user.id);
+                        if (isStaff(member)) {
+                            switch (reaction.emoji.name) {
+                                case AttendanceManager.delete:
+                                    await server.getAttendanceManager().awaitDeleteAdvancedAttendance(reaction, user);
+                                    break;
+                                case AdvancedAttendance.editEmoji:
+                                    await server.getAttendanceManager().editAdvancedAttendance(driver.member, attendance);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    } catch(err) {
+                        console.log(`[ERROR] Missing member ${user.id}`);
                     }
                     await reaction.users.remove(user);
                 }

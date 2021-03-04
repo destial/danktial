@@ -83,19 +83,21 @@ class Server {
 
         this.alerts.on('live', data => {
             if (this.alertChannel) {
-                const embed = new Discord.MessageEmbed();
-                embed.setAuthor(`${data.name} is now live! Playing ${data.game}`, data.profile, `https://www.twitch.tv/${data.name}`);
-                embed.setTitle(data.title);
-                embed.setURL(`https://www.twitch.tv/${data.name}`);
-                embed.addFields([
-                    { name: 'Topic', value: data.game, inline: true },
-                    { name: 'Viewers', value: data.viewers, inline: true }
-                ]);
-                embed.setImage(data.thumbnail);
-                embed.setColor("DARK_PURPLE");
-                embed.setThumbnail(data.profile);
-                embed.setTimestamp(data.date);
-                this.alertChannel.send(embed);
+                if (data.date.getTime() > (Date.now() - 1000*60*15)) {
+                    const embed = new Discord.MessageEmbed();
+                    embed.setAuthor(`${data.name} is now live! Playing ${data.game}`, data.profile, `https://www.twitch.tv/${data.name}`);
+                    embed.setTitle(data.title);
+                    embed.setURL(`https://www.twitch.tv/${data.name}`);
+                    embed.addFields([
+                        { name: 'Topic', value: data.game, inline: true },
+                        { name: 'Viewers', value: data.viewers, inline: true }
+                    ]);
+                    embed.setImage(data.thumbnail);
+                    embed.setColor('DARK_PURPLE');
+                    embed.setThumbnail(data.profile);
+                    embed.setTimestamp(data.date);
+                    this.alertChannel.send(embed);
+                }
             }
         });
     }
@@ -122,7 +124,6 @@ class Server {
                 if (fields) {
                     embed.addFields(fields);
                 }
-                this.modlog.stopTyping(true);
                 return await this.modlog.send(embed);
             } catch (err) {
                 console.log(err);

@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const Database = require('../database/Database');
-//const Reserve = require('./Reserve');
 const Server = require('./Server');
 const Team = require('./Team');
 const Tier = require('./Tier');
@@ -116,7 +115,7 @@ class Driver {
             id: this.id,
             guild: this.guild.id,
             number: this.number,
-            team: this.team.name,
+            team: (this.team ? this.team.name : null),
             tier: this.tier.name,
             reserved: false
         };

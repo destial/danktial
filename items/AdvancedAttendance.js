@@ -5,7 +5,6 @@ const Tier = require('./Tier');
 const Driver = require('./Driver');
 const Database = require('../database/Database');
 const schedule = require('node-schedule');
-const formatFormalTime = require('../utils/formatFormatTime');
 const Attendance = require('./Attendance');
 
 class AdvancedAttendance {

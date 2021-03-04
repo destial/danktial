@@ -4,12 +4,6 @@ const Database = require('./database/Database');
 const Server = require('./items/Server');
 const ServerManager = require('./managers/ServerManager');
 const fs = require('fs');
-const Ticket = require('./items/Ticket');
-const TicketPanel = require('./items/TicketPanel');
-const Tier = require('./items/Tier');
-const Driver = require('./items/Driver');
-const Team = require('./items/Team');
-const Reserve = require('./items/Reserve');
 const { Logger } = require('./utils/Utils');
 const formatDiscordRegion = require('./utils/formatDiscordRegion');
 

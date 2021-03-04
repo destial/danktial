@@ -1,5 +1,3 @@
-const { DiscordAPIError } = require("discord.js");
-
 const Discord = require('discord.js');
 const Server = require("./Server");
 const Driver = require('./Driver');
