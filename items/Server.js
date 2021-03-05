@@ -35,6 +35,7 @@ class Server {
         this.joinEmbed = undefined;
         this.serverManager = serverManager;
         this.enableTickets = true;
+        this.subbedChannels = [];
         
         /**
          * @constant
@@ -79,26 +80,6 @@ class Server {
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
             interval: 3
-        });
-
-        this.alerts.on('live', data => {
-            if (this.alertChannel) {
-                if (data.date.getTime() > (Date.now() - 1000*60*15)) {
-                    const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`${data.name} is now live! Playing ${data.game}`, data.profile, `https://www.twitch.tv/${data.name}`);
-                    embed.setTitle(data.title);
-                    embed.setURL(`https://www.twitch.tv/${data.name}`);
-                    embed.addFields([
-                        { name: 'Topic', value: data.game, inline: true },
-                        { name: 'Viewers', value: data.viewers, inline: true }
-                    ]);
-                    embed.setImage(data.thumbnail);
-                    embed.setColor('DARK_PURPLE');
-                    embed.setThumbnail(data.profile);
-                    embed.setTimestamp(data.date);
-                    this.alertChannel.send(embed);
-                }
-            }
         });
     }
 
@@ -187,8 +168,9 @@ class Server {
         });
         this.alertChannel = this.guild.channels.cache.get(data.twitch.alertChannel);
 
-        data.twitch.subscribedChannels.forEach(channel => {
-            this.alerts.addChannel(channel);
+        data.twitch.subscribedChannels.forEach(async channel => {
+            const user = await this.alerts.getUser(channel);
+            this.subbedChannels.push(user.id);
         });
     }
 

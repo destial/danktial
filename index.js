@@ -6,6 +6,9 @@ const ServerManager = require('./managers/ServerManager');
 const fs = require('fs');
 const { Logger } = require('./utils/Utils');
 const formatDiscordRegion = require('./utils/formatDiscordRegion');
+const express = require('express');
+const app = express();
+app.use(express.json());
 
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
@@ -85,4 +88,33 @@ client.once('ready', () => {
     } catch(err) {
         console.log(err);
     } 
+});
+
+app.post('/streams', (req, res) => {
+    if (req.headers['client_id'] === process.env.DISCORD_TOKEN) {
+        client.manager.servers.forEach(server => {
+            if (server.alertChannel) {
+                const { body } = req.body;
+                const { data } = body.stream;
+                if (server.subbedChannels.find(body.to_id)) {
+                    const embed = new Discord.MessageEmbed();
+                    embed.setAuthor(`${data.name} is now live!`, data.profile, `https://www.twitch.tv/${data.name}`);
+                    embed.setTitle(data.title);
+                    embed.setURL(`https://www.twitch.tv/${data.name}`);
+                    embed.addFields([
+                        { name: 'Playing', value: data.game, inline: true }
+                    ]);
+                    embed.setImage(data.thumbnail);
+                    embed.setColor('DARK_PURPLE');
+                    embed.setThumbnail(data.profile);
+                    embed.setTimestamp(data.startedAt);
+                    server.alertChannel.send(embed);
+                }
+            }
+        });
+    }
+});
+
+app.listen(3001, () => {
+    console.log(`[API FETCHER] Started webserver`);
 });
