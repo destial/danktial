@@ -106,7 +106,6 @@ class AttendanceManager {
                 const description = answers[1];
                 const date = answers[2];
                 const tier = answers[3];
-                console.log(date);
                 const replyEmbed = new Discord.MessageEmbed();
                 replyEmbed.setColor('RED');
                 if (!title || !description || !date || !tier) {
@@ -248,7 +247,6 @@ class AttendanceManager {
                     const title = answers[0];
                     const description = answers[1];
                     const date = answers[2];
-                    console.log(date);
                     if (!title || !description || !date) {
                         embed.setAuthor("Ran out of time!");
                         await member.user.send(embed);
@@ -502,6 +500,9 @@ class AttendanceManager {
                             if (edit) {
                                 if (emojiname === "🇹") {
                                     attendanceevent.embed.setTitle(edit);
+                                    if (formatTrack(edit)) {
+                                        attendanceevent.embed.setThumbnail(formatTrack(edit));
+                                    }
                                     attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                         try {
                                             await attendanceevent.update();
@@ -515,6 +516,9 @@ class AttendanceManager {
                                     });
                                 } else if (emojiname === "🇩") {
                                     attendanceevent.embed.setDescription(edit);
+                                    if (formatTrack(edit)) {
+                                        attendanceevent.embed.setThumbnail(formatTrack(edit));
+                                    }
                                     attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                         try {
                                             await attendanceevent.update();

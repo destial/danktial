@@ -32,6 +32,8 @@ function formatTrack(string) {
     countryAlias.set('redbull ring', 'austria');
     countryAlias.set('british', 'great britain');
     countryAlias.set('britain', 'great britain');
+    countryAlias.set('hungarian', 'hungary');
+    countryAlias.set('hungaroring', 'hungary');
     countryAlias.set('silverstone', 'great britain');
     countryAlias.set('spa francorshamp', 'belgium');
     countryAlias.set('spafrancorshamp', 'belgium');
