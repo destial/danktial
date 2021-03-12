@@ -16,7 +16,7 @@ module.exports = {
     async run(client, server, command, args, message) {
         if (isStaff(message.member)) {
             const embed = new Discord.MessageEmbed()
-                .setAuthor(`Settings for ${server.guild.name}:`)
+                .setTitle(`Statistics for ${server.guild.name}:`)
                 .addFields([
                     { name: 'Prefix', value: server.prefix, inline: true },
                     { name: 'Mod-Log', value: (server.modlog ? server.modlog : "None"), inline: true },

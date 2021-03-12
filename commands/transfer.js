@@ -22,12 +22,14 @@ module.exports = {
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                embed.setFooter(this.description);
                 message.channel.send(embed);
                 return;
             }
             if (message.mentions.members.size === 0) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                embed.setFooter(this.description);
                 message.channel.send(embed);
                 return;
             }

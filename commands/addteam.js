@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Driver = require('../items/Driver');
 const Server = require('../items/Server');
 const Team = require('../items/Team');
+const AttendanceManager = require('../managers/AttendanceManager');
 const isStaff = require('../utils/isStaff');
 
 module.exports = {
@@ -23,6 +24,7 @@ module.exports = {
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                embed.setFooter(this.description);
                 message.channel.send(embed);
                 return;
             }
@@ -70,6 +72,7 @@ module.exports = {
                         const team = new Team(client, server, name, tier);
                         tier.addTeam(team);
                         const mentionP = new Promise((resolve, reject) => {
+                            if (mentions.size === 0) resolve();
                             mentions.forEach(async (mention,index) => {
                                 const driver = tier.drivers.get(mention.id);
                                 const reserve = tier.reserves.get(mention.id);
@@ -98,11 +101,36 @@ module.exports = {
                                     driverList += (`- ${driver.member}\n`);
                                     if (index === team.drivers.last().id) resolve();
                                 });
+                                if (team.drivers.size === 0) resolve();
                             });
                             promise.then(async () => {
                                 embed.setDescription(driverList);
-                                await team.save();
                                 await message.channel.send(embed);
+                                await team.save();
+                                server.getAttendanceManager().getAdvancedEvents().forEach(async event => {
+                                    if (event.tier === tier) {
+                                        const lastField = event.embed.fields[event.embed.fields.length - 1];
+                                        const lastFieldTeam = tier.getTeam(lastField.name);
+                                        const driverNames = [];
+                                        team.drivers.forEach(d => {
+                                            driverNames.push(`${AttendanceManager.unknown} ${d.member}`);
+                                        });
+                                        if (team.drivers.size === 0) {
+                                            driverNames.push('-');
+                                        }
+                                        if (lastFieldTeam) {
+                                            event.embed.addField(team.name, driverNames.join('\n'), false);
+                                        } else {
+                                            const newField = {
+                                                name: team.name,
+                                                value: driverNames.join('\n'),
+                                                inline: false,
+                                            };
+                                            event.embed.fields.splice(event.embed.fields.length - 1, 0, newField);
+                                        }
+                                        await event.edit();
+                                    }
+                                });
                                 await server.log(`${message.member.user.tag} has created team ${team.name} under ${tier.name}`, driverList);
                             });
                         });

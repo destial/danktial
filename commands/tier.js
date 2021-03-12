@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'tier',
     usage: '[ dupe | add | remove | clear | list ]',
-    description: `The main command for all driver setup`,
+    description: `The main command for all tier setup`,
     /**
      * @param {Discord.Client} client 
      * @param {Server} server 
@@ -20,6 +20,7 @@ module.exports = {
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                embed.setFooter(this.description);
                 await message.channel.send(embed);
                 return;
             }
