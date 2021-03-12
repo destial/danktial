@@ -27,18 +27,6 @@ client.once('ready', () => {
                         client.manager.addServer(server).then(() => {}).catch((err) => console.log(err));
                     }
                 });
-                guild.channels.cache.forEach(channel => {
-                    if (channel.isText() && channel.manageable && channel.viewable) {
-                        try {
-                            channel.messages.fetch({limit: 100}, true);
-                        } catch(err) {
-                            Logger.boot(`Error loading channel messages of ${channel.name} under ${channel.guild.name}`);
-                        }
-                    }
-                });
-                if (id === client.guilds.cache.last().id) {
-                    resolve();
-                }
             });
         });
 
@@ -84,6 +72,20 @@ client.once('ready', () => {
                 await listener.run(client, client.manager);
                 console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
             }
+            client.guilds.cache.forEach(guild => {
+                guild.channels.cache.forEach(channel => {
+                    if (channel.isText() && channel.manageable && channel.viewable) {
+                        try {
+                            channel.messages.fetch({limit: 100}, true);
+                        } catch(err) {
+                            Logger.boot(`Error loading channel messages of ${channel.name} under ${channel.guild.name}`);
+                        }
+                    }
+                });
+                if (id === client.guilds.cache.last().id) {
+                    resolve();
+                }
+            });
         });
     } catch(err) {
         console.log(err);
