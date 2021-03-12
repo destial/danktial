@@ -81,6 +81,23 @@ class Server {
             client_secret: process.env.CLIENT_SECRET,
             interval: 3
         });
+
+        this.alerts.on('live', (stream) => {
+            if (this.alertChannel) {
+                const embed = new Discord.MessageEmbed();
+                embed.setAuthor(`${stream.name} is now live!`, stream.profile, `https://www.twitch.tv/${stream.name}`);
+                embed.setTitle(stream.title);
+                embed.setURL(`https://www.twitch.tv/${stream.name}`);
+                embed.addFields([
+                    { name: 'Playing', value: stream.game, inline: true }
+                ]);
+                embed.setImage(stream.thumbnail);
+                embed.setColor('DARK_PURPLE');
+                embed.setThumbnail(stream.profile);
+                embed.setTimestamp(stream.startedAt);
+                this.alertChannel.send(embed);
+            }
+        });
     }
 
     /**
@@ -168,9 +185,13 @@ class Server {
         });
         this.alertChannel = this.guild.channels.cache.get(data.twitch.alertChannel);
 
-        data.twitch.subscribedChannels.forEach(async channel => {
-            const user = await this.alerts.getUser(channel);
-            this.subbedChannels.push(user.id);
+        data.twitch.subscribedChannels.forEach(async id => {
+            const user = await this.alerts.resolveID(id);
+            if (user) {
+                this.alerts.addChannel(user.name);
+                console.log(`[TWITCH] Loaded channel ${user.name} to ${this.guild.name}`);
+                this.subbedChannels.push(user.id);
+            }
         });
     }
 
@@ -217,7 +238,7 @@ class Server {
     async removeChannel(string) {
         this.alerts.removeChannel(string);
         const user = await this.alerts.getUser(string.toLowerCase());
-        const index = this.subbedChannels.findIndex(user.id);
+        const index = this.subbedChannels.indexOf(user.id);
         if (index !== -1) {
             this.subbedChannels.splice(index, 1);
         }
@@ -299,7 +320,7 @@ class Server {
     toJSON() {
         const channels = [];
         this.alerts.allChannels().forEach(tc => {
-            channels.push(tc.name);
+            channels.push(tc.user.id);
         });
         const tiersData = [];
         this.getTierManager().tiers.forEach(tier => {
