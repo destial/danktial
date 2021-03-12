@@ -36,13 +36,11 @@ module.exports = {
                 }
                 if (args[1].toLowerCase() === 'true') {
                     server.enableTickets = true;
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                     await server.update();
                     embed.setAuthor('Enabled tickets!');
                     message.channel.send(embed);
                 } else if (args[1].toLowerCase() === 'false') {
                     server.enableTickets = false;
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                     await server.update();
                     embed.setAuthor('Disabled tickets!');
                     message.channel.send(embed);
@@ -56,7 +54,6 @@ module.exports = {
                 const channel = message.mentions.channels.first();
                 if (channel) {
                     server.alertChannel = channel;
-                    await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                     await server.update();
                     embed.setAuthor(`Set #${channel.name} as the Twitch Alerts channel!`);
                     message.channel.send(embed);
@@ -68,7 +65,6 @@ module.exports = {
                 return;
             } else if (args[0].toLowerCase() === 'addchannel') {
                 server.addChannel(args[1].toLowerCase());
-                await Database.run(Database.serverDataUpdateQuery, [server.id, JSON.stringify(server.toJSON())]);
                 await server.update();
                 embed.setAuthor(`Added channel ${args[1].toLowerCase()} to the Twitch Alerts!`);
                 message.channel.send(embed);
