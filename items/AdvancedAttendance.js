@@ -349,6 +349,10 @@ class AdvancedAttendance {
         await this.message.edit(this.embed);
     }
 
+    async edit() {
+        await this.message.edit(this.embed);
+    }
+
     async update() {
         await Database.run(Database.advancedAttendanceUpdateQuery, [String(this.date.getTime()), this.id, this.message.channel.id]);
         await this.server.update();

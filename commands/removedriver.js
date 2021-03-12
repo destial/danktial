@@ -20,7 +20,8 @@ module.exports = {
             embed.setColor('RED');
             if (!args.length) {
                 embed.setAuthor('Usage is:');
-                embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                embed.setFooter(this.description);
                 await message.channel.send(embed);
                 return;
             }
@@ -31,7 +32,7 @@ module.exports = {
                 const tierName = args.join(' ');
                 if (!tierName) {
                     embed.setAuthor('Usage is:');
-                    embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                    embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     await message.channel.send(embed);
                     return;
                 }
@@ -67,7 +68,8 @@ module.exports = {
                 }
             } else {
                 embed.setAuthor('Usage is:');
-                embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                embed.setFooter(this.description);
                 await message.channel.send(embed);
                 return;
             }

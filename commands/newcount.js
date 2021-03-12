@@ -277,7 +277,8 @@ module.exports = {
                         const embed = new Discord.MessageEmbed()
                             .setAuthor('Usage is:')
                             .setDescription(`${server.prefix}${this.name} ${this.usage}`)
-                            .setColor('RED');
+                            .setColor('RED')
+                            .setFooter(this.description);
                         await message.channel.send(embed);
                     }
                 }

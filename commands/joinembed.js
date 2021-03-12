@@ -6,7 +6,7 @@ const parseInt = require('../utils/parseInt');
 
 module.exports = {
     name: 'joinembed',
-    usage: '< "send" >',
+    usage: '< send >',
     description: 'Creates an embed to send to new users',
     /**
      * @param {Discord.Client} client 

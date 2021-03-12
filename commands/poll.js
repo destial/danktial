@@ -26,6 +26,7 @@ module.exports = {
             embed.setColor('RED');
             if (!args.length) {
                 embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${command} ${this.usage}\n**Yes / No**\n${server.prefix}${command} "Do you like this bot?"`);
+                embed.setFooter(this.description);
                 channel.send(embed);
                 reject();
             } else {
@@ -34,6 +35,7 @@ module.exports = {
                 var arguments = parseQuotations(str);
                 if (!arguments.length) {
                     embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${command} "What's Your Favorite Color?" "Blue" "Red" "Yellow"\n**Yes / No**\n${server.prefix}poll "Do you like this bot?"`);
+                    embed.setFooter(this.description);
                     channel.send(embed);
                     reject();
                 } else {

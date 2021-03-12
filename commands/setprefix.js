@@ -26,6 +26,7 @@ module.exports = {
                 console.log(`[PREFIX] Prefix for guild ${server.guild.name} changed to ${server.prefix}`);
             } else {
                 embed.setAuthor(`Prefix should be at most 3 characters long! E.g ${server.prefix}${command} - or ${server.prefix}${command} ///`);
+                embed.setFooter(this.description);
                 await message.channel.send(embed);
             }
         }

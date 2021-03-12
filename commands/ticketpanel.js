@@ -22,6 +22,7 @@ module.exports = {
                     embed.setColor('RED');
                     embed.setAuthor(`Usage is:`);
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                    embed.setFooter(this.description);
                     await message.channel.send(embed);
                     return;
                 }

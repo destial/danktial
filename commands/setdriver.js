@@ -26,6 +26,7 @@ module.exports = {
                 if (!args.length) {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                    embed.setFooter(this.description);
                     await message.channel.send(embed);
                     return;
                 }
@@ -38,6 +39,7 @@ module.exports = {
                     if (arguments.length < 3) {
                         embed.setAuthor('Usage is:');
                         embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                        embed.setFooter(this.description);
                         await message.channel.send(embed);
                         return;
                     }

@@ -22,6 +22,7 @@ module.exports = {
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage} \n E.g ${server.prefix}${this.example}`);
+                embed.setFooter(this.description);
                 message.channel.send(embed);
                 return;
             }
@@ -29,6 +30,7 @@ module.exports = {
                 if (!args[1]) {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage} \n E.g ${server.prefix}${this.example}`);
+                    embed.setFooter(this.description);
                     message.channel.send(embed);
                     return;
                 }

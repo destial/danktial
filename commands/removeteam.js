@@ -21,7 +21,8 @@ module.exports = {
             embed.setColor('RED');
             if (!args.length) {
                 embed.setAuthor('Usage is:');
-                embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                embed.setFooter(this.description);
                 await message.channel.send(embed);
                 return;
             }
@@ -30,7 +31,7 @@ module.exports = {
             const tier = server.getTierManager().getTier(arguments[1]);
             if (!tier) {
                 embed.setAuthor('Invalid tier name!');
-                embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 await message.channel.send(embed);
                 return;
             }
@@ -48,10 +49,11 @@ module.exports = {
             const team = teamCol.first();
             if (!team) {
                 embed.setAuthor('Invalid team name!');
-                embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 await message.channel.send(embed);
                 return;
             }
+            await team.delete();
             tier.removeTeam(team.name);
             team.tier = undefined;
             team.drivers.forEach(driver => {
@@ -60,7 +62,16 @@ module.exports = {
                 tier.addReserve(driver);
                 driver.update();
             });
-            team.delete();
+            server.getAttendanceManager().getAdvancedEvents().forEach(async event => {
+                if (event.tier === tier) {
+                    const teamField = event.embed.fields.find(f => f.name === team.name);
+                    if (teamField) {
+                        const index = event.embed.fields.indexOf(teamField);
+                        event.embed.fields.splice(index, 1);
+                    }
+                    await event.edit();
+                }
+            });
             embed.setAuthor(`Successfully removed team ${team.name} from tier ${tier.name}`);
             server.log(`${message.member.displayName} has removed team ${team.name} from tier ${tier.name}`);
             await message.channel.send(embed);
