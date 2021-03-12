@@ -20,6 +20,7 @@ class Reserve extends Driver {
         this.member = member;
         this.server = server;
         this.number = number;
+        this.name = member.displayName;
         this.tier = tier;
         this.team = undefined;
     }

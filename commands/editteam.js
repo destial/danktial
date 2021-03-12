@@ -115,9 +115,15 @@ module.exports = {
                                         await driver.update();
                                     });
                                     await team.updateName(oldName);
+                                    await server.update();
                                     embed.setDescription(driverList1);
                                     await message.channel.send(embed);
                                     await server.log(`${message.member.user.tag} has edited the name of team ${oldName} to ${team.name}`);
+                                    server.getAttendanceManager().getAdvancedEvents().forEach(async event => {
+                                        if (event.tier === tier) {
+                                            await event.fixTeams(oldName, team.name);
+                                        }
+                                    });
                                 });
                             } else if (messageReaction.emoji.name === "🏎️") {
                                 team.drivers.clear();
@@ -154,6 +160,7 @@ module.exports = {
                                     });
                                     embed.setDescription(driverList);
                                     await message.channel.send(embed);
+                                    await server.update();
                                     await server.log(`${message.member.user.tag} has added drivers to team ${team.name}`, driverList);
                                 });
                             }

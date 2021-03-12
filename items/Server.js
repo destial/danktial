@@ -204,16 +204,23 @@ class Server {
      * 
      * @param {string} string 
      */
-    addChannel(string) {
+    async addChannel(string) {
         this.alerts.addChannel(string);
+        const user = await this.alerts.getUser(string.toLowerCase());
+        this.subbedChannels.push(user.id);
     }
 
     /**
      * 
      * @param {string} string 
      */
-    removeChannel(string) {
+    async removeChannel(string) {
         this.alerts.removeChannel(string);
+        const user = await this.alerts.getUser(string.toLowerCase());
+        const index = this.subbedChannels.findIndex(user.id);
+        if (index !== -1) {
+            this.subbedChannels.splice(index, 1);
+        }
     }
 
     /**

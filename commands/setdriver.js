@@ -54,7 +54,7 @@ module.exports = {
                                 const team = teamCol.first();
                                 if (driver && team) {
                                     if (driver.number != String(driverNumber)) {
-                                        await driver.updateNumber(String(driverNumber));
+                                        await driver.updateNum(String(driverNumber));
                                     }
                                     driver.setNumber(String(driverNumber));
                                     driver.team.removeDriver(id);

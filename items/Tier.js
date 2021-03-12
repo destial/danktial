@@ -209,6 +209,7 @@ class Tier {
                             const driver = new Driver(this.client, member, this.server, team, driverJSON.number, this);
                             this.addDriver(driver);
                             team.setDriver(driver);
+                            console.log(`[DRIVER] Loaded driver ${driver.name} from ${driver.guild.name} into tier ${driver.tier.name} with team ${driver.team.name}`);
                         }
                     } catch(err) {
                         console.log(`[TIER] Missing driver ${driverJSON.id}`);
@@ -223,6 +224,7 @@ class Tier {
                     if (member) {
                         const reserve = new Reserve(this.client, member, this.server, reserveJSON.number, this);
                         this.addReserve(reserve);
+                        console.log(`[DRIVER] Loaded reserve ${reserve.name} from ${reserve.guild.name} into tier ${reserve.tier.name}`);
                     }
                 } catch(err) {
                     console.log(`[TIER] Missing reserve ${reserveJSON.id}`);

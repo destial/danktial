@@ -22,7 +22,7 @@ class Driver {
         this.guild = member.guild;
         this.team = team;
         this.number = number || 0;
-        this.name = member.user.username;
+        this.name = member.displayName;
         this.tier = tier;
     }
 

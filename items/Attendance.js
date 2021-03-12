@@ -240,7 +240,8 @@ class Attendance {
                 try {
                     this.message = await channel.messages.fetch(object.id);
                 } catch(err) {
-                    console.log(`[ATTENDANCE] Missing message ${object.id}`);
+                    console.log(`[ATTENDANCE] Missing attendance id ${object.id} from ${object.guild}`);
+                    this.message = undefined;
                 }
                 if (this.message) {
                     this.id = this.message.id;

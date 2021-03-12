@@ -389,58 +389,62 @@ class AttendanceManager {
                                     allTimezones += "`" + tmze + "`\n";
                                 });
                                 embed2.setDescription(allTimezones);
+                            } else {
+                                embed2.setAuthor('Ran out of time!');
                             }
                             member.user.send(embed2).then((m3) => {
-                                let mfilter = m => m.author.id === member.id;
-                                let mcollector = m3.channel.createMessageCollector(mfilter, {max: 1, time: 60000});
-                                mcollector.on('collect', async (message) => {
-                                    /**
-                                     * @type {string}
-                                     */
-                                    let edit = message.content;
-                                    if (emojiname === "🇹") {
-                                        attendanceevent.embed.setTitle(edit);
-                                        attendanceevent.title = edit;
-                                        mcollector.stop();
-                                    } else if (emojiname === "🇩") {
-                                        attendanceevent.embed.setDescription(edit);
-                                        attendanceevent.description = edit;
-                                        mcollector.stop();
-                                    } else if (emojiname === "📆") {
-                                        const dateNow = new Date();
-                                        formatDate(edit).then((date) => {
-                                            if (date.getTime() < dateNow.getTime()) {
-                                                const difference = dateNow.getTime() - date.getTime();
-                                                embed.setAuthor("Invalid date! Date cannot be in the past!");
-                                                embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
-                                                member.user.send(embed);
-                                            } else {
-                                                const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(edit.substring(edit.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
-                                                mcollector.stop();
-                                                attendanceevent.updateDate(date, dateString);
-                                            }
-                                        }).catch((err) => {
-                                            embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY hh:mm TMZE)");
-                                            member.user.send(embed2);
-                                        });
-                                    }
-                                });
-                                mcollector.on('end', async (mcollected) => {
-                                    attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
-                                        try {
-                                            const embed3 = new Discord.MessageEmbed();
-                                            embed3.setColor('RED');
-                                            await Database.run(Database.attendanceSaveQuery, [attendanceevent.id, String(attendanceevent.date.getTime()), attendanceevent.message.channel.id]);
-                                            this.server.update();
-                                            console.log(`[UPDATE] Edited attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
-                                            embed3.setAuthor("Successfully edited event!");
-                                            member.user.send(embed3);
-                                            await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
-                                        } catch (err) {
-                                            console.log(err);
+                                if (emojiname) {
+                                    let mfilter = m => m.author.id === member.id;
+                                    let mcollector = m3.channel.createMessageCollector(mfilter, {max: 1, time: 60000});
+                                    mcollector.on('collect', async (message) => {
+                                        /**
+                                         * @type {string}
+                                         */
+                                        let edit = message.content;
+                                        if (emojiname === "🇹") {
+                                            attendanceevent.embed.setTitle(edit);
+                                            attendanceevent.title = edit;
+                                            mcollector.stop();
+                                        } else if (emojiname === "🇩") {
+                                            attendanceevent.embed.setDescription(edit);
+                                            attendanceevent.description = edit;
+                                            mcollector.stop();
+                                        } else if (emojiname === "📆") {
+                                            const dateNow = new Date();
+                                            formatDate(edit).then((date) => {
+                                                if (date.getTime() < dateNow.getTime()) {
+                                                    const difference = dateNow.getTime() - date.getTime();
+                                                    embed.setAuthor("Invalid date! Date cannot be in the past!");
+                                                    embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
+                                                    member.user.send(embed);
+                                                } else {
+                                                    const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(edit.substring(edit.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
+                                                    mcollector.stop();
+                                                    attendanceevent.updateDate(date, dateString);
+                                                }
+                                            }).catch((err) => {
+                                                embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY hh:mm TMZE)");
+                                                member.user.send(embed2);
+                                            });
                                         }
                                     });
-                                });
+                                    mcollector.on('end', async (mcollected) => {
+                                        attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
+                                            try {
+                                                const embed3 = new Discord.MessageEmbed();
+                                                embed3.setColor('RED');
+                                                await Database.run(Database.attendanceSaveQuery, [attendanceevent.id, String(attendanceevent.date.getTime()), attendanceevent.message.channel.id]);
+                                                this.server.update();
+                                                console.log(`[UPDATE] Edited attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
+                                                embed3.setAuthor("Successfully edited event!");
+                                                member.user.send(embed3);
+                                                await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
+                                            } catch (err) {
+                                                console.log(err);
+                                            }
+                                        });
+                                    });
+                                }
                             });
                         });
                     });
@@ -493,7 +497,14 @@ class AttendanceManager {
                         mcollector.on('collect', async (message) => {
                             mcollector.stop();
                         });
-                        mcollector.on('end', async (mcollected) => {
+                        mcollector.once('end', async (mcollected) => {
+                            if (!mcollected.first()) {
+                                const embed4 = new Discord.MessageEmbed();
+                                embed4.setColor('RED');
+                                embed4.setAuthor('Ran out of time!');
+                                member.send(embed4);
+                                return;
+                            }
                             let edit = mcollected.first().content;
                             const embed3 = new Discord.MessageEmbed();
                             embed3.setColor('RED');

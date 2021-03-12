@@ -45,7 +45,7 @@ module.exports = {
                 }
                 const tier = server.getTierManager().getTier(arguments[1]);
                 if (tier) {
-                    const teamCol = tier.searchTeam(teamName.toLowerCase());
+                    const teamCol = tier.searchTeam(arguments[0]);
                     if (teamCol.size > 1) {
                         const embed5 = new Discord.MessageEmbed();
                         embed5.setColor('RED');

@@ -335,6 +335,20 @@ class AdvancedAttendance {
         });
     }
 
+    /**
+     * 
+     * @param {string} oldTeamName 
+     * @param {string} newTeamName 
+     */
+    async fixTeams(oldTeamName, newTeamName) {
+        this.embed.fields.forEach(field => {
+            if (field.name === oldTeamName) {
+                field.name = newTeamName;
+            }
+        });
+        await this.message.edit(this.embed);
+    }
+
     async update() {
         await Database.run(Database.advancedAttendanceUpdateQuery, [String(this.date.getTime()), this.id, this.message.channel.id]);
         await this.server.update();
@@ -388,7 +402,12 @@ class AdvancedAttendance {
         if (this.server) {
             const channel = this.server.guild.channels.cache.get(object.channel);
             if (channel && channel.isText()) {
-                this.message = await channel.messages.fetch(object.id);
+                try {
+                    this.message = await channel.messages.fetch(object.id);
+                } catch(err) {
+                    console.log(`[ADVANCEDATTENDANCE] Missing advancedattendance id ${object.id} from ${object.guild}`);
+                    this.message = undefined;
+                }
                 if (this.message) {
                     this.id = this.message.id;
                     this.embed = this.message.embeds[0];

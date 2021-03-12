@@ -94,25 +94,32 @@ app.post('/streams', (req, res) => {
     if (req.headers['client_id'] === process.env.DISCORD_TOKEN) {
         client.manager.servers.forEach(server => {
             if (server.alertChannel) {
-                const { body } = req.body;
-                const { data } = body.stream;
+                const { body } = req;
+                const { stream } = body;
                 if (server.subbedChannels.find(body.to_id)) {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`${data.name} is now live!`, data.profile, `https://www.twitch.tv/${data.name}`);
-                    embed.setTitle(data.title);
-                    embed.setURL(`https://www.twitch.tv/${data.name}`);
+                    embed.setAuthor(`${stream.name} is now live!`, stream.profile, `https://www.twitch.tv/${stream.name}`);
+                    embed.setTitle(stream.title);
+                    embed.setURL(`https://www.twitch.tv/${stream.name}`);
                     embed.addFields([
-                        { name: 'Playing', value: data.game, inline: true }
+                        { name: 'Playing', value: stream.game, inline: true }
                     ]);
-                    embed.setImage(data.thumbnail);
+                    embed.setImage(stream.thumbnail);
                     embed.setColor('DARK_PURPLE');
-                    embed.setThumbnail(data.profile);
-                    embed.setTimestamp(data.startedAt);
+                    embed.setThumbnail(stream.profile);
+                    embed.setTimestamp(stream.startedAt);
                     server.alertChannel.send(embed);
                 }
             }
         });
     }
+    res.status(200).end();
+});
+
+app.get('/', (req, res) => {
+    console.log('ok');
+    res.send('ok');
+    res.status(200).end();
 });
 
 app.listen(3001, () => {
