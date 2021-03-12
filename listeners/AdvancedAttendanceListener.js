@@ -90,7 +90,7 @@ module.exports = {
                 try {
                     await message.fetch();
                 } catch(err) {
-                    console.log(`[ADVANCEDATTENDANCE] Something happened while trying to cache uncached message reactions on remove!`);
+                    console.log(`[ADVANCEDATTENDANCE] Something happened while trying to cache uncached message reactions on remove all!`);
                 }
             }
             if (!message.guild) return;

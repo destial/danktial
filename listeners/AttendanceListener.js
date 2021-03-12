@@ -15,7 +15,7 @@ module.exports = {
                 try {
                     await reaction.fetch();
                 } catch (err) {
-                    console.log(`[ATTENDANCE] Something happened while trying to cache uncached message reactions!`);
+                    console.log(`[ATTENDANCE] Something happened while trying to cache uncached message reactions on add!`);
                 }
             }
             if (user.bot) return;
@@ -71,7 +71,7 @@ module.exports = {
                 try {
                     await message.fetch();
                 } catch(err) {
-                    console.log(`[ATTENDANCE] Something happened while trying to cache uncached message reactions!`);
+                    console.log(`[ATTENDANCE] Something happened while trying to cache uncached message reactions on remove all!`);
                 }
             }
             if (!message.guild) return;
@@ -106,21 +106,35 @@ module.exports = {
                 const server = await servers.fetch(newMember.guild.id);
                 if (server) {
                     server.getAttendanceManager().getEvents().forEach(async attendance => {
-                        if (attendance.accepted.get(oldMember.user.username)) {
-                            attendance.accepted.delete(oldMember.user.username);
+                        if (attendance.accepted.get(oldMember.id)) {
+                            attendance.accepted.delete(oldMember.id);
                             attendance.accept(newMember.user);
                             await attendance.message.edit(attendance.embed);
-                        } else if (attendance.rejected.get(oldMember.user.username)) {
-                            attendance.rejected.delete(oldMember.user.username);
+
+                        } else if (attendance.rejected.get(oldMember.id)) {
+                            attendance.rejected.delete(oldMember.id);
                             attendance.reject(newMember.user);
                             await attendance.message.edit(attendance.embed);
-                        } else if (attendance.tentative.get(oldMember.user.username)) {
-                            attendance.tentative.delete(oldMember.user.username);
+
+                        } else if (attendance.tentative.get(oldMember.id)) {
+                            attendance.tentative.delete(oldMember.id);
                             attendance.maybe(newMember.user);
                             await attendance.message.edit(attendance.embed);
                         }
                     });
                 }
+            }
+        });
+
+        client.on('guildMemberRemove', async (member) => {
+            const server = await servers.fetch(member.guild.id);
+            if (server) {
+                server.getAttendanceManager().getEvents().forEach(async attendance => {
+                    attendance.accepted.delete(member.id);
+                    attendance.rejected.delete(member.id);
+                    attendance.tentative.delete(member.id);
+                    attendance.edit();
+                });
             }
         });
     }

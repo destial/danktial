@@ -227,6 +227,10 @@ class Attendance {
         });
     }
 
+    async edit() {
+        await this.message.edit(this.embed);
+    }
+
     async loadJSON(object) {
         try {
             this.guild = await this.client.guilds.fetch(object.guild);
