@@ -14,6 +14,7 @@ const Tier = require('./Tier');
 const Attendance = require('./Attendance');
 const AdvancedAttendance = require('./AdvancedAttendance');
 const TicketPanel = require('./TicketPanel');
+const { Logger } = require('../utils/Utils');
 
 class Server {
     /**
@@ -135,38 +136,46 @@ class Server {
         this.joinEmbed = (data.embed != null ? new Discord.MessageEmbed(data.embed) : undefined);
         
         this.enableTickets = data.tickets.enabled;
-        this.getTicketManager().totaltickets = data.tickets.total;
+        this.ticketManager.totaltickets = data.tickets.total;
         data.tickets.open.forEach(async ticket => {
-            const member = await this.guild.members.fetch(ticket.member);
-            const channel = this.guild.channels.cache.get(ticket.id);
-            if (channel && member && channel.isText()) {
-                const base = await channel.messages.fetch(ticket.base);
-                const t = new Ticket(member, ticket.number, channel, base, this.getTicketManager());
-                this.getTicketManager().loadTicket(t);
-                console.log(`[LOAD] Loaded ticket ${t.number}`);
+            try {
+                const member = await this.guild.members.fetch(ticket.member);
+                const channel = this.guild.channels.cache.get(ticket.id);
+                if (channel && member && channel.isText()) {
+                    const base = await channel.messages.fetch(ticket.base);
+                    const t = new Ticket(member, ticket.number, channel, base, this.ticketManager);
+                    this.ticketManager.loadTicket(t);
+                    console.log(`[LOAD] Loaded ticket ${t.number}`);
+                }
+            } catch(err) {
+                Logger.warn(`Missing ticket member ${ticket.member} or channel ${ticket.id} under ${this.guild.name}`);
             }
         });
         data.tickets.panels.forEach(async panel => {
             const channel = this.guild.channels.cache.get(panel.channel);
             if (channel && channel.isText()) {
-                const message = await channel.messages.fetch(panel.id);
-                if (message) {
-                    const p = new TicketPanel(this.client, this.getTicketManager(), message.id, message.embeds[0], channel);
-                    this.getTicketManager().loadTicketPanel(p);
+                try {
+                    const message = await channel.messages.fetch(panel.id);
+                    if (message) {
+                        const p = new TicketPanel(this.client, this.ticketManager, message.id, message.embeds[0], channel);
+                        this.ticketManager.loadTicketPanel(p);
+                    }
+                } catch(err) {
+                    Logger.warn(`Missing ticket panel ${panel.id} under ${this.guild.name}`);
                 }
             }
         });
         if (data.count.member != null) {
             const count = this.guild.channels.cache.get(data.count.member);
-            this.getCountManager().setCount('member', count);
+            this.countManager.setCount('member', count);
         }
         if (data.count.role != null) {
             const count = this.guild.channels.cache.get(data.count.role);
-            this.getCountManager().setCount('role', count);
+            this.countManager.setCount('role', count);
         }
         if (data.count.channel != null) {
             const membercount = this.guild.channels.cache.get(data.count.channel);
-            this.getCountManager().setCount('channel', membercount);
+            this.countManager.setCount('channel', membercount);
         }
 
         data.tiers.forEach(tier => {
@@ -180,7 +189,7 @@ class Server {
         });
 
         data.advancedAttendances.forEach(attendance => {
-            const a = new AdvancedAttendance(this.client, undefined, this, undefined, new Date(attendance.date), this.getAttendanceManager());
+            const a = new AdvancedAttendance(this.client, undefined, this, undefined, new Date(attendance.date), this.attendanceManager);
             a.loadJSON(attendance);
         });
         this.alertChannel = this.guild.channels.cache.get(data.twitch.alertChannel);
@@ -250,6 +259,12 @@ class Server {
      */
     setAlerts(channel) {
         this.alertChannel = channel;
+        this.update();
+        if (channel) {
+            console.log(`[SERVER] Set alerts channel of ${this.guild.name} to #${channel.name}`);
+        } else {
+            console.log(`[SERVER] Removed alerts channel of ${this.guild.name}`);
+        }
     }
 
     async save() {

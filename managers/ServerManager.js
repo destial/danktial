@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Server = require('../items/Server');
 const Database = require("../database/Database");
 const QueueWorker = require('../database/QueueWorker');
+const { Router } = require('express');
 
 class ServerManager {
     /**
@@ -21,6 +22,80 @@ class ServerManager {
                 server.backup();
             });
         }, 1000 * 60 * 60 * 3);
+
+        if (this.client.app) {
+            this.guildRoute = Router();
+            this.guildRoute.post('/:guildID', (req, res, next) => {
+                if (req.headers.token === this.client.token) {
+                    const { guildID } = req.params;
+                    const server = this.servers.get(guildID);
+                    if (server) {
+                        switch (req.headers.type) {
+                            case 'prefix': {
+                                server.setPrefix(req.body.prefix);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                        res.status(200).send({
+                            success: 'Success!',
+                            code: 200,
+                        });
+                    } else {
+                        res.status(404).send({
+                            error: 'Invalid guildID',
+                            code: 404,
+                        });
+                    }
+                } else {
+                    res.status(403).send({
+                        error: 'Unauthorized access',
+                        code: 403,
+                    });
+                }
+                next();
+            });
+
+            this.guildRoute.get('/:guildID', (req, res, next) => {
+                if (req.headers.token === this.client.token) {
+                    const { guildID } = req.params;
+                    const server = this.servers.get(guildID);
+                    if (server) {
+                        res.send(server.toJSON());
+                    } else {
+                        res.status(404).send({
+                            error: 'Invalid guildID',
+                            code: 404,
+                        });
+                    }
+                } else {
+                    res.status(403).send({
+                        error: 'Unauthorized access',
+                        code: 403,
+                    });
+                }
+                next();
+            });
+
+            this.guildRoute.get('/', (req, res) => {
+                if (req.headers.token === this.client.token) {
+                    const serverArray = [];
+                    this.servers.forEach(server => {
+                        serverArray.push(server.toJSON());
+                    });
+                    res.send(serverArray);
+                } else {
+                    res.status(403).send({
+                        error: 'Unauthorized access',
+                        code: 403,
+                    });
+                }
+            });
+
+            this.client.app.use('/api/discord/guilds', this.guildRoute);
+        }
     }
 
     /**

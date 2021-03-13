@@ -6,6 +6,7 @@ const ServerManager = require('./managers/ServerManager');
 const fs = require('fs');
 const { Logger } = require('./utils/Utils');
 const formatDiscordRegion = require('./utils/formatDiscordRegion');
+const express = require('express');
 
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
@@ -13,7 +14,13 @@ const client = new Discord.Client({
 
 client.login(process.env.DISCORD_TOKEN);
 client.setMaxListeners(15);
+/**
+ * @type {express.Application}
+ */
+client.app = express();
+client.app.use(express.json());
 client.manager = new ServerManager(client);
+client.app.listen(1025);
 client.once('ready', () => {
     try {
         const loadServer = new Promise((resolve, reject) => {
