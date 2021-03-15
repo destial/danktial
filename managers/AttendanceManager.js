@@ -175,6 +175,8 @@ class AttendanceManager {
                                 replyEmbed.setDescription(`[Click here to view the attendance](${m.url})`);
                                 await member.user.send(replyEmbed);
                                 const attendance = new AdvancedAttendance(client, m, server, t, dateObject, this);
+                                attendance.creator = member;
+                                attendance.timezone = date.substring(date.length-4).trim().toUpperCase();
                                 this.advancedEvents.set(attendance.id, attendance);
                                 this.server.update();
                                 try {
@@ -194,6 +196,103 @@ class AttendanceManager {
                 }
             });
         });
+    }
+
+    /**
+     * @param {Attendance | AdvancedAttendance} attendance 
+     */
+    async createSchedule(attendance) {
+        if (attendance.next) {
+            if (attendance.attendanceType === 'advanced') {
+                const dateObject = new Date(attendance.next.date);
+                const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(attendance.timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, attendance.timezone)}`;
+                const attendanceembed = new Discord.MessageEmbed();
+                attendanceembed.setTitle(attendance.next.title);
+                attendanceembed.setDescription(attendance.next.description);
+                if (formatTrack(attendance.next.title)) {
+                    attendanceembed.setThumbnail(formatTrack(attendance.next.title));
+                } else if (formatTrack(description)) {
+                    attendanceembed.setThumbnail(formatTrack(attendance.next.description));
+                }
+                attendanceembed.addFields(
+                    { name: "Date & Time", value: dateString, inline: false }
+                );
+                attendance.tier.teams.forEach(team => {
+                    const driverNames = [];
+                    if (team.drivers.size === 0) {
+                        driverNames.push('-');
+                    }
+                    team.drivers.forEach(d => {
+                        driverNames.push(`${AttendanceManager.unknown} ${d.member}`);
+                    });
+                    attendanceembed.addField(team.name, driverNames.join('\n'), false);
+                });
+                const reserveNames = [];
+                if (attendance.tier.reserves.size !== 0) {
+                    attendance.tier.reserves.forEach(reserve => {
+                        reserveNames.push(`${AttendanceManager.unknown} ${reserve.member}`);
+                    });
+                    attendanceembed.addField('Reserves', reserveNames.join('\n'), false);
+                }
+                attendanceembed.setFooter(attendance.tier.name);
+                attendanceembed.setTimestamp(dateObject);
+                attendanceembed.setColor('RED');
+                const m = await attendance.message.channel.send(attendanceembed)
+                await m.react(AttendanceManager.accept);
+                await m.react(AttendanceManager.reject);
+                await m.react(AttendanceManager.tentative);
+                await m.react(AttendanceManager.delete);
+                await m.react(AdvancedAttendance.editEmoji);
+                const a = new AdvancedAttendance(attendance.client, m, attendance.server, attendance.tier, dateObject, this);
+                a.creator = attendance.creator;
+                a.type = attendance.type;
+                this.advancedEvents.set(a.id, a);
+                this.server.update();
+                try {
+                    await a.save();
+                    return a;
+                } catch (err) {
+                    console.log(err);
+                }
+            } else if (attendance.attendanceType === 'normal') {
+                const dateObject = new Date(attendance.next.date);
+                const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(attendance.timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, attendance.timezone)}`;
+                const attendanceembed = new Discord.MessageEmbed();
+                attendanceembed.setTitle(attendance.next.title);
+                attendanceembed.setDescription(attendance.next.description);
+                if (formatTrack(attendance.next.title)) {
+                    attendanceembed.setThumbnail(formatTrack(attendance.next.title));
+                } else if (formatTrack(attendance.next.description)) {
+                    attendanceembed.setThumbnail(formatTrack(attendance.next.description));
+                }
+                attendanceembed.addFields(
+                    { name: "Date & Time", value: dateString, inline: false },
+                    { name: `${AttendanceManager.accept} Accepted (0)`, value: ">>> -", inline: true },
+                    { name: `${AttendanceManager.reject} Rejected (0)`, value: ">>> -", inline: true },
+                    { name: `${AttendanceManager.tentative} Tentative (0)`, value: ">>> -", inline: true }
+                );
+                attendanceembed.setFooter('Local Time');
+                attendanceembed.setTimestamp(dateObject);
+                attendanceembed.setColor('RED');
+                const m = await channel.send(attendanceembed)
+                await m.react(AttendanceManager.accept);
+                await m.react(AttendanceManager.reject);
+                await m.react(AttendanceManager.tentative);
+                await m.react(AttendanceManager.delete);
+                const a = new Attendance(attendanceembed, m.id, dateObject, this.server, m, this.client);
+                a.creator = attendance.creator;
+                a.timezone = attendance.timezone;
+                this.events.set(attendance.id, attendance);
+                try {
+                    await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
+                    this.server.update();
+                    console.log(`[UPDATE] Saved attendance ${attendance.title} of id ${attendance.id}`);
+                    return attendance;
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+        }
     }
 
     /**
@@ -295,7 +394,9 @@ class AttendanceManager {
                                     embed3.setDescription(`[Click here to view the attendance](${m.url})`);
                                     embed3.setColor('RED');
                                     member.user.send(embed3);
-                                    const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server, m);
+                                    const attendance = new Attendance(attendanceembed, m.id, dateObject, this.server, m, this.client);
+                                    attendance.creator = member;
+                                    attendance.timezone = date.substring(date.length-4).trim().toUpperCase();
                                     this.events.set(attendance.id, attendance);
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
@@ -585,7 +686,8 @@ class AttendanceManager {
      * @param {Date} date
      */
     loadAttendance(message, date) {
-        const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild, message);
+        
+        const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild, message, this.client);
         this.events.set(attendance.id, attendance);
         console.log(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
     }

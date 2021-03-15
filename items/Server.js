@@ -37,6 +37,7 @@ class Server {
         this.serverManager = serverManager;
         this.enableTickets = true;
         this.subbedChannels = [];
+        this.premium = false;
         
         /**
          * @constant
@@ -321,6 +322,7 @@ class Server {
         try {
             const guild = await this.client.guilds.fetch(object.id);
             if (guild) {
+                this.premium = object.premium;
                 this.enableTickets = object.tickets.enabled;
                 this.alertChannel = this.guild.channels.cache.get(object.twitch.alertChannel);
                 object.twitch.subscribedChannels.forEach(channel => {
@@ -362,6 +364,7 @@ class Server {
             prefix: this.prefix,
             log: (this.modlog ? this.modlog.id : null),
             embed: (this.joinEmbed ? this.joinEmbed.toJSON() : null),
+            premium: this.premium,
             tickets: {
                 enabled: this.enableTickets,
                 total: this.ticketManager.totaltickets,

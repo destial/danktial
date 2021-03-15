@@ -20,7 +20,7 @@ client.setMaxListeners(15);
 client.app = express();
 client.app.use(express.json());
 client.manager = new ServerManager(client);
-client.app.listen(1025);
+client.app.listen(process.env.PORT);
 client.once('ready', () => {
     try {
         const loadServer = new Promise((resolve, reject) => {

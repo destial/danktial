@@ -83,9 +83,11 @@ module.exports = {
                         message.channel.send(embed);
                         await server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
-                            await advanced.fix();
+                            if (advanced.tier === tier) {
+                                await advanced.fix();
+                            }
                         });
-                        server.update();
+                        await server.update();
                     } else if (arguments[0].toLowerCase().includes('reserve')) {
                         if (driver) {
                             driver.team.removeDriver(driver.id);
@@ -98,10 +100,11 @@ module.exports = {
                         message.channel.send(embed);
                         await server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
-                            if (advanced.tier.name === tier.name)
+                            if (advanced.tier === tier) {
                                 await advanced.fix();
+                            }
                         });
-                        server.update();
+                        await server.update();
                     } else {
                         embed.setAuthor('No team were matched! Usage is:');
                         embed.setDescription(`${server.prefix}${command} ${this.usage}`);

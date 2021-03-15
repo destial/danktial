@@ -79,6 +79,78 @@ class ServerManager {
                 next();
             });
 
+            this.guildRoute.get('/:guildID/members/', async (req, res, next) => {
+                if (req.headers.token === this.client.token) {
+                    const { guildID } = req.params;
+                    const server = this.servers.get(guildID);
+                    if (server) {
+                        try {
+                            await server.guild.members.fetch();
+                            const array = [];
+                            for (const member of server.guild.members.cache.values()) {
+                                const data = {
+                                    member: member.toJSON(),
+                                    hasPermission: member.hasPermission('MANAGE_GUILD')
+                                };
+                                array.push(data);
+                            }
+                            res.send(array);
+                        } catch(err) {
+                            res.status(404).send({
+                                error: 'Invalid memberID',
+                                code: 404,
+                            });
+                        }
+                    } else {
+                        res.status(404).send({
+                            error: 'Invalid guildID',
+                            code: 404,
+                        });
+                    }
+                } else {
+                    res.status(403).send({
+                        error: 'Unauthorized access',
+                        code: 403,
+                    });
+                }
+                next();
+            });
+
+            this.guildRoute.get('/:guildID/members/:memberID', async (req, res, next) => {
+                if (req.headers.token === this.client.token) {
+                    const { guildID, memberID } = req.params;
+                    const server = this.servers.get(guildID);
+                    if (server) {
+                        try {
+                            const member = await server.guild.members.fetch(memberID);
+                            if (member) {
+                                const data = {
+                                    member: member.toJSON(),
+                                    hasPermission: member.hasPermission('MANAGE_GUILD')
+                                };
+                                res.send(data);
+                            }
+                        } catch(err) {
+                            res.status(404).send({
+                                error: 'Invalid memberID',
+                                code: 404,
+                            });
+                        }
+                    } else {
+                        res.status(404).send({
+                            error: 'Invalid guildID',
+                            code: 404,
+                        });
+                    }
+                } else {
+                    res.status(403).send({
+                        error: 'Unauthorized access',
+                        code: 403,
+                    });
+                }
+                next();
+            });
+
             this.guildRoute.get('/', (req, res) => {
                 if (req.headers.token === this.client.token) {
                     const serverArray = [];

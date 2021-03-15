@@ -14,6 +14,9 @@ class Attendance {
      * @param {Discord.Client} client
      */
     constructor(embed, id, date, server, message, client) {
+        this.type = '';
+        this.timezone = '';
+        this.attendanceType = 'normal'
         /**
          * @constant
          */
@@ -28,6 +31,7 @@ class Attendance {
             this.title = embed.title;
             this.description = embed.description;
         }
+        this.creator = undefined;
         this.server = server;
         this.guild = this.server.guild;
         this.date = new Date(date);
@@ -93,6 +97,47 @@ class Attendance {
     static get reject() { return "❌"; }
     static get tentative() { return "❔"; }
     static get delete() { return "🗑️"; }
+
+    async newSchedule(type, title, description) {
+        this.type = type.toLowerCase();
+        const newSchedule = new Date(this.date.getTime());
+        switch (this.type) {
+            case 'daily': {
+                this.next = {
+                    date: newSchedule.setDate(newSchedule.getDate() + 1),
+                    title: title ? title : this.title,
+                    description: description ? description: this.embed.description,
+                }
+                break;
+            }
+            case 'monthly': {
+                this.next = {
+                    date: newSchedule.setMonth(newSchedule.getMonth() + 1),
+                    title: title ? title : this.title,
+                    description: description ? description: this.embed.description,
+                }
+                break;
+            }
+            case 'fortnightly': {
+                this.next = {
+                    date: newSchedule.setDate(newSchedule.getDate() + 14),
+                    title: title ? title : this.title,
+                    description: description ? description: this.embed.description,
+                }
+                break;
+            }
+            default: {
+                this.next = {
+                    date: newSchedule.setDate(newSchedule.getDate() + 7),
+                    title: title ? title : this.title,
+                    description: description ? description: this.embed.description,
+                }
+                break;
+            }
+        }
+        return this.next;
+    }
+
 
     async delete() {
         await Database.run(Database.attendanceDeleteQuery, [this.id]);
@@ -243,6 +288,9 @@ class Attendance {
             if (channel && channel.isText()) {
                 try {
                     this.message = await channel.messages.fetch(object.id);
+                    if (object.creator) {
+                        this.creator = await this.guild.members.fetch(object.creator);
+                    }
                 } catch(err) {
                     console.log(`[ATTENDANCE] Missing attendance id ${object.id} from ${object.guild}`);
                     this.message = undefined;
@@ -256,6 +304,7 @@ class Attendance {
                     this.accepted.clear();
                     this.rejected.clear();
                     this.tentative.clear();
+                    this.type = 'normal';
 
                     object.accepted.forEach(async id => {
                         try {
@@ -321,7 +370,9 @@ class Attendance {
     toJSON() {
         return {
             id: this.id,
+            title: this.title,
             guild: this.guild.id,
+            creator: this.creator ? this.creator.id : null,
             channel: this.message.channel.id,
             date: this.date.toISOString(),
             accepted: this.accepted.keyArray(),

@@ -18,6 +18,9 @@ class AdvancedAttendance {
      * @param {AttendanceManager} attendanceManager 
      */
     constructor(client, message, server, tier, date, attendanceManager) {
+        this.type = '';
+        this.timezone = '';
+        this.attendanceType = 'advanced';
         this.client = client;
         this.message = message;
         if (this.message) {
@@ -33,6 +36,7 @@ class AdvancedAttendance {
             this.tier = tier;
             this.drivers = tier.drivers;
         }
+        this.creator = undefined;
 
         /**
          * @type {Discord.Collection<string, Driver>}
@@ -135,6 +139,46 @@ class AdvancedAttendance {
     static get maybeEmoji() { return "🔵"; }
     static get unknownEmoji() { return "🟠"; }
     static get editEmoji() { return "✏️"; }
+
+    async newSchedule(type, title, description) {
+        this.type = type.toLowerCase();
+        const newSchedule = new Date(this.date.getTime());
+        switch (this.type) {
+            case 'daily': {
+                this.next = {
+                    date: newSchedule.setDate(newSchedule.getDate() + 1),
+                    title: title ? title : this.title,
+                    description: description ? description: this.embed.description,
+                }
+                break;
+            }
+            case 'monthly': {
+                this.next = {
+                    date: newSchedule.setMonth(newSchedule.getMonth() + 1),
+                    title: title ? title : this.title,
+                    description: description ? description: this.embed.description,
+                }
+                break;
+            }
+            case 'fortnightly': {
+                this.next = {
+                    date: newSchedule.setDate(newSchedule.getDate() + 14),
+                    title: title ? title : this.title,
+                    description: description ? description: this.embed.description,
+                }
+                break;
+            }
+            default: {
+                this.next = {
+                    date: newSchedule.setDate(newSchedule.getDate() + 7),
+                    title: title ? title : this.title,
+                    description: description ? description: this.embed.description,
+                }
+                break;
+            }
+        }
+        return this.next;
+    }
 
     /**
      * 
@@ -408,6 +452,9 @@ class AdvancedAttendance {
             if (channel && channel.isText()) {
                 try {
                     this.message = await channel.messages.fetch(object.id);
+                    if (object.creator) {
+                        this.creator = await this.guild.members.fetch(object.creator);
+                    }
                 } catch(err) {
                     console.log(`[ADVANCEDATTENDANCE] Missing advancedattendance id ${object.id} from ${object.guild}`);
                     this.message = undefined;
@@ -420,6 +467,7 @@ class AdvancedAttendance {
                     this.rejected.clear();
                     this.tentative.clear();
                     this.unknown.clear();
+                    this.type = 'advanced';
 
                     this.tier = this.server.getTierManager().getTier(object.tier);
 
@@ -490,6 +538,8 @@ class AdvancedAttendance {
     toJSON() {
         return {
             id: this.id,
+            title: this.embed.title,
+            creator: this.creator ? this.creator.id : null,
             guild: this.server.id,
             channel: this.message.channel.id,
             date: this.date.toISOString(),
