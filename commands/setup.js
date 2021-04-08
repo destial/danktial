@@ -50,7 +50,6 @@ module.exports = {
                         const embed3 = new Discord.MessageEmbed()
                             .setTitle('How many tiers do you want to have? Reply with a number, not a word!')
                             .setColor('RED');
-                        message.channel.startTyping(1);
                         await message.channel.send(embed3);
                         let cFilter = (m) => (m.author.id === message.member.id);
                         const messageCollector = message.channel.createMessageCollector(cFilter, {
@@ -74,7 +73,6 @@ module.exports = {
                                     This means each tier will be named Tier 1, Tier 2, etc or Split A, Split B, etc.
                                     Reply with [name] {placeholder}. E.g Tier {letter}
                                     *If you use the letter placeholder, you only have a limit of ${letters.length} tiers`);
-                                    message.channel.startTyping();
                                     await message.channel.send(embed3);
 
                                     let ccFilter = (m) => (m.author.id === message.member.id);
@@ -190,6 +188,7 @@ module.exports = {
                                                     .setDescription(`To continue setup for drivers per team per tier, please use the ${server.prefix}setdriver command!`)
                                                     .setColor('RED');
                                                 await message.channel.send(embed4);
+                                                await server.save();
                                             });
                                         } else {
                                             const embed2 = new Discord.MessageEmbed().setTitle('Ran out of time!');

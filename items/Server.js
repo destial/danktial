@@ -77,29 +77,29 @@ class Server {
          */
         this.reactionRoleManager = new ReactionRoleManager(client, this);
 
-        this.alerts = new TwitchRequest.Client({
-            channels: [],
-            client_id: process.env.CLIENT_ID,
-            client_secret: process.env.CLIENT_SECRET,
-            interval: 3
-        });
+        // this.alerts = new TwitchRequest.Client({
+        //     channels: [],
+        //     client_id: process.env.CLIENT_ID,
+        //     client_secret: process.env.CLIENT_SECRET,
+        //     interval: 3
+        // });
 
-        this.alerts.on('live', (stream) => {
-            if (this.alertChannel) {
-                const embed = new Discord.MessageEmbed();
-                embed.setAuthor(`${stream.name} is now live!`, stream.profile, `https://www.twitch.tv/${stream.name}`);
-                embed.setTitle(stream.title);
-                embed.setURL(`https://www.twitch.tv/${stream.name}`);
-                embed.addFields([
-                    { name: 'Playing', value: stream.game, inline: true }
-                ]);
-                embed.setImage(stream.thumbnail);
-                embed.setColor('DARK_PURPLE');
-                embed.setThumbnail(stream.profile);
-                embed.setTimestamp(stream.startedAt);
-                this.alertChannel.send(embed);
-            }
-        });
+        // this.alerts.on('live', (stream) => {
+        //     if (this.alertChannel) {
+        //         const embed = new Discord.MessageEmbed();
+        //         embed.setAuthor(`${stream.name} is now live!`, stream.profile, `https://www.twitch.tv/${stream.name}`);
+        //         embed.setTitle(stream.title);
+        //         embed.setURL(`https://www.twitch.tv/${stream.name}`);
+        //         embed.addFields([
+        //             { name: 'Playing', value: stream.game, inline: true }
+        //         ]);
+        //         embed.setImage(stream.thumbnail);
+        //         embed.setColor('DARK_PURPLE');
+        //         embed.setThumbnail(stream.profile);
+        //         embed.setTimestamp(stream.startedAt);
+        //         this.alertChannel.send(embed);
+        //     }
+        // });
     }
 
     /**
@@ -196,12 +196,13 @@ class Server {
         this.alertChannel = this.guild.channels.cache.get(data.twitch.alertChannel);
 
         data.twitch.subscribedChannels.forEach(async id => {
-            const user = await this.alerts.resolveID(id);
-            if (user) {
-                this.alerts.addChannel(user.name);
-                console.log(`[TWITCH] Loaded channel ${user.name} to ${this.guild.name}`);
-                this.subbedChannels.push(user.id);
-            }
+            this.subbedChannels.push(id);
+            //const user = await this.alerts.resolveID(id);
+            // if (user) {
+            //     //this.alerts.addChannel(user.name);
+            //     console.log(`[TWITCH] Loaded channel ${user.name} to ${this.guild.name}`);
+            //     this.subbedChannels.push(user.id);
+            // }
         });
     }
 
@@ -236,8 +237,8 @@ class Server {
      * @param {string} string 
      */
     async addChannel(string) {
-        this.alerts.addChannel(string);
-        const user = await this.alerts.getUser(string.toLowerCase());
+        //this.alerts.addChannel(string);
+        //const user = await this.alerts.getUser(string.toLowerCase());
         this.subbedChannels.push(user.id);
     }
 
@@ -246,8 +247,8 @@ class Server {
      * @param {string} string 
      */
     async removeChannel(string) {
-        this.alerts.removeChannel(string);
-        const user = await this.alerts.getUser(string.toLowerCase());
+        //this.alerts.removeChannel(string);
+        //const user = await this.alerts.getUser(string.toLowerCase());
         const index = this.subbedChannels.indexOf(user.id);
         if (index !== -1) {
             this.subbedChannels.splice(index, 1);
@@ -335,10 +336,10 @@ class Server {
     }
 
     toJSON() {
-        const channels = [];
-        this.alerts.allChannels().forEach(tc => {
-            channels.push(tc.user.id);
-        });
+        // this.
+        // this.alerts.allChannels().forEach(tc => {
+        //     channels.push(tc.user.id);
+        // });
         const tiersData = [];
         this.getTierManager().tiers.forEach(tier => {
             tiersData.push(tier.toJSON());
@@ -372,7 +373,7 @@ class Server {
                 panels: ticketPanelsData
             },
             twitch: {
-                subscribedChannels: channels,
+                subscribedChannels: this.subbedChannels,
                 alertChannel: (this.alertChannel ? this.alertChannel.id : null),
             },
             count: {

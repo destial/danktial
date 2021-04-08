@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Database = require('../database/Database');
 const Query = require('../database/Query');
 const Driver = require('./Driver');
+const Racer = require('./Racer');
 const Reserve = require('./Reserve');
 const Server = require('./Server');
 const Team = require('./Team');
@@ -103,6 +104,14 @@ class Tier {
     addDriver(driver) {
         if (!this.drivers.get(driver.id)) {
             this.drivers.set(driver.id, driver);
+            // const racer = this.server.serverManager.racers.get(driver.id);
+            // if (racer) {
+            //     racer.addLeague(driver);
+            // } else {
+            //     const r = new Racer(this.client, driver.member.user);
+            //     r.addLeague(driver);
+            //     this.server.serverManager.racers.set(racer.id, racer);
+            // }
         }
     }
 
@@ -113,6 +122,14 @@ class Tier {
     loadDriver(driver) {
         if (!this.drivers.get(driver.id)) {
             this.drivers.set(driver.id, driver);
+            // const racer = this.server.serverManager.racers.get(driver.id);
+            // if (racer) {
+            //     racer.addLeague(driver);
+            // } else {
+            //     const r = new Racer(this.client, driver.member.user);
+            //     r.addLeague(driver);
+            //     this.server.serverManager.racers.set(racer.id, racer);
+            // }
         }
     }
 
@@ -121,6 +138,11 @@ class Tier {
      * @param {string} id 
      */
     removeDriver(id) {
+        const driver = this.drivers.get(id);
+        // const racer = this.server.serverManager.racers.get(id);
+        // if (racer && driver) {
+        //     racer.removeLeague(driver);
+        // }
         this.drivers.delete(id);
     }
 
@@ -131,6 +153,13 @@ class Tier {
     addReserve(reserve) {
         if (!this.reserves.get(reserve.id)) {
             this.reserves.set(reserve.id, reserve);
+            // const racer = this.server.serverManager.racers.get(reserve.id);
+            // if (racer) {
+            //     racer.addLeague(reserve);
+            // } else {
+            //     const r = new Racer(this.client, reserve.member.user);
+            //     r.addLeague(reserve);
+            // }
         }
     }
 
@@ -139,6 +168,11 @@ class Tier {
      * @param {string} id 
      */
     removeReserve(id) {
+        const driver = this.reserves.get(id);
+        const racer = this.server.serverManager.racers.get(id);
+        // if (racer && driver) {
+        //     racer.removeLeague(driver);
+        // }
         this.reserves.delete(id);
     }
 
@@ -189,6 +223,72 @@ class Tier {
      */
     getReserve(id) {
         return this.reserves.get(id);
+    }
+
+    setName(newName) {
+        if (newName) {
+            this.name = newName;
+            this.save();
+            this.server.save();
+        }
+    }
+
+    /**
+     * 
+     * @param {string} id 
+     * @param {Team} team 
+     */
+    async transferDriver(id, team) {
+        const driver = this.getDriver(id);
+        const reserve = this.getReserve(id);
+        if (team) {
+            if (driver) {
+                if (team != driver.team) {
+                    driver.team.removeDriver(id);
+                    driver.setTeam(team);
+                    team.setDriver(driver);
+                    const racer = this.server.serverManager.racers.get(id);
+                    if (racer) {
+                        racer.transferTeam(driver);
+                    }
+                }
+            } else if (reserve) {
+                team.setDriver(reserve);
+                this.addDriver(reserve);
+                this.removeReserve(reserve.id);
+                reserve.toDriver(team);
+                reserve.setTeam(team);
+                // const racer = this.server.serverManager.racers.get(id);
+                // if (racer) {
+                //     racer.transferTeam(reserve);
+                // }
+            } else {
+                return;
+            }
+            this.server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
+                if (advanced.tier === this) {
+                    await advanced.fix();
+                }
+            });
+            await this.server.update();
+        } else {
+            if (driver) {
+                driver.team.removeDriver(driver.id);
+                this.addReserve(driver);
+                this.removeDriver(driver.id);
+                driver.toReserve();
+                // const racer = this.server.serverManager.racers.get(id);
+                // if (racer) {
+                //     racer.transferTeam(driver);
+                // }
+                this.server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
+                    if (advanced.tier === this) {
+                        await advanced.fix();
+                    }
+                });
+                await this.server.update();
+            }
+        }
     }
 
     async loadJSON(object) {

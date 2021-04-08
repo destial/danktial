@@ -35,6 +35,9 @@ module.exports = {
         });
 
         client.on('messageDelete', async message => {
+            if (!message.author) return;
+            if (message.author.bot) return;
+            if (!message.guild) return;
             const server = await servers.fetch(message.guild.id);
             if (server) {
                 await server.getTicketManager().removeTicketPanel(message.id);

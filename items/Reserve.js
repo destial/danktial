@@ -89,6 +89,7 @@ class Reserve extends Driver {
         return {
             id: this.id,
             guild: this.guild.id,
+            name: this.member.displayName,
             number: this.number,
             team: null,
             tier: this.tier.name,

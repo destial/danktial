@@ -24,11 +24,11 @@ client.app.listen(process.env.PORT);
 client.once('ready', () => {
     try {
         const loadServer = new Promise((resolve, reject) => {
-            client.guilds.cache.forEach(async (guild, id) => {
-                const server = await client.manager.fetch(guild.id)
+            client.guilds.cache.forEach((guild, id) => {
+                const server = client.manager.servers.get(guild.id)
                 if (!server) {
                     const server = new Server(client, guild, undefined, '-', 0, client.manager);
-                    await client.manager.addServer(server);
+                    client.manager.servers.set(server.id, server);
                 }
                 if (id === client.guilds.cache.last().id) resolve();
             });
@@ -65,6 +65,7 @@ client.once('ready', () => {
                         await server.modlog.setTopic(`danktial has been online since ${date} ${(time.startsWith('0') ? time.substring(1) : time)} ${server.guild.region.toLocaleUpperCase()}`);
                     }
                 });
+                console.log(client.manager.racers);
                 client.guilds.cache.forEach(async (guild, id) => {
                     guild.channels.cache.forEach(async (channel) => {
                         if (channel.isText() && channel.manageable && channel.viewable) {

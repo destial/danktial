@@ -21,7 +21,7 @@ class Driver {
         this.server = server;
         this.guild = member.guild;
         this.team = team;
-        this.number = number || 0;
+        this.number = number || '0';
         this.name = member.displayName;
         this.tier = tier;
     }
@@ -115,6 +115,7 @@ class Driver {
             id: this.id,
             guild: this.guild.id,
             number: this.number,
+            name: this.member.displayName,
             team: (this.team ? this.team.name : null),
             tier: this.tier.name,
             reserved: false

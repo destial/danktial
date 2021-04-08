@@ -94,7 +94,6 @@ module.exports = {
                             tier.addReserve(driver);
                             tier.removeDriver(driver.id);
                             driver.toReserve();
-                        } else if (reserve) {
                         }
                         embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
                         message.channel.send(embed);

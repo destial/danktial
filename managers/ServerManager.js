@@ -3,6 +3,8 @@ const Server = require('../items/Server');
 const Database = require("../database/Database");
 const QueueWorker = require('../database/QueueWorker');
 const { Router } = require('express');
+const Racer = require('../items/Racer');
+const AdvancedAttendance = require('../items/AdvancedAttendance');
 
 class ServerManager {
     /**
@@ -14,6 +16,11 @@ class ServerManager {
          * @type {Discord.Collection<string, Server>}
          */
         this.servers = new Discord.Collection();
+
+        /**
+         * @type {Discord.Collection<string, Racer>}
+         */
+        this.racers = new Discord.Collection();
         this.queueWorker = new QueueWorker(this);
         this.client = client;
 
@@ -25,130 +32,224 @@ class ServerManager {
 
         if (this.client.app) {
             this.guildRoute = Router();
-            this.guildRoute.post('/:guildID', (req, res, next) => {
-                if (req.headers.token === this.client.token) {
-                    const { guildID } = req.params;
-                    const server = this.servers.get(guildID);
-                    if (server) {
-                        switch (req.headers.type) {
-                            case 'prefix': {
-                                server.setPrefix(req.body.prefix);
-                                break;
-                            }
-                            default: {
-                                break;
-                            }
-                        }
-                        res.status(200).send({
+            this.guildRoute.post('/:guildID', async (req, res) => {
+                const { guildID } = req.params;
+                const server = this.servers.get(guildID);
+                if (server && req.headers.id) {
+                    const members = await server.guild.members.fetch();
+                    const member = members.get(req.headers.id);
+                    if (member && member.hasPermission('MANAGE_GUILD')) {
+                        this.editServer(server, req);
+                        return res.status(200).send({
                             success: 'Success!',
                             code: 200,
                         });
-                    } else {
-                        res.status(404).send({
-                            error: 'Invalid guildID',
-                            code: 404,
-                        });
                     }
-                } else {
-                    res.status(403).send({
+                } else if (!server && req.headers.id) {
+                    return res.status(404).send({
+                        error: 'Invalid guildID',
+                        code: 404,
+                    });
+                }
+                return res.status(403).send({
+                    error: 'Unauthorized access',
+                    code: 403,
+                });
+            });
+
+            this.guildRoute.get('/:guildID', async (req, res) => {
+                const { guildID } = req.params;
+                const server = this.servers.get(guildID);
+                if (server && req.headers.id) {
+                    const members = await server.guild.members.fetch();
+                    const member = members.get(req.headers.id);
+                    if (member && member.hasPermission('MANAGE_GUILD')) {
+                        return res.send(server.toJSON());
+                    }
+                    return res.status(403).send({
                         error: 'Unauthorized access',
                         code: 403,
                     });
                 }
-                next();
+                return res.status(404).send({
+                    error: 'Invalid guildID',
+                    code: 404,
+                });
             });
 
-            this.guildRoute.get('/:guildID', (req, res, next) => {
-                if (req.headers.token === this.client.token) {
-                    const { guildID } = req.params;
-                    const server = this.servers.get(guildID);
-                    if (server) {
-                        res.send(server.toJSON());
-                    } else {
-                        res.status(404).send({
-                            error: 'Invalid guildID',
-                            code: 404,
-                        });
-                    }
-                } else {
-                    res.status(403).send({
-                        error: 'Unauthorized access',
-                        code: 403,
-                    });
-                }
-                next();
-            });
-
-            this.guildRoute.get('/:guildID/members/', async (req, res, next) => {
-                if (req.headers.token === this.client.token) {
-                    const { guildID } = req.params;
-                    const server = this.servers.get(guildID);
-                    if (server) {
-                        try {
-                            await server.guild.members.fetch();
+            this.guildRoute.get('/:guildID/members/', async (req, res) => {
+                const { guildID } = req.params;
+                const server = this.servers.get(guildID);
+                if (server && req.headers.id) {
+                    try {
+                        const members = await server.guild.members.fetch();
+                        const member = members.get(req.headers.id);
+                        if (member && member.hasPermission('MANAGE_GUILD')) {
                             const array = [];
                             for (const member of server.guild.members.cache.values()) {
-                                const data = {
-                                    member: member.toJSON(),
-                                    hasPermission: member.hasPermission('MANAGE_GUILD')
-                                };
-                                array.push(data);
+                                array.push(member.toJSON());
                             }
-                            res.send(array);
-                        } catch(err) {
-                            res.status(404).send({
-                                error: 'Invalid memberID',
-                                code: 404,
-                            });
+                            return res.send(array);
                         }
-                    } else {
-                        res.status(404).send({
-                            error: 'Invalid guildID',
+                    } catch(err) {
+                        return res.status(404).send({
+                            error: 'Invalid memberID',
                             code: 404,
                         });
                     }
-                } else {
-                    res.status(403).send({
-                        error: 'Unauthorized access',
-                        code: 403,
+                }
+                else if (!server && req.headers.id) {
+                    return res.status(404).send({
+                        error: 'Invalid guildID',
+                        code: 404,
                     });
                 }
-                next();
+                return res.status(403).send({
+                    error: 'Unauthorized access',
+                    code: 403,
+                });
             });
 
-            this.guildRoute.get('/:guildID/members/:memberID', async (req, res, next) => {
-                if (req.headers.token === this.client.token) {
-                    const { guildID, memberID } = req.params;
-                    const server = this.servers.get(guildID);
-                    if (server) {
-                        try {
-                            const member = await server.guild.members.fetch(memberID);
-                            if (member) {
-                                const data = {
-                                    member: member.toJSON(),
-                                    hasPermission: member.hasPermission('MANAGE_GUILD')
-                                };
-                                res.send(data);
+            this.guildRoute.get('/:guildID/attendances/', async (req, res) => {
+                const { guildID } = req.params;
+                const server = this.servers.get(guildID);
+                if (server && req.headers.id) {
+                    try {
+                        const members = await server.guild.members.fetch();
+                        const member = members.get(req.headers.id);
+                        if (member && member.hasPermission('MANAGE_GUILD')) {
+                            const array = [];
+                            for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
+                                array.push(attendance.toJSON());
                             }
-                        } catch(err) {
-                            res.status(404).send({
+                            return res.send(array);
+                        }
+                    } catch(err) {
+                        return res.status(404).send({
+                            error: 'Invalid member',
+                            code: 404,
+                        });
+                    }
+                }
+                else if (!server && req.headers.id) {
+                    return res.status(404).send({
+                        error: 'Invalid guildID',
+                        code: 404,
+                    });
+                }
+                return res.status(403).send({
+                    error: 'Unauthorized access',
+                    code: 403,
+                });
+            });
+
+            this.guildRoute.get('/:guildID/attendances/:attendanceID', async (req, res) => {
+                const { guildID, attendanceID } = req.params;
+                const server = this.servers.get(guildID);
+                if (server && req.headers.id) {
+                    try {
+                        const members = await server.guild.members.fetch();
+                        const member = members.get(req.headers.id);
+                        if (member && member.hasPermission('MANAGE_GUILD')) {
+                            const attendance = server.getAttendanceManager().fetchAdvanced(attendanceID);
+                            if (attendance) {
+                                return res.send(attendance.toJSON());
+                            }
+                            return res.status(404).send({
+                                error: 'Invalid attendanceID',
+                                code: 404,
+                            });
+                        }
+                    } catch(err) {
+                        return res.status(404).send({
+                            error: 'Invalid member',
+                            code: 404,
+                        });
+                    }
+                } else if (!server && req.headers.id) {
+                    res.status(404).send({
+                        error: 'Invalid guildID',
+                        code: 404,
+                    });
+                }
+                return res.status(403).send({
+                    error: 'Unauthorized access',
+                    code: 403,
+                });
+            });
+
+            this.guildRoute.post('/:guildID/attendances/:attendanceID', async (req, res) => {
+                const { guildID, attendanceID } = req.params;
+                const server = this.servers.get(guildID);
+                if (server && req.headers.id) {
+                    try {
+                        const members = await server.guild.members.fetch();
+                        const member = members.get(req.headers.id);
+                        if (member) {
+                            const attendance = server.getAttendanceManager().fetchAdvanced(attendanceID);
+                            if (attendance) {
+                                this.attendanceMark(member.id, attendance, attendance.tier.name, server, req);
+                                return res.status(200).send({
+                                    success: 'Success!',
+                                    code: 200,
+                                });
+                            }
+                            return res.status(404).send({
+                                error: 'Invalid attendanceID',
+                                code: 404,
+                            });
+                        }
+                    } catch(err) {
+                        return res.status(404).send({
+                            error: 'Invalid member',
+                            code: 404,
+                        });
+                    }
+                } else if (!server && req.headers.id) {
+                    res.status(404).send({
+                        error: 'Invalid guildID',
+                        code: 404,
+                    });
+                }
+                return res.status(403).send({
+                    error: 'Unauthorized access',
+                    code: 403,
+                });
+            });
+
+            this.guildRoute.get('/:guildID/members/:memberID', async (req, res) => {
+                const { guildID, memberID } = req.params;
+                const server = this.servers.get(guildID);
+                if (server && req.headers.id) {
+                    try {
+                        const members = await server.guild.members.fetch();
+                        const member = members.get(req.headers.id);
+                        if (member && member.hasPermission('MANAGE_GUILD')) {
+                            const requestMember = members.get(memberID);
+                            if (requestMember) {
+                                return res.send(requestMember.toJSON());
+                            }
+                            return res.status(404).send({
                                 error: 'Invalid memberID',
                                 code: 404,
                             });
                         }
-                    } else {
-                        res.status(404).send({
-                            error: 'Invalid guildID',
+                    } catch(err) {
+                        return res.status(404).send({
+                            error: 'Invalid member',
                             code: 404,
                         });
                     }
-                } else {
-                    res.status(403).send({
-                        error: 'Unauthorized access',
-                        code: 403,
+                } else if (!server && req.headers.id) {
+                    res.status(404).send({
+                        error: 'Invalid guildID',
+                        code: 404,
                     });
                 }
-                next();
+                return res.status(403).send({
+                    error: 'Unauthorized access',
+                    code: 403,
+                });
             });
 
             this.guildRoute.get('/', (req, res) => {
@@ -157,13 +258,12 @@ class ServerManager {
                     this.servers.forEach(server => {
                         serverArray.push(server.toJSON());
                     });
-                    res.send(serverArray);
-                } else {
-                    res.status(403).send({
-                        error: 'Unauthorized access',
-                        code: 403,
-                    });
+                    return res.send(serverArray);
                 }
+                return res.status(403).send({
+                    error: 'Unauthorized access',
+                    code: 403,
+                });
             });
 
             this.client.app.use('/api/discord/guilds', this.guildRoute);
@@ -209,6 +309,93 @@ class ServerManager {
             const server = this.servers.get(id);
             resolve(server);
         });
+    }
+
+    /**
+     * 
+     * @param {Server} server 
+     * @param {*} req 
+     */
+    editServer(server, req) {
+        switch (req.headers.type) {
+            case 'set_prefix': {
+                server.setPrefix(req.body.prefix);
+                break;
+            }
+            case 'transfer_driver': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const team = tier.getTeam(req.body.team);
+                tier.transferDriver(req.body.driver, team);
+                break;
+            }
+            case 'new_driver': {
+                break;
+            }
+            case 'remove_driver': {
+                break;
+            }
+            case 'new_advanced_attendance': {
+                break;
+            }
+            case 'new_attendance': {
+                break;
+            }
+            case 'new_tier': {
+                break;
+            }
+            case 'delete_tier': {
+                break;
+            }
+            case 'edit_tier': {
+                const oldTierName = req.body.old_name;
+                const newTierName = req.body.new_name;
+                const tier = server.getTierManager().getTier(oldTierName);
+                if (tier) {
+                    tier.setName(newTierName);
+                }
+                break;
+            }
+            case 'new_team': {
+                break;
+            }
+            case 'delete_team': {
+                
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {string} userID 
+     * @param {AdvancedAttendance} attendance
+     * @param {string} tier
+     * @param {Server} server 
+     * @param {*} req 
+     */
+    attendanceMark(userID, attendance, tier, server, req) {
+        var driver = server.getTierManager().getTier(tier).getDriver(userID);
+        if (!driver) {
+            driver = server.getTierManager().getTier(tier).getReserve(userID);
+        }
+        if (driver) {
+            switch (req.headers.type) {
+                case 'mark_in': {
+                    attendance.accept(driver);
+                    break;
+                }
+                case 'mark_out': {
+                    attendance.reject(driver);
+                    break;
+                }
+                default: {
+                    attendance.maybe(driver);
+                    break;
+                }
+            }
+        }
     }
 }
 

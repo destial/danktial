@@ -453,7 +453,7 @@ class AdvancedAttendance {
                 try {
                     this.message = await channel.messages.fetch(object.id);
                     if (object.creator) {
-                        this.creator = await this.guild.members.fetch(object.creator);
+                        this.creator = await this.server.guild.members.fetch(object.creator);
                     }
                 } catch(err) {
                     console.log(`[ADVANCEDATTENDANCE] Missing advancedattendance id ${object.id} from ${object.guild}`);
@@ -468,45 +468,9 @@ class AdvancedAttendance {
                     this.tentative.clear();
                     this.unknown.clear();
                     this.type = 'advanced';
-
                     this.tier = this.server.getTierManager().getTier(object.tier);
+                    this.loadAttendees(this.embed);
 
-                    object.accepted.forEach(id => {
-                        const driver = this.server.getTierManager().getTier(object.tier).getDriver(id);
-                        const reserve = this.server.getTierManager().getTier(object.tier).getReserve(id);
-                        if (driver) {
-                            this.accepted.set(id, driver);
-                        } else if (reserve) {
-                            this.accepted.set(id, reserve);
-                        }
-                    });
-                    object.rejected.forEach(id => {
-                        const driver = this.server.getTierManager().getTier(object.tier).getDriver(id);
-                        const reserve = this.server.getTierManager().getTier(object.tier).getReserve(id);
-                        if (driver) {
-                            this.rejected.set(id, driver);
-                        } else if (reserve) {
-                            this.rejected.set(id, reserve);
-                        }
-                    });
-                    object.tentative.forEach(id => {
-                        const driver = this.server.getTierManager().getTier(object.tier).getDriver(id);
-                        const reserve = this.server.getTierManager().getTier(object.tier).getReserve(id);
-                        if (driver) {
-                            this.tentative.set(id, driver);
-                        } else if (reserve) {
-                            this.tentative.set(id, reserve);
-                        }
-                    });
-                    object.unknown.forEach(id => {
-                        const driver = this.server.getTierManager().getTier(object.tier).getDriver(id);
-                        const reserve = this.server.getTierManager().getTier(object.tier).getReserve(id);
-                        if (driver) {
-                            this.unknown.set(id, driver);
-                        } else if (reserve) {
-                            this.unknown.set(id, reserve);
-                        }
-                    });
                     if (this.schedule) {
                         this.schedule.cancel();
                     }
@@ -529,6 +493,74 @@ class AdvancedAttendance {
                 }
             }
         }
+    }
+
+    /**
+     * 
+     * @param {Discord.MessageEmbed} embed 
+     */
+    loadAttendees(embed) {
+        this.accepted.clear();
+        this.rejected.clear();
+        this.tentative.clear();
+        this.unknown.clear();
+        embed.fields.forEach(field => {
+            if (field.name !== "Date & Time") {
+                const splits = field.value.split('\n');
+                if (!splits.length && field.value !== '-') {
+                    splits.push(field.value);
+                }
+                splits.forEach(value => {
+                    if (value.startsWith(AdvancedAttendance.rejectEmoji)) {
+                        const raw = value.replace(`${AdvancedAttendance.rejectEmoji} `, '');
+                        const id = raw.replace('<@', '').replace('!', '').replace('>', '');
+                        const driver = this.tier.getDriver(id);
+                        const reserve = this.tier.getReserve(id);
+                        if (driver) {
+                            this.rejected.set(driver.id, driver);
+                        } else if (reserve) {
+                            this.rejected.set(reserve.id, reserve);
+                        }
+                    }
+
+                    if (value.startsWith(AdvancedAttendance.acceptEmoji)) {
+                        const raw = value.replace(`${AdvancedAttendance.acceptEmoji} `, '');
+                        const id = raw.replace('<@', '').replace('!', '').replace('>', '');
+                        const driver = this.tier.getDriver(id);
+                        const reserve = this.tier.getReserve(id);
+                        if (driver) {
+                            this.accepted.set(driver.id, driver);
+                        } else if (reserve) {
+                            this.accepted.set(reserve.id, reserve);
+                        }
+                    }
+
+                    if (value.startsWith(AdvancedAttendance.maybeEmoji)) {
+                        const raw = value.replace(`${AdvancedAttendance.maybeEmoji} `, '');
+                        const id = raw.replace('<@', '').replace('!', '').replace('>', '');
+                        const driver = this.tier.getDriver(id);
+                        const reserve = this.tier.getReserve(id);
+                        if (driver) {
+                            this.tentative.set(driver.id, driver);
+                        } else if (reserve) {
+                            this.tentative.set(reserve.id, reserve);
+                        }
+                    }
+
+                    if (value.startsWith(AdvancedAttendance.unknownEmoji)) {
+                        const raw = value.replace(`${AdvancedAttendance.unknownEmoji} `, '');
+                        const id = raw.replace('<@', '').replace('!', '').replace('>', '');
+                        const driver = this.tier.getDriver(id);
+                        const reserve = this.tier.getReserve(id);
+                        if (driver) {
+                            this.unknown.set(driver.id, driver);
+                        } else if (reserve) {
+                            this.unknown.set(reserve.id, reserve);
+                        }
+                    }
+                });
+            }
+        });
     }
 
     toString() {

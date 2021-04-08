@@ -178,9 +178,9 @@ class AttendanceManager {
                                 attendance.creator = member;
                                 attendance.timezone = date.substring(date.length-4).trim().toUpperCase();
                                 this.advancedEvents.set(attendance.id, attendance);
-                                this.server.update();
                                 try {
                                     await attendance.save();
+                                    await this.server.update();
                                     resolve(attendance);
                                 } catch (err) {
                                     console.log(err);
