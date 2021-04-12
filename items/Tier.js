@@ -227,9 +227,12 @@ class Tier {
 
     setName(newName) {
         if (newName) {
+            this.server.getTierManager().tiers.delete(this.name.toLowerCase());
             this.name = newName;
+            this.server.getTierManager().tiers.set(this.name.toLowerCase(), this);
             this.save();
             this.server.save();
+
         }
     }
 
