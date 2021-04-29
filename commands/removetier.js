@@ -51,12 +51,14 @@ module.exports = {
                     await server.log(`${message.member.user.tag} has deleted tier ${tier.name}`);
                     await message.channel.send(embed);
                     console.log(`[TIER] Deleted tier ${tier.name} from server ${tier.server.guild.name}`);
+                    server.save();
                 } catch(err) {
                     console.log(err);
                 }
             } else {
                 embed.setAuthor('Tier does not exist!');
                 await message.channel.send(embed);
+                return;
             }
         }
     }

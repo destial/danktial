@@ -225,14 +225,19 @@ class Tier {
         return this.reserves.get(id);
     }
 
-    setName(newName) {
+    async setName(newName) {
         if (newName) {
             this.server.getTierManager().tiers.delete(this.name.toLowerCase());
             this.name = newName;
             this.server.getTierManager().tiers.set(this.name.toLowerCase(), this);
             this.save();
             this.server.save();
-
+            for (const attendance of this.server.getAttendanceManager().getAdvancedEvents().values()) {
+                if (attendance.tier == this) {
+                    attendance.embed.setFooter(this.name);
+                    await attendance.message.edit(attendance.embed);
+                }
+            }
         }
     }
 

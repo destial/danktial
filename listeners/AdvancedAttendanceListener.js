@@ -29,7 +29,7 @@ module.exports = {
                     if (!driver) {
                         driver = attendance.tier.getReserve(user.id);
                     }
-                    if (driver) {
+                    if (driver && !attendance.isLocked()) {
                         switch (reaction.emoji.name) {
                             case AttendanceManager.accept:
                                 await attendance.accept(driver);
@@ -54,6 +54,18 @@ module.exports = {
                                 case AdvancedAttendance.editEmoji:
                                     await server.getAttendanceManager().editAdvancedAttendance(driver.member, attendance);
                                     break;
+                                case AdvancedAttendance.lockEmoji:
+                                    if (!attendance.isLocked()) {
+                                        attendance.setLocked(true);
+                                        attendance.message.reactions.removeAll();
+                                    }
+                                    break;
+                                case AdvancedAttendance.unlockEmoji:
+                                    if (attendance.isLocked()) {
+                                        attendance.setLocked(false);
+                                        attendance.message.reactions.removeAll();
+                                    }
+                                    break;
                                 default:
                                     break;
                             }
@@ -74,11 +86,18 @@ module.exports = {
                     const attendance = server.getAttendanceManager().fetchAdvanced(reaction.message.id);
                     if (attendance) {
                         attendance.message.reactions.removeAll().then(async () => {
-                            await attendance.message.react(AttendanceManager.accept);
-                            await attendance.message.react(AttendanceManager.reject);
-                            await attendance.message.react(AttendanceManager.tentative);
+                            if (!attendance.isLocked()) {
+                                await attendance.message.react(AttendanceManager.accept);
+                                await attendance.message.react(AttendanceManager.reject);
+                                await attendance.message.react(AttendanceManager.tentative);
+                            }
                             await attendance.message.react(AttendanceManager.delete);
                             await attendance.message.react(AdvancedAttendance.editEmoji);
+                            if (!attendance.isLocked()) {
+                                await attendance.message.react(AdvancedAttendance.lockEmoji);
+                            } else {
+                                await attendance.message.react(AdvancedAttendance.unlockEmoji);
+                            }
                         });
                     }
                 }
@@ -100,18 +119,25 @@ module.exports = {
             if (server) {
                 const attendance = server.getAttendanceManager().fetchAdvanced(message.id);
                 if (attendance) {
-                    await attendance.message.react(AttendanceManager.accept);
-                    await attendance.message.react(AttendanceManager.reject);
-                    await attendance.message.react(AttendanceManager.tentative);
+                    if (!attendance.isLocked()) {
+                        await attendance.message.react(AttendanceManager.accept);
+                        await attendance.message.react(AttendanceManager.reject);
+                        await attendance.message.react(AttendanceManager.tentative);
+                    }
                     await attendance.message.react(AttendanceManager.delete);
                     await attendance.message.react(AdvancedAttendance.editEmoji);
+                    if (!attendance.isLocked()) {
+                        await attendance.message.react(AdvancedAttendance.lockEmoji);
+                    } else {
+                        await attendance.message.react(AdvancedAttendance.unlockEmoji);
+                    }
                 }
             }
         });
 
         client.on('messageDelete', async message => {
             if (!message.author) return;
-            if (message.author.bot) return;
+            if (!message.author.bot) return;
             if (!message.guild) return;
             const server = await servers.fetch(message.guild.id);
             if (server) {

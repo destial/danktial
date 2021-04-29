@@ -33,9 +33,8 @@ module.exports = {
                 message.channel.send(embed);
                 return;
             }
-            const arg1 = args.shift();
-            const id = arg1.replace('<@', '').replace('>', '').replace('!', '');
-            const member = await server.guild.members.fetch(id);
+            args.shift();
+            const member = message.mentions.members.first();
             if (member) {
                 var str = args.join(' ');
                 const arguments = parseQuotations(str);
@@ -61,11 +60,11 @@ module.exports = {
                         return;
                     }
                     const team = teamCol.first();
-                    const driver = tier.getDriver(id);
-                    const reserve = tier.getReserve(id);
+                    const driver = tier.getDriver(member.id);
+                    const reserve = tier.getReserve(member.id);
                     if (team) {
                         if (driver) {
-                            driver.team.removeDriver(id);
+                            driver.team.removeDriver(member.id);
                             driver.setTeam(team);
                             team.setDriver(driver);
                         } else if (reserve) {

@@ -32,9 +32,11 @@ module.exports = {
                 embed.setAuthor(`Tier ${tier.name} has been cleared of all drivers and reserves!`);
                 await server.log(`Cleared tier ${tier.name} from all drivers and reserves`);
                 await message.channel.send(embed);
+                return;
             } else {
                 embed.setAuthor(`Unknown tier "${tierName}"`);
                 await message.channel.send(embed);
+                return;
             }
         }
     }

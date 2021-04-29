@@ -49,12 +49,14 @@ module.exports = {
                 if (attendance) {
                     await attendance.fix();
                     embed.setAuthor(`Attendance ${attendance.embed.title} has been fixed and updated!`);
-                    message.channel.send(embed);
+                    await message.channel.send(embed);
                     await server.log(`${message.member.user.tag} has fixed attendance ${attendance.embed.title}`);
+                    return;
                 } else {
                     embed.setAuthor('Attendance does not exist! Perhaps using the wrong message id?');
                     embed.setDescription('If you are in developer mode, right click the attendance and copy the id to get the message id');
-                    message.channel.send(embed);
+                    await message.channel.send(embed);
+                    return;
                 }
             }
         }

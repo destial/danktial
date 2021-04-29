@@ -132,6 +132,8 @@ class AdvancedAttendance {
             });
             console.log(`[ADATTENDANCE] Created new schedule for ${this.schedule.name} at ${new Date(fiveMinBefore).toString()}`);
         }
+
+        this.locked = false;
     }
 
     static get acceptEmoji() { return "🟢"; }
@@ -139,6 +141,8 @@ class AdvancedAttendance {
     static get maybeEmoji() { return "🔵"; }
     static get unknownEmoji() { return "🟠"; }
     static get editEmoji() { return "✏️"; }
+    static get lockEmoji() { return "🔒"; }
+    static get unlockEmoji() { return "🔓"; }
 
     async newSchedule(type, title, description) {
         this.type = type.toLowerCase();
@@ -469,6 +473,9 @@ class AdvancedAttendance {
                     this.unknown.clear();
                     this.type = 'advanced';
                     this.tier = this.server.getTierManager().getTier(object.tier);
+                    if (object.locked) {
+                        this.locked = object.locked;
+                    }
                     this.loadAttendees(this.embed);
 
                     if (this.schedule) {
@@ -489,6 +496,7 @@ class AdvancedAttendance {
                         console.log(`[ADATTENDANCE] Created schedule for ${this.embed.title}`);
                     }
                     this.server.getAttendanceManager().getAdvancedEvents().set(this.id, this);
+                    //this.message.react(AdvancedAttendance.lockEmoji);
                     console.log(`[ADATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
                 }
             }
@@ -563,6 +571,14 @@ class AdvancedAttendance {
         });
     }
 
+    isLocked() {
+        return this.locked;
+    }
+
+    setLocked(lock) {
+        this.locked = lock;
+    }
+
     toString() {
         return `[Message](${this.message.url})`;
     }
@@ -579,7 +595,8 @@ class AdvancedAttendance {
             rejected: this.rejected.keyArray(),
             tentative: this.tentative.keyArray(),
             unknown: this.unknown.keyArray(),
-            tier: this.tier.name
+            tier: this.tier.name,
+            locked: this.locked,
         };
     }
 }

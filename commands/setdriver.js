@@ -30,9 +30,10 @@ module.exports = {
                     await message.channel.send(embed);
                     return;
                 }
-                const arg1 = args.shift();
-                const id = arg1.replace('<@', '').replace('>', '').replace('!', '');
-                const member = await server.guild.members.fetch(id);
+                args.shift();
+                //const id = arg1.replace('<@', '').replace('>', '').replace('!', '');
+                //const member = await server.guild.members.fetch(id);
+                const member = message.mentions.members.first()
                 if (member) {
                     var str = args.join(" ");
                     var arguments = parseQuotations(str);
@@ -50,8 +51,8 @@ module.exports = {
                     if (tier) {
                         const teamCol = tier.searchTeam(teamName.toLowerCase());
                         if (driverNumber) {
-                            const driver = tier.getDriver(id);
-                            const reserve = tier.getReserve(id);
+                            const driver = tier.getDriver(member.id);
+                            const reserve = tier.getReserve(member.id);
                             if (teamCol.size === 1) {
                                 const team = teamCol.first();
                                 if (driver && team) {
@@ -59,7 +60,7 @@ module.exports = {
                                         await driver.updateNum(String(driverNumber));
                                     }
                                     driver.setNumber(String(driverNumber));
-                                    driver.team.removeDriver(id);
+                                    driver.team.removeDriver(member.id);
                                     driver.setTeam(team);
                                     driver.setTier(tier);
                                     team.setDriver(driver);
@@ -86,6 +87,7 @@ module.exports = {
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                                     await advanced.fix();
                                 });
+                                server.save();
                             } else if (teamCol.size > 1) {
                                 const embed5 = new Discord.MessageEmbed();
                                 embed5.setColor('RED');
@@ -125,6 +127,7 @@ module.exports = {
                                     if (advanced.tier.name === tier.name)
                                         await advanced.fix();
                                 });
+                                server.save();
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);
                                 embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
@@ -144,13 +147,19 @@ module.exports = {
                         return;
                     }
                 } else {
-                    embed.setAuthor(`${arg1} is not a valid member! Usage is:`);
+                    embed.setAuthor(`No user was tagged! Usage is:`);
                     embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                     await message.channel.send(embed);
                     return;
                 }
             } catch(err) {
                 console.log(err);
+                const embed = new Discord.MessageEmbed();
+                embed.setAuthor(`Error! Usage is:`);
+                embed.setColor('RED');
+                embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
+                await message.channel.send(embed);
+                return;
             }
         }
     }

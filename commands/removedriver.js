@@ -25,9 +25,8 @@ module.exports = {
                 await message.channel.send(embed);
                 return;
             }
-            const arg1 = args.shift();
-            const id = arg1.replace('<@', '').replace('>', '').replace('!', '');
-            const member = await server.guild.members.fetch(id);
+            args.shift();
+            const member = message.mentions.members.first();
             if (member) {
                 const tierName = args.join(' ');
                 if (!tierName) {
@@ -65,6 +64,8 @@ module.exports = {
                         embed2.setAuthor(`Unknown driver / reserve ${member.user.username}`);
                     }
                     await message.channel.send(embed2);
+                    server.save();
+                    return;
                 }
             } else {
                 embed.setAuthor('Usage is:');

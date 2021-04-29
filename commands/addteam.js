@@ -62,11 +62,13 @@ module.exports = {
                 if (!tier) {
                     embed.setAuthor('Invalid tier name! Did not match any tier. Please try again!');
                     await message.channel.send(embed);
+                    return;
                 } else {
                     const existingTeam = tier.getTeam(name.toLowerCase());
                     if (existingTeam) {
                         embed.setAuthor('Team name already exists in that tier! Please use a different name!');
                         await message.channel.send(embed);
+                        return;
                     } else {
                         const mentions = reply.mentions.members;
                         const team = new Team(client, server, name, tier);
@@ -83,7 +85,7 @@ module.exports = {
                                     await newDriver.save();
                                 } else if (reserve) {
                                     const newDriver = reserve.toDriver(team);
-                                    team.setDriver(driver);
+                                    team.setDriver(newDriver);
                                     tier.removeReserve(reserve);
                                     tier.addDriver(newDriver);
                                     await newDriver.update();
