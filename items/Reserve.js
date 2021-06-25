@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const Database = require('../database/Database');
 const Driver = require('./Driver');
 const Server = require('./Server');
-const Team = require('./Team');
 const Tier = require('./Tier');
 
 class Reserve extends Driver {
@@ -37,10 +36,6 @@ class Reserve extends Driver {
         console.log(`[DRIVER] Updated reserve ${this.name} from ${this.guild.name}`);
     }
 
-    /**
-     * 
-     * @param {string} number 
-     */
     async updateNumber(number) {
         await Database.run(Database.driverUpdateNumberQuery, [number, this.id, this.server.id]);
         this.setNumber(number);
@@ -52,18 +47,10 @@ class Reserve extends Driver {
         console.log(`[DRIVER] Deleted reserve ${this.name} from ${this.guild.name}`);
     }
 
-    /**
-     * 
-     * @param {string} number 
-     */
     setNumber(number) {
         this.number = number;
     }
 
-    /**
-     * 
-     * @param {Tier} tier 
-     */
     setTier(tier) {
         this.tier = tier;
     }
@@ -72,10 +59,6 @@ class Reserve extends Driver {
         return `#${this.number} - ${this.member}`;
     }
 
-    /**
-     * @param {Team} team
-     * @returns {Driver}
-     */
     async toDriver(team) {
         this.team = team;
         this.tier.removeReserve(this.id);

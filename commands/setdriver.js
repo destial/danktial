@@ -155,7 +155,7 @@ module.exports = {
             } catch(err) {
                 console.log(err);
                 const embed = new Discord.MessageEmbed();
-                embed.setAuthor(`Error! Usage is:`);
+                embed.setAuthor(`Error, ${err}! Usage is:`);
                 embed.setColor('RED');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                 await message.channel.send(embed);

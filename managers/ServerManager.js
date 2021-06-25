@@ -5,6 +5,7 @@ const QueueWorker = require('../database/QueueWorker');
 const { Router } = require('express');
 const Racer = require('../items/Racer');
 const AdvancedAttendance = require('../items/AdvancedAttendance');
+const Team = require('../items/Team');
 
 class ServerManager {
     /**
@@ -292,11 +293,11 @@ class ServerManager {
      * @param {Server} server 
      */
     async removeServer(server) {
-        const deleted = this.servers.delete(server.id);
-        if (deleted) {
-            await Database.runNewDB('DELETE FROM servers WHERE id=(?)', [server.id]);
-            console.log(`[DELETED SERVER] Deleted server ${server.guild.name}`);
-        }
+        //const deleted = this.servers.delete(server.id);
+        //if (deleted) {
+        //    await Database.runNewDB('DELETE FROM servers WHERE id=(?)', [server.id]);
+        //    console.log(`[DELETED SERVER] Deleted server ${server.guild.name}`);
+        //}
     }
 
     /**
@@ -319,13 +320,20 @@ class ServerManager {
     editServer(server, req) {
         switch (req.headers.type) {
             case 'set_prefix': {
+                const oldPrefix = server.prefix;
                 server.setPrefix(req.body.prefix);
+                server.log(`Updated server prefix from ${oldPrefix} to ${server.prefix}`);
                 break;
             }
             case 'transfer_driver': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                const team = tier.getTeam(req.body.team);
-                tier.transferDriver(req.body.driver, team);
+                if (tier) {
+                    const team = tier.getTeam(req.body.team);
+                    if (team) {
+                        tier.transferDriver(req.body.driver, team);
+                        server.log(`Transferred driver of id ${req.body.driver} to team ${team.name} in tier ${tier.name}`);
+                    }
+                }
                 break;
             }
             case 'new_driver': {
@@ -344,6 +352,8 @@ class ServerManager {
                 break;
             }
             case 'delete_tier': {
+                const tier = server.getTierManager().getTier(req.body.name.replace("_", " "));
+                server.log(`fake deleting ${tier.name}`)
                 break;
             }
             case 'edit_tier': {
@@ -352,14 +362,41 @@ class ServerManager {
                 const tier = server.getTierManager().getTier(oldTierName);
                 if (tier) {
                     tier.setName(newTierName);
+                    server.log(`Updated tier ${oldTierName} to ${tier.name}`);
                 }
                 break;
             }
             case 'new_team': {
+                const tier = server.getTierManager().getTier(req.body.tier.replace("_", " "));
+                if (tier) {
+                    const team = new Team(client, server, req.body.team, tier);
+                    tier.addTeam(team);
+                    server.log(`Added team ${team.name} to tier ${tier.name}`);
+                }
                 break;
             }
             case 'delete_team': {
-                
+                const tier = server.getTierManager().getTier(req.body.tier.replace("_", " "));
+                if (tier) {
+                    const team = tier.getTeam(req.body.team);
+                    if (team) {
+                        tier.removeTeam(team.name);
+                        server.log(`Removed team ${team.name} from tier ${tier.name}`);
+                    }
+                }
+                break;
+            }
+            case 'edit_team' : {
+                const tier = server.getTierManager().getTier(req.body.tier.replace("_", " "));
+                if (tier) {
+                    const teamName = req.body.old_name;
+                    const team = tier.getTeam(teamName);
+                    if (team) {
+                        team.name = req.body.new_name;
+                        server.log(`Updated team ${teamName} to ${team.name} in tier ${tier.name}`);
+                    }
+                }
+                break;
             }
             default: {
                 break;

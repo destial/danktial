@@ -46,7 +46,7 @@ client.once('ready', () => {
                             await server.loadData(JSON.parse(row.data));
                         }
                     } catch(err) {
-                        console.log(`[BOOT] Error loading server ${row.id}`);
+                        //console.log(`[BOOT] Error loading server ${row.id}`);
                     }
                     size++;
                 }

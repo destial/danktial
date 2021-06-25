@@ -30,7 +30,7 @@ module.exports = {
             if (member) {
                 const tierName = args.join(' ');
                 if (!tierName) {
-                    embed.setAuthor('Usage is:');
+                    embed.setAuthor('No tier was supplied! Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     await message.channel.send(embed);
                     return;
@@ -68,7 +68,7 @@ module.exports = {
                     return;
                 }
             } else {
-                embed.setAuthor('Usage is:');
+                embed.setAuthor('No user was tagged! Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
                 await message.channel.send(embed);

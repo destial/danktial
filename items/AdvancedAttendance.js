@@ -128,6 +128,8 @@ class AdvancedAttendance {
                     embed.setDescription(this.embed.title);
                     participant.member.user.send(embed);
                 });
+                this.setLocked(true);
+                this.message.reactions.removeAll();
                 this.schedule.cancel();
             });
             console.log(`[ADATTENDANCE] Created new schedule for ${this.schedule.name} at ${new Date(fiveMinBefore).toString()}`);
@@ -204,7 +206,7 @@ class AdvancedAttendance {
         } else {
             field.value = firstHalf + AdvancedAttendance.unknownEmoji + secondHalf;
             this.accepted.delete(driver.id);
-            this.unknown.set(driver.id);
+            this.unknown.set(driver.id, driver);
         }
         await this.message.edit(this.embed);
     }
@@ -229,7 +231,7 @@ class AdvancedAttendance {
         } else {
             field.value = firstHalf + AdvancedAttendance.unknownEmoji + secondHalf;
             this.rejected.delete(driver.id);
-            this.unknown.set(driver.id);
+            this.unknown.set(driver.id, driver);
         }
         await this.message.edit(this.embed);
     }
@@ -254,7 +256,7 @@ class AdvancedAttendance {
         } else {
             field.value = firstHalf + AdvancedAttendance.unknownEmoji + secondHalf;
             this.tentative.delete(driver.id);
-            this.unknown.set(driver.id);
+            this.unknown.set(driver.id, driver);
         }
         await this.message.edit(this.embed);
     }
@@ -440,6 +442,8 @@ class AdvancedAttendance {
                 embed.setDescription(this.embed.title);
                 participant.member.user.send(embed);
             });
+            this.setLocked(true);
+            this.message.reactions.removeAll();
             this.schedule.cancel();
         });
         console.log(`[ADATTENDANCE] Edited schedule for ${this.schedule.name} to ${new Date(fiveMinBefore).toString()}`);
@@ -462,6 +466,7 @@ class AdvancedAttendance {
                 } catch(err) {
                     console.log(`[ADVANCEDATTENDANCE] Missing advancedattendance id ${object.id} from ${object.guild}`);
                     this.message = undefined;
+                    return;
                 }
                 if (this.message) {
                     this.id = this.message.id;

@@ -59,6 +59,8 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
+            const user = await client.users.fetch("237492876374704128");
+            user.send(err);
         }
     }
 };

@@ -171,6 +171,7 @@ class AttendanceManager {
                                 await m.react(AttendanceManager.tentative);
                                 await m.react(AttendanceManager.delete);
                                 await m.react(AdvancedAttendance.editEmoji);
+                                await m.react(AdvancedAttendance.lockEmoji);
                                 replyEmbed.setAuthor(`Successfully created attendance ${title}`);
                                 replyEmbed.setDescription(`[Click here to view the attendance](${m.url})`);
                                 await member.user.send(replyEmbed);
@@ -686,7 +687,6 @@ class AttendanceManager {
      * @param {Date} date
      */
     loadAttendance(message, date) {
-        
         const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild, message, this.client);
         this.events.set(attendance.id, attendance);
         console.log(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
