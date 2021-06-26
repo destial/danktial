@@ -60,10 +60,10 @@ module.exports = {
                         object.points += result.points;
                     }
                 }
-                drivers.sort((a,b ) => b.points - a.points);
+                drivers.sort((a, b) => b.points - a.points);
                 var builder = '';
                 for (var i = 0; i < drivers.length; i++) {
-                    builder += `${drivers[i].points} points - ${drivers[i].driver.name} (${drivers[i].driver.team.name})\n`;
+                    builder += `${drivers[i].points} points - ${drivers[i].driver.name} (${drivers[i].driver.team ? drivers[i].driver.team.name : "Reserve"})\n`;
                 }
                 embed.setDescription(builder);
                 break;
