@@ -383,10 +383,28 @@ class ServerManager {
             }
             case 'new_race': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                const race = new Race(tier, req.body.name, new Date(req.body.date), req.body.timezone);
+                const name = req.body.name;
+                const date = new Date(req.body.date);
+                const existing = tier.races.find(r => r.name.toLowerCase() === name.toLowerCase() && r.date.getTime() === date.getTime());
+                if (existing) break;
+                const race = new Race(tier, name, date, req.body.timezone);
                 tier.races.push(race);
                 tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 server.log(`Created new race ${race.name} in tier ${tier.name}`);
+                break;
+            }
+            case 'delete_race': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const index = req.body.index;
+                const race = tier.races[index - 1];
+                if (race.results.length) break;
+                server.log(`Deleted race ${race.name} in tier ${tier.name}`);
+                break;
+            }
+            case 'clear_season': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                tier.races = [];
+                server.log(`Cleared the calendar of ${tier.name}`);
                 break;
             }
             case 'new_driver': {

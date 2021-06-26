@@ -44,6 +44,12 @@ module.exports = {
             }
             try {
                 const date = await formatDate(arguments[2]);
+                const existing = tier.races.find(r => r.name.toLowerCase() === arguments[1].toLowerCase() && r.date.getTime() === date.getTime());
+                if (existing) {
+                    embed.setAuthor(`That race already exists in this calendar!`);
+                    message.channel.send(embed);
+                    return;
+                }
                 const race = new Race(tier, arguments[1], date, arguments[2].substring(arguments[2].length - 4).trim());
                 tier.races.push(race);
                 tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
