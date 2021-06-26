@@ -19,10 +19,6 @@ class Tier {
         this.client = client;
         this.server = server;
         /**
-         * @type {Discord.Collection<string, Driver>}
-         */
-        this.drivers = new Discord.Collection();
-        /**
          * @type {Discord.Collection<string, Reserve>}
          */
         this.reserves = new Discord.Collection();
@@ -83,9 +79,7 @@ class Tier {
                     });
                     if (team.drivers.size === 0) resolve1();
                 });
-                deleteDrivers.then(() => {
-                    this.drivers.clear();
-                });
+                deleteDrivers.then(() => {});
             });
             const deleteReserves = new Promise((resolve1, reject1) => {
                 this.reserves.forEach(async (reserve, id) => {
@@ -108,17 +102,7 @@ class Tier {
      * @param {Driver} driver 
      */
     addDriver(driver) {
-        if (!this.drivers.get(driver.id)) {
-            this.drivers.set(driver.id, driver);
-            // const racer = this.server.serverManager.racers.get(driver.id);
-            // if (racer) {
-            //     racer.addLeague(driver);
-            // } else {
-            //     const r = new Racer(this.client, driver.member.user);
-            //     r.addLeague(driver);
-            //     this.server.serverManager.racers.set(racer.id, racer);
-            // }
-        }
+        
     }
 
     /**
@@ -126,9 +110,7 @@ class Tier {
      * @param {Driver} driver 
      */
     loadDriver(driver) {
-        if (!this.drivers.get(driver.id)) {
-            this.drivers.set(driver.id, driver);
-        }
+        
     }
 
     /**
@@ -136,7 +118,7 @@ class Tier {
      * @param {string} id 
      */
     removeDriver(id) {
-        this.drivers.delete(id);
+        
     }
 
     /**
@@ -195,7 +177,14 @@ class Tier {
      * @param {string} id 
      */
     getDriver(id) {
-        return this.drivers.get(id);
+        for (const reserve of this.reserves) {
+            if (reserve[1].id === id) return reserve[1];
+        }
+        for (const team of this.teams) {
+            for (const driver of team[1].drivers) {
+                if (driver[1].id === id) return driver[1];
+            }
+        }
     }
 
     /**
@@ -274,7 +263,6 @@ class Tier {
             this.server.getTierManager().addTier(this);
             this.name = object.name;
             this.teams.clear();
-            this.drivers.clear();
             this.reserves.clear();
 
             for (const teamJSON of object.teams) {
@@ -310,8 +298,10 @@ class Tier {
 
             if (object.races) {
                 for (const raceObject of object.races) {
-                    const race = new Race(this, raceObject.name, new Date(raceObject.date));
+                    const race = new Race(this);
+                    race.load(this, raceObject);
                     this.races.push(race);
+                    this.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 }
             }
         }

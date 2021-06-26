@@ -33,10 +33,7 @@ class AdvancedAttendance {
         }
         this.date = new Date(date);
         this.attendanceManager = attendanceManager;
-        if (tier) {
-            this.tier = tier;
-            this.drivers = tier.drivers;
-        }
+        this.tier = tier;
         this.creator = undefined;
 
         /**

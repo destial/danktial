@@ -51,21 +51,11 @@ module.exports = {
                     if (tier) {
                         const teamCol = tier.searchTeam(teamName.toLowerCase());
                         if (driverNumber) {
-                            const driver = tier.getDriver(member.id);
                             const reserve = tier.getReserve(member.id);
+                            const driver = tier.getDriver(member.id);
                             if (teamCol.size === 1) {
                                 const team = teamCol.first();
-                                if (driver && team) {
-                                    if (driver.number != String(driverNumber)) {
-                                        await driver.updateNum(String(driverNumber));
-                                    }
-                                    driver.setNumber(String(driverNumber));
-                                    driver.team.removeDriver(member.id);
-                                    driver.setTeam(team);
-                                    driver.setTier(tier);
-                                    team.setDriver(driver);
-                                    await driver.update();
-                                } else if (reserve && team) {
+                                if (reserve && team) {
                                     reserve.setTier(tier);
                                     team.setDriver(reserve);
                                     tier.addDriver(reserve);
@@ -74,6 +64,18 @@ module.exports = {
                                         await reserve.updateNum(String(driverNumber));
                                     }
                                     reserve.toDriver(team);
+                                } else if (driver && team) {
+                                    if (driver.number != String(driverNumber)) {
+                                        await driver.updateNum(String(driverNumber));
+                                    }
+                                    driver.setNumber(String(driverNumber));
+                                    if (driver.team) {
+                                        driver.team.removeDriver(member.id);
+                                    }
+                                    driver.setTeam(team);
+                                    driver.setTier(tier);
+                                    team.setDriver(driver);
+                                    await driver.update();
                                 } else if (team) {
                                     const newDriver = new Driver(client, member, server, team, driverNumber, tier);
                                     tier.addDriver(newDriver);
@@ -99,22 +101,22 @@ module.exports = {
                                 embed5.setDescription(teamList);
                                 message.channel.send(embed5);
                             } else if (teamName.toLowerCase().includes('reserve')) {
-                                if (driver) {
-                                    driver.setTier(tier);
-                                    driver.team.removeDriver(driver.id);
-                                    tier.addReserve(driver);
+                                if (reserve) {
+                                    if (reserve.number != String(driverNumber)) {
+                                        reserve.updateNumber(String(driverNumber));
+                                    }
+                                    reserve.setNumber(String(driverNumber));
+                                    await reserve.updateReserve();
+                                } else if (driver) {
+                                    if (driver.team) {
+                                        driver.team.removeDriver(driver.id);
+                                        tier.addReserve(driver);
+                                    }
                                     tier.removeDriver(driver.id);
                                     if (driver.number != String(driverNumber)) {
                                         await driver.updateNum(String(driverNumber));
                                     }
                                     driver.toReserve();
-                                } else if (reserve) {
-                                    if (reserve.number != String(driverNumber)) {
-                                        reserve.updateNumber(String(driverNumber));
-                                    }
-                                    reserve.setNumber(String(driverNumber));
-                                    reserve.setTier(tier);
-                                    await reserve.updateReserve();
                                 } else {
                                     const newReserve = new Reserve(client, member, server, String(driverNumber), tier);
                                     tier.addReserve(newReserve);

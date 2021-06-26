@@ -385,6 +385,7 @@ class ServerManager {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = new Race(tier, req.body.name, new Date(req.body.date));
                 tier.races.push(race);
+                tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 server.log(`Created new race ${race.name} in tier ${tier.name}`);
                 break;
             }
@@ -478,6 +479,7 @@ class ServerManager {
                 break;
             }
         }
+        server.save();
     }
 
     /**

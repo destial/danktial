@@ -76,19 +76,19 @@ module.exports = {
                         const mentionP = new Promise((resolve, reject) => {
                             if (mentions.size === 0) resolve();
                             mentions.forEach(async (mention,index) => {
-                                const driver = tier.drivers.get(mention.id);
                                 const reserve = tier.reserves.get(mention.id);
-                                if (!driver && !reserve) {
-                                    const newDriver = new Driver(client, mention, server, team, 0, tier);
-                                    team.setDriver(newDriver);
-                                    tier.addDriver(newDriver);
-                                    await newDriver.save();
-                                } else if (reserve) {
+                                const driver = tier.getDriver(mention.id);
+                                if (reserve) {
                                     const newDriver = reserve.toDriver(team);
                                     team.setDriver(newDriver);
                                     tier.removeReserve(reserve);
                                     tier.addDriver(newDriver);
                                     await newDriver.update();
+                                } else if (!driver) {
+                                    const newDriver = new Driver(client, mention, server, team, 0, tier);
+                                    team.setDriver(newDriver);
+                                    tier.addDriver(newDriver);
+                                    await newDriver.save();
                                 } else {
                                     driver.setTeam(team);
                                 }
@@ -101,12 +101,16 @@ module.exports = {
                             const promise = new Promise((resolve, reject) => {
                                 team.drivers.forEach(async (driver, index) => {
                                     driverList += (`- ${driver.member}\n`);
-                                    if (index === team.drivers.last().id) resolve();
+                                    if (index === team.drivers.last().id) {
+                                        embed.setDescription(driverList);
+                                        resolve();
+                                    }
                                 });
-                                if (team.drivers.size === 0) resolve();
+                                if (team.drivers.size === 0) {
+                                    resolve();
+                                }
                             });
                             promise.then(async () => {
-                                embed.setDescription(driverList);
                                 await message.channel.send(embed);
                                 await team.save();
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async event => {

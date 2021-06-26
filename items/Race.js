@@ -8,10 +8,11 @@ class Race {
      * @param {string} name
      * @param {Date} date 
      */
-    constructor(tier, name, date) {
+    constructor(tier, name, date, timezone) {
         this.tier = tier;
         this.name = name;
         this.date = date;
+        this.timezone = timezone;
         this.link = undefined;
 
         /**
@@ -24,6 +25,7 @@ class Race {
         this.tier = tier;
         this.name = object.name;
         this.date = new Date(object.date);
+        this.timezone = object.timezone;
         for (const resultObject of object.results) {
             const result = new RaceResult();
             result.load(tier, resultObject);
@@ -41,6 +43,7 @@ class Race {
             name: this.name,
             tier: this.tier.name,
             date: this.date.toISOString(),
+            timezone: this.timezone,
             results,
             link: this.link,
         }

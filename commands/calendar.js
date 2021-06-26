@@ -1,0 +1,49 @@
+const Discord = require('discord.js');
+const Server = require('../items/Server');
+const formatFormalTime = require('../utils/formatFormatTime');
+const { timezoneNames } = require('../utils/timezones');
+
+module.exports = {
+    name: 'calendar',
+    aliases: [],
+    usage: '[ tier ]',
+    description: 'Shows the race calendar for that tier',
+    /**
+     * @param {Discord.Client} client 
+     * @param {Server} server 
+     * @param {string} command 
+     * @param {string[]} args 
+     * @param {Discord.Message} message
+     */
+    async run(client, server, command, args, message) {
+        const embed = new Discord.MessageEmbed();
+        embed.setColor('RED');
+        if (!args.length) {
+            embed.setAuthor('Usage is:');
+            embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+            embed.setFooter(this.description);
+            message.channel.send(embed);
+            return;
+        }
+        const tier = server.getTierManager().getTier(args.join(" "));
+        if (!tier) {
+            embed.setAuthor(`Invalid tier name of ${args.join(" ")}`);
+            await message.channel.send(embed);
+            return;
+        }
+        if (tier.races.length === 0) {
+            embed.setAuthor(`This tier does not have a calendar set!`);
+            await message.channel.send(embed);
+            return;
+        }
+        embed.setAuthor(`Calendar of ${tier.name}`);
+        for (var i = 0; i < 24 && i < tier.races.length; i++) {
+            const race = tier.races[i];
+            embed.addField(race.name, `${race.date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(race.timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(race.date, race.timezone)}`, false);
+        }
+        if (tier.races.length > 24) {
+            embed.setFooter('More races not shown');
+        }
+        await message.channel.send(embed);
+    }
+};

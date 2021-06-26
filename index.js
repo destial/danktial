@@ -65,7 +65,6 @@ client.once('ready', () => {
                         await server.modlog.setTopic(`danktial has been online since ${date} ${(time.startsWith('0') ? time.substring(1) : time)} ${server.guild.region.toLocaleUpperCase()}`);
                     }
                 });
-                console.log(client.manager.racers);
                 client.guilds.cache.forEach(async (guild, id) => {
                     guild.channels.cache.forEach(async (channel) => {
                         if (channel.isText() && channel.manageable && channel.viewable) {
