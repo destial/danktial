@@ -469,7 +469,7 @@ class ServerManager {
                     const teamName = req.body.old_name;
                     const team = tier.getTeam(teamName);
                     if (team) {
-                        team.name = req.body.new_name;
+                        team.setName(req.body.new_name);
                         server.log(`Updated team ${teamName} to ${team.name} in tier ${tier.name}`);
                     }
                 }

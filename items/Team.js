@@ -78,6 +78,22 @@ class Team {
         console.log(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
+    async setName(newName) {
+        if (newName) {
+            this.tier.teams.delete(this.name.toLowerCase());
+            this.name = newName;
+            this.tier.teams.set(this.name.toLowerCase(), this);
+            this.save();
+            this.server.save();
+            for (const attendance of this.server.getAttendanceManager().getAdvancedEvents().values()) {
+                if (attendance.tier == this) {
+                    attendance.embed.setFooter(this.name);
+                    await attendance.message.edit(attendance.embed);
+                }
+            }
+        }
+    }
+
     /**
      * 
      * @param {Tier} tier 
