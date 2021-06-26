@@ -383,7 +383,7 @@ class ServerManager {
             }
             case 'new_race': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                const race = new Race(tier, req.body.name, new Date(req.body.date));
+                const race = new Race(tier, req.body.name, new Date(req.body.date), req.body.timezone);
                 tier.races.push(race);
                 tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 server.log(`Created new race ${race.name} in tier ${tier.name}`);
