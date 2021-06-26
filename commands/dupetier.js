@@ -60,6 +60,7 @@ module.exports = {
                         promise.then(async () => {
                             newTier.saveTeams();
                             server.getTierManager().addTier(newTier);
+                            server.getTierManager().tiers.sort((a, b) => a.name.localeCompare(b.name));
                             embed.setAuthor(`Successfully duplicated tier ${newTier.name} from ${existingTier.name}. Here are the teams:`);
                             var teamList = '';
                             newTier.teams.forEach(team => {

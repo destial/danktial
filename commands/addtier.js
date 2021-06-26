@@ -49,7 +49,7 @@ module.exports = {
                     tier.addReserve(reserve);
                 });
                 server.getTierManager().addTier(tier);
-
+                server.getTierManager().tiers.sort((a, b) => a.name.localeCompare(b.name));
                 embed.setAuthor(`Created tier ${name} with drivers:`);
                 var driverList = "";
                 tier.reserves.forEach(reserve => {

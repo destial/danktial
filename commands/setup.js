@@ -189,6 +189,7 @@ module.exports = {
                                                     .setColor('RED');
                                                 await message.channel.send(embed4);
                                                 await server.save();
+                                                server.getTierManager().tiers.sort((a, b) => a.name.localeCompare(b.name));
                                             });
                                         } else {
                                             const embed2 = new Discord.MessageEmbed().setTitle('Ran out of time!');

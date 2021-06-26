@@ -181,6 +181,7 @@ class Server {
         data.tiers.forEach(async tier => {
             const t = new Tier(this.client, this, tier.name);
             await t.loadJSON(tier);
+            this.tierManager.tiers.sort((a, b) => a.name.localeCompare(b.name));
         });
 
         data.attendances.forEach(attendance => {
