@@ -8,6 +8,7 @@ const formatFormalTime = require('../utils/formatFormatTime');
 const Tier = require('../items/Tier');
 const formatTrack = require('../utils/formatTrack');
 const { timezones, timezoneNames } = require('../utils/timezones');
+const { Logger } = require('../utils/Utils');
 
 class AttendanceManager {
     /**
@@ -287,7 +288,7 @@ class AttendanceManager {
                 try {
                     await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
                     this.server.update();
-                    console.log(`[UPDATE] Saved attendance ${attendance.title} of id ${attendance.id}`);
+                    Logger.info(`[ATTENDANCE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                     return attendance;
                 } catch (err) {
                     console.log(err);
@@ -402,7 +403,7 @@ class AttendanceManager {
                                     try {
                                         await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
                                         this.server.update();
-                                        console.log(`[UPDATE] Saved attendance ${attendance.title} of id ${attendance.id}`);
+                                        Logger.info(`[ATTENDANCE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                                         resolve(attendance);
                                     } catch (err) {
                                         console.log(err);
@@ -537,7 +538,7 @@ class AttendanceManager {
                                                 embed3.setColor('RED');
                                                 await Database.run(Database.attendanceSaveQuery, [attendanceevent.id, String(attendanceevent.date.getTime()), attendanceevent.message.channel.id]);
                                                 this.server.update();
-                                                console.log(`[UPDATE] Edited attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
+                                                Logger.info(`[ATTENDANCE] Edited attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
                                                 embed3.setAuthor("Successfully edited event!");
                                                 member.user.send(embed3);
                                                 await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
@@ -689,7 +690,7 @@ class AttendanceManager {
     loadAttendance(message, date) {
         const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild, message, this.client);
         this.events.set(attendance.id, attendance);
-        console.log(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
+        Logger.boot(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -701,7 +702,7 @@ class AttendanceManager {
     async loadAdvancedAttendance(message, tier, date) {
         const attendance = new AdvancedAttendance(this.client, message, this.server, tier, date, this);
         this.advancedEvents.set(attendance.id, attendance);
-        console.log(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
+        Logger.boot(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
     }
 
     /**

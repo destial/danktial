@@ -8,7 +8,6 @@ const TierManager = require('../managers/TierManager');
 const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
 const formatDiscordRegion = require('../utils/formatDiscordRegion');
-const TwitchRequest = require('twitchrequest');
 const Ticket = require('./Ticket');
 const Tier = require('./Tier');
 const Attendance = require('./Attendance');
@@ -146,10 +145,10 @@ class Server {
                     const base = await channel.messages.fetch(ticket.base);
                     const t = new Ticket(member, ticket.number, channel, base, this.ticketManager);
                     this.ticketManager.loadTicket(t);
-                    console.log(`[LOAD] Loaded ticket ${t.number}`);
+                    Logger.boot(`[LOAD] Loaded ticket ${t.number}`);
                 }
             } catch(err) {
-                Logger.warn(`Missing ticket member ${ticket.member} or channel ${ticket.id} under ${this.guild.name}`);
+                Logger.warn(`[TICKET] Missing ticket member ${ticket.member} or channel ${ticket.id} under ${this.guild.name}`);
             }
         });
         data.tickets.panels.forEach(async panel => {
@@ -162,7 +161,7 @@ class Server {
                         this.ticketManager.loadTicketPanel(p);
                     }
                 } catch(err) {
-                    Logger.warn(`Missing ticket panel ${panel.id} under ${this.guild.name}`);
+                    Logger.warn(`[TICKETPANEL] Missing ticket panel ${panel.id} under ${this.guild.name}`);
                 }
             }
         });
@@ -179,9 +178,9 @@ class Server {
             this.countManager.setCount('channel', membercount);
         }
 
-        data.tiers.forEach(tier => {
+        data.tiers.forEach(async tier => {
             const t = new Tier(this.client, this, tier.name);
-            t.loadJSON(tier);
+            await t.loadJSON(tier);
         });
 
         data.attendances.forEach(attendance => {
@@ -263,9 +262,9 @@ class Server {
         this.alertChannel = channel;
         this.update();
         if (channel) {
-            console.log(`[SERVER] Set alerts channel of ${this.guild.name} to #${channel.name}`);
+            Logger.info(`[SERVER] Set alerts channel of ${this.guild.name} to #${channel.name}`);
         } else {
-            console.log(`[SERVER] Removed alerts channel of ${this.guild.name}`);
+            Logger.warn(`[SERVER] Removed alerts channel of ${this.guild.name}`);
         }
     }
 
@@ -273,26 +272,26 @@ class Server {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
         await Database.run(Database.serverDataUpdateQuery, [this.id, JSON.stringify(this.toJSON())]);
         await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
-        console.log(`[SERVER] Saved server ${this.guild.name}`);
+        Logger.info(`[SERVER] Saved server ${this.guild.name}`);
     }
 
     async update() {
         await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
         await Database.run(Database.serverDataUpdateQuery, [this.id, JSON.stringify(this.toJSON())]);
         await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
-        console.log(`[SERVER] Updated server ${this.guild.name}`);
+        Logger.info(`[SERVER] Updated server ${this.guild.name}`);
     }
 
     async delete() {
         await Database.run(Database.serverDeleteQuery, [this.id]);
         await Database.run(Database.serverDataDeleteQuery, [this.id]);
         await Database.runNewDB(Database.getStatement('delete'), [this.id]);
-        console.log(`[SERVER] Deleted server ${this.guild.name}`);
+        Logger.warn(`[SERVER] Deleted server ${this.guild.name}`);
     }
 
     async backup() {
         await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
-        console.log(`[BACKUP] Backed up server ${this.guild.name}`);
+        Logger.info(`[BACKUP] Backed up server ${this.guild.name}`);
     }
 
     /**
@@ -307,7 +306,7 @@ class Server {
         this.modlog = modlog;
         this.prefix = prefix;
         this.ticketManager.totaltickets = Number(tickets);
-        console.log(`[SERVER] Loaded server ${this.guild.name}`);
+        Logger.boot(`[SERVER] Loaded server ${this.guild.name}`);
     }
 
     /**
@@ -316,7 +315,7 @@ class Server {
      */
     loadEmbed(joinEmbed) {
         this.joinEmbed = joinEmbed;
-        console.log(`[SERVER] Loaded embed from server ${this.guild.name}`);
+        Logger.boot(`[SERVER] Loaded embed from server ${this.guild.name}`);
     }
 
     async loadJSON(object) {
@@ -331,7 +330,7 @@ class Server {
                 });
             }
         } catch(err) {
-            console.log(`[SERVER] Missing server ${object.id}`);
+            Logger.boot(`[SERVER] Missing server ${object.id}`);
         }
     }
 

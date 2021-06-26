@@ -21,6 +21,7 @@ class Team {
         this.drivers = new Discord.Collection();
         this.name = name;
         this.tier = tier;
+        this.logo = undefined;
     }
 
     /**
@@ -77,18 +78,23 @@ class Team {
         console.log(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
-    async loadJSON(object) {
+    /**
+     * 
+     * @param {Tier} tier 
+     * @param {any} object 
+     */
+    async loadJSON(tier, object) {
         this.server = await this.client.manager.fetch(object.guild);
         if (this.server) {
             this.name = object.name;
-            this.tier = this.server.getTierManager().getTier(object.tier);
+            this.tier = tier;
             if (this.tier) {
-                object.drivers.forEach(id => {
+                for (const id of object.drivers) {
                     const driver = this.tier.getDriver(id);
                     if (driver) {
                         this.drivers.set(driver.id, driver);
                     }
-                });
+                };
             }
         }
     }

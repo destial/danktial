@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Database = require('../database/Database');
+const { Logger } = require('../utils/Utils');
 const Driver = require('./Driver');
 const Server = require('./Server');
 const Tier = require('./Tier');
@@ -27,24 +28,24 @@ class Reserve extends Driver {
     async save() {
         await Database.run(Database.driverSaveQuery, [this.id, this.guild.id, this.number, 1, "", this.tier.name]);
         await this.server.update();
-        console.log(`[DRIVER] Saved reserve ${this.name} from ${this.guild.name}`);
+        Logger.info(`[DRIVER] Saved reserve ${this.name} from ${this.guild.name}`);
     }
 
     async updateReserve() {
         await Database.run(Database.driverUpdateQuery, [1, "", this.id, this.guild.id, this.number, this.tier.name]);
         await this.server.update();
-        console.log(`[DRIVER] Updated reserve ${this.name} from ${this.guild.name}`);
+        Logger.info(`[DRIVER] Updated reserve ${this.name} from ${this.guild.name}`);
     }
 
     async updateNumber(number) {
         await Database.run(Database.driverUpdateNumberQuery, [number, this.id, this.server.id]);
         this.setNumber(number);
-        console.log(`[DRIVER] Updated reserve number ${this.name} from ${this.guild.name}`);
+        Logger.info(`[DRIVER] Updated reserve number ${this.name} from ${this.guild.name}`);
     }
 
     async delete() {
         await Database.run(Database.driversDeleteQuery, [this.id, this.guild.id, this.tier.name]);
-        console.log(`[DRIVER] Deleted reserve ${this.name} from ${this.guild.name}`);
+        Logger.warn(`[DRIVER] Deleted reserve ${this.name} from ${this.guild.name}`);
     }
 
     setNumber(number) {

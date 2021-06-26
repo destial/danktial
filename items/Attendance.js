@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const schedule = require('node-schedule');
 const Database = require('../database/Database');
+const { Logger } = require('../utils/Utils');
 const Server = require('./Server');
 
 class Attendance {
@@ -89,7 +90,7 @@ class Attendance {
                 });
                 this.schedule.cancel();
             });
-            console.log(`[ATTENDANCE] Created schedule for ${this.schedule.name}`);
+            Logger.info(`[ATTENDANCE] Created schedule for ${this.schedule.name}`);
         }
     }
 
@@ -142,13 +143,13 @@ class Attendance {
     async delete() {
         await Database.run(Database.attendanceDeleteQuery, [this.id]);
         await this.server.update();
-        console.log(`[ATTENDANCE] Deleted attendance ${this.title} from ${this.guild.name}`);
+        Logger.warn(`[ATTENDANCE] Deleted attendance ${this.title} from ${this.guild.name}`);
     }
 
     async save() {
         await Database.run(Database.attendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id]);
         await this.server.update();
-        console.log(`[ATTENDANCE] Saved attendance ${this.title} from ${this.guild.name}`);
+        Logger.info(`[ATTENDANCE] Saved attendance ${this.title} from ${this.guild.name}`);
     }
 
     /**
@@ -266,7 +267,7 @@ class Attendance {
             });
             this.schedule.cancel();
         });
-        console.log(`[ATTENDANCE] Edited schedule for ${this.schedule.name}`);
+        Logger.info(`[ATTENDANCE] Edited schedule for ${this.schedule.name}`);
         return this.embed.spliceFields(0, 1, {
             name: "Date & Time", value: (dateString), inline: false
         });
@@ -281,7 +282,7 @@ class Attendance {
             this.guild = await this.client.guilds.fetch(object.guild);
             this.server = await this.client.manager.fetch(object.guild);
         } catch(err) {
-            console.log(`[ATTENDANCE] Missing guild ${object.guild}`);
+            Logger.warn(`[ATTENDANCE] Missing guild ${object.guild}`);
         }
         if (this.guild) {
             const channel = this.guild.channels.cache.get(object.channel);
@@ -292,7 +293,7 @@ class Attendance {
                         this.creator = await this.guild.members.fetch(object.creator);
                     }
                 } catch(err) {
-                    console.log(`[ATTENDANCE] Missing attendance id ${object.id} from ${object.guild}`);
+                    Logger.warn(`[ATTENDANCE] Missing attendance id ${object.id} from ${object.guild}`);
                     this.message = undefined;
                 }
                 if (this.message) {
@@ -313,7 +314,7 @@ class Attendance {
                                 this.accepted.set(member.id, member.user.username);
                             }
                         } catch(err) {
-                            console.log(`[ATTENDANCE] Missing member ${id}`);
+                            Logger.warn(`[ATTENDANCE] Missing member ${id}`);
                         }
                     });
 
@@ -324,7 +325,7 @@ class Attendance {
                                 this.rejected.set(member.id, member.user.username);
                             }
                         } catch(err) {
-                            console.log(`[ATTENDANCE] Missing member ${id}`);
+                            Logger.warn(`[ATTENDANCE] Missing member ${id}`);
                         }
                     });
 
@@ -335,7 +336,7 @@ class Attendance {
                                 this.tentative.set(member.id, member.user.username);
                             }
                         } catch(err) {
-                            console.log(`[ATTENDANCE] Missing member ${id}`);
+                            Logger.warn(`[ATTENDANCE] Missing member ${id}`);
                         }
                     });
                     this.server.getAttendanceManager().getEvents().set(this.id, this);
@@ -357,7 +358,7 @@ class Attendance {
                         });
                         this.schedule.cancel();
                     });
-                    console.log(`[ATTENDANCE] Loaded ${this.embed.title} from ${this.guild.name}`);
+                    Logger.boot(`[ATTENDANCE] Loaded ${this.embed.title} from ${this.guild.name}`);
                 }
             }
         }

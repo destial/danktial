@@ -3,6 +3,7 @@ const AttendanceManager= require('../managers/AttendanceManager');
 const TicketManager = require('../managers/TicketManager');
 
 const Discord = require('discord.js');
+const { Logger } = require('../utils/Utils');
 
 class Ticket {
     /**
@@ -164,7 +165,7 @@ class Ticket {
 
     async save() {
         await Database.run(Database.ticketSaveQuery, this.id, this.member.id, this.number, this.base.id);
-        console.log(`[TICKET] Created new ticket ${this.number}`);
+        Logger.info(`[TICKET] Created new ticket ${this.number}`);
     }
 
     async loadJSON(object) {

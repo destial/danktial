@@ -1,11 +1,13 @@
 const Discord = require('discord.js');
 const Server = require('../items/Server');
-const Database = require("../database/Database");
 const QueueWorker = require('../database/QueueWorker');
 const { Router } = require('express');
-const Racer = require('../items/Racer');
 const AdvancedAttendance = require('../items/AdvancedAttendance');
 const Team = require('../items/Team');
+const Race = require('../items/Race');
+const Tier = require('../items/Tier');
+const RaceResult = require('../items/RaceResult');
+const Driver = require('../items/Driver');
 
 class ServerManager {
     /**
@@ -18,10 +20,6 @@ class ServerManager {
          */
         this.servers = new Discord.Collection();
 
-        /**
-         * @type {Discord.Collection<string, Racer>}
-         */
-        this.racers = new Discord.Collection();
         this.queueWorker = new QueueWorker(this);
         this.client = client;
 
@@ -317,7 +315,7 @@ class ServerManager {
      * @param {Server} server 
      * @param {*} req 
      */
-    editServer(server, req) {
+    async editServer(server, req) {
         switch (req.headers.type) {
             case 'set_prefix': {
                 const oldPrefix = server.prefix;
@@ -336,7 +334,77 @@ class ServerManager {
                 }
                 break;
             }
+            case 'delete_race': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = tier.races.find(r => r.name === req.body.name);
+                if (race) {
+                    if (race.results.length !== 0) break;
+                    const index = tier.races.indexOf(race);
+                    tier.races.splice(index, 1);
+                    server.log(`Deleted race ${race.name} from tier ${tier.name}`);
+                }
+                break;
+            }
+            case 'new_raceresult': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = tier.races.find(r => r.name === req.body.race);
+                const driver = tier.getDriver(req.body.driver);
+                const result = new RaceResult(tier, driver, Number(req.body.position), Number(req.body.gap), Number(req.body.points), Number(req.body.stops), Number(req.body.penalties));
+                race.results.push(result);
+                server.log(`Created new race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
+                break;
+            }
+            case 'update_raceresult': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = tier.races.find(r => r.name === req.body.race);
+                const result = race.results.find(r => r.driver.id === req.body.driver);
+                if (result) {
+                    result.gap = Number(req.body.gap);
+                    result.penalties = Number(req.body.penalties);
+                    result.points = Number(req.body.points);
+                    result.stops = Number(req.body.stops);
+                    server.log(`Updated race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
+                }
+                break;
+            }
+            case 'delete_raceresult': {
+                break;
+            }
+            case 'update_race': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = tier.races.find(r => r.name === req.body.old_name);
+                if (race) {
+                    race.link = req.body.link;
+                    race.name = req.body.name;
+                    race.date = new Date(req.body.date);
+                    server.log(`Updated race ${race.name} in tier ${tier.name}`);
+                }
+                break;
+            }
+            case 'new_race': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = new Race(tier, req.body.name, new Date(req.body.date));
+                tier.races.push(race);
+                server.log(`Created new race ${race.name} in tier ${tier.name}`);
+                break;
+            }
             case 'new_driver': {
+                const member = await server.guild.members.fetch(req.body.driver);
+                if (member) {
+                    const tier = server.getTierManager().getTier(req.body.tier);
+                    var team = undefined;
+                    if (req.body.team !== "Reserves") {
+                        team = tier.getTeam(req.body.team);
+                    }
+                    const driver = new Driver(client, member, server, team, req.body.number, tier);
+                    if (team) {
+                        team.setDriver(driver);
+                    } else {
+                        tier.addReserve(driver);
+                    }
+                    tier.addDriver(driver);
+                    server.log(`Created new driver ${driver.name} in tier ${tier.name}`)
+                }
                 break;
             }
             case 'remove_driver': {
@@ -349,11 +417,19 @@ class ServerManager {
                 break;
             }
             case 'new_tier': {
+                const tier = new Tier(client, server, req.body.name);
+                server.getTierManager().addTier(tier);
+                server.log(`Created new tier ${tier.name}`);
                 break;
             }
             case 'delete_tier': {
                 const tier = server.getTierManager().getTier(req.body.name.replace("_", " "));
-                server.log(`fake deleting ${tier.name}`)
+                if (tier) {
+                    if (tier.teams.size !== 0) break;
+                    if (tier.reserves.size !== 0) break;
+                    server.getTierManager().removeTier(tier);
+                    server.log(`Deleted tier ${tier.name}`);
+                }
                 break;
             }
             case 'edit_tier': {

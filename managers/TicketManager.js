@@ -4,6 +4,7 @@ const Server = require('../items/Server');
 const formatTicket = require('../utils/formatTicket');
 const Database = require('../database/Database');
 const Discord = require('discord.js');
+const { Logger } = require('../utils/Utils');
 
 class TicketManager {
     /**
@@ -47,9 +48,9 @@ class TicketManager {
             this.ticketpanels.set(ticketPanel.id, ticketPanel);
             await Database.run(Database.ticketPanelSaveQuery, [panelMessage.id, channel.id]);
             await this.server.update();
-            console.log(`[UPDATE] Added ticket panel ${ticketPanel.id}`);
+            Logger.info(`[TICKETPANEL] Added ticket panel ${ticketPanel.id}`);
         } catch (err) {
-            console.log(`[ERROR] Something happened while creating a ticket panel!`, err);
+            Logger.warn(`[TICKETPANEL] Something happened while creating a ticket panel!`, err);
         }
     }
 
@@ -59,7 +60,7 @@ class TicketManager {
      */
     async loadTicketPanel(panel) {
         this.ticketpanels.set(panel.id, panel);
-        console.log(`[PANEL] Loaded ticket panel ${panel.id} from ${this.server.guild.name}`);
+        Logger.boot(`[TICKETPANEL] Loaded ticket panel ${panel.id} from ${this.server.guild.name}`);
     }
 
     /**
@@ -71,9 +72,9 @@ class TicketManager {
         if (deleted) {
             try {
                 await Database.run(Database.ticketPanelDeleteQuery, [id]);
-                console.log(`[UPDATE] Deleted ticket panel ${id} from ${this.server.guild.name}`);
+                Logger.info(`[TICKETPANEL] Deleted ticket panel ${id} from ${this.server.guild.name}`);
             } catch (err) {
-                console.log(err);
+                Logger.warn(err);
             }
         }
     }
@@ -145,7 +146,7 @@ class TicketManager {
                 this.opentickets.set(ticket.id, ticket);
                 await ticket.save();
                 await this.server.update();
-                console.log(`[UPDATE] Created ${ticket.channel.name} by ${ticket.member.displayName}`);
+                Logger.info(`[TICKET] Created ${ticket.channel.name} by ${ticket.member.displayName}`);
                 resolve(ticket);
             } catch (err) {
                 console.log(err);
@@ -161,7 +162,7 @@ class TicketManager {
     async loadTicket(ticket) {
         this.opentickets.set(ticket.id, ticket);
         this.totaltickets = this.opentickets.size;
-        console.log(`[TICKET] Loaded ticket ${ticket.channel.name} from ${this.server.guild.name}`);
+        Logger.boot(`[TICKET] Loaded ticket ${ticket.channel.name} from ${this.server.guild.name}`);
     }
 
     /**

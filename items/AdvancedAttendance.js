@@ -6,6 +6,7 @@ const Driver = require('./Driver');
 const Database = require('../database/Database');
 const schedule = require('node-schedule');
 const Attendance = require('./Attendance');
+const { Logger } = require('../utils/Utils');
 
 class AdvancedAttendance {
     /**
@@ -132,7 +133,7 @@ class AdvancedAttendance {
                 this.message.reactions.removeAll();
                 this.schedule.cancel();
             });
-            console.log(`[ADATTENDANCE] Created new schedule for ${this.schedule.name} at ${new Date(fiveMinBefore).toString()}`);
+            Logger.info(`[ADATTENDANCE] Created new schedule for ${this.schedule.name} at ${new Date(fiveMinBefore).toString()}`);
         }
 
         this.locked = false;
@@ -406,7 +407,7 @@ class AdvancedAttendance {
     async update() {
         await Database.run(Database.advancedAttendanceUpdateQuery, [String(this.date.getTime()), this.id, this.message.channel.id]);
         await this.server.update();
-        console.log(`[ADATTENDANCE] Updated attendance ${this.embed.title} from ${this.server.guild.name}`);
+        Logger.info(`[ADATTENDANCE] Updated attendance ${this.embed.title} from ${this.server.guild.name}`);
     }
 
     async delete() {
@@ -415,13 +416,13 @@ class AdvancedAttendance {
         }
         await this.server.update();
         await Database.run(Database.advancedAttendanceDeleteQuery, [this.id]);
-        console.log(`[ADATTENDANCE] Deleted attendance ${this.embed.title} from ${this.server.guild.name}`);
+        Logger.warn(`[ADATTENDANCE] Deleted attendance ${this.embed.title} from ${this.server.guild.name}`);
     }
 
     async save() {
         await Database.run(Database.advancedAttendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id, this.tier.name]);
         await this.server.update();
-        console.log(`[ADATTENDANCE] Saved attendance ${this.embed.title} from ${this.server.guild.name}`);
+        Logger.info(`[ADATTENDANCE] Saved attendance ${this.embed.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -464,7 +465,7 @@ class AdvancedAttendance {
                         this.creator = await this.server.guild.members.fetch(object.creator);
                     }
                 } catch(err) {
-                    console.log(`[ADVANCEDATTENDANCE] Missing advancedattendance id ${object.id} from ${object.guild}`);
+                    Logger.warn(`[ADVANCEDATTENDANCE] Missing advancedattendance id ${object.id} from ${object.guild}`);
                     this.message = undefined;
                     return;
                 }
@@ -498,11 +499,11 @@ class AdvancedAttendance {
                             });
                             this.schedule.cancel();
                         });
-                        console.log(`[ADATTENDANCE] Created schedule for ${this.embed.title}`);
+                        Logger.boot(`[ADATTENDANCE] Created schedule for ${this.embed.title}`);
                     }
                     this.server.getAttendanceManager().getAdvancedEvents().set(this.id, this);
                     //this.message.react(AdvancedAttendance.lockEmoji);
-                    console.log(`[ADATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
+                    Logger.boot(`[ADATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
                 }
             }
         }

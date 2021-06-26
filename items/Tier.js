@@ -1,8 +1,9 @@
 const Discord = require('discord.js');
 const Database = require('../database/Database');
 const Query = require('../database/Query');
+const { Logger } = require('../utils/Utils');
 const Driver = require('./Driver');
-const Racer = require('./Racer');
+const Race = require('./Race');
 const Reserve = require('./Reserve');
 const Server = require('./Server');
 const Team = require('./Team');
@@ -30,13 +31,18 @@ class Tier {
          */
         this.teams = new Discord.Collection();
 
+        /**
+         * @type {Race[]}
+         */
+        this.races = [];
+
         this.name = name;
-        console.log(`[TIER] Added tier ${this.name} from ${this.server.guild.name}`);
+        Logger.info(`[TIER] Added tier ${this.name} from ${this.server.guild.name}`);
     }
 
     async save() {
         await Database.run(Database.tierSaveQuery, [this.server.id, this.name]);
-        console.log(`[TIER] Saved tier ${this.name} from ${this.server.guild.name}`);
+        Logger.info(`[TIER] Saved tier ${this.name} from ${this.server.guild.name}`);
     }
 
     async saveTeams() {
@@ -56,12 +62,12 @@ class Tier {
     async update(newname) {
         await Database.run(Database.tierUpdateQuery, [newname, this.server.id, this.name]);
         this.name = newname;
-        console.log(`[TIER] Updated tier ${this.name} from ${this.server.guild.name}`);
+        Logger.info(`[TIER] Updated tier ${this.name} from ${this.server.guild.name}`);
     }
 
     async delete() {
         await Database.run(Database.tierDeleteQuery, [this.server.id, this.name]);
-        console.log(`[TIER] Deleted tier ${this.name} from ${this.server.guild.name}`);
+        Logger.warn(`[TIER] Deleted tier ${this.name} from ${this.server.guild.name}`);
     }
 
     async clear() {
@@ -122,14 +128,6 @@ class Tier {
     loadDriver(driver) {
         if (!this.drivers.get(driver.id)) {
             this.drivers.set(driver.id, driver);
-            // const racer = this.server.serverManager.racers.get(driver.id);
-            // if (racer) {
-            //     racer.addLeague(driver);
-            // } else {
-            //     const r = new Racer(this.client, driver.member.user);
-            //     r.addLeague(driver);
-            //     this.server.serverManager.racers.set(racer.id, racer);
-            // }
         }
     }
 
@@ -138,11 +136,6 @@ class Tier {
      * @param {string} id 
      */
     removeDriver(id) {
-        const driver = this.drivers.get(id);
-        // const racer = this.server.serverManager.racers.get(id);
-        // if (racer && driver) {
-        //     racer.removeLeague(driver);
-        // }
         this.drivers.delete(id);
     }
 
@@ -153,13 +146,6 @@ class Tier {
     addReserve(reserve) {
         if (!this.reserves.get(reserve.id)) {
             this.reserves.set(reserve.id, reserve);
-            // const racer = this.server.serverManager.racers.get(reserve.id);
-            // if (racer) {
-            //     racer.addLeague(reserve);
-            // } else {
-            //     const r = new Racer(this.client, reserve.member.user);
-            //     r.addLeague(reserve);
-            // }
         }
     }
 
@@ -168,11 +154,6 @@ class Tier {
      * @param {string} id 
      */
     removeReserve(id) {
-        const driver = this.reserves.get(id);
-        const racer = this.server.serverManager.racers.get(id);
-        // if (racer && driver) {
-        //     racer.removeLeague(driver);
-        // }
         this.reserves.delete(id);
     }
 
@@ -183,7 +164,7 @@ class Tier {
     addTeam(team) {
         if (!this.teams.get(team.name.toLowerCase())) {
             this.teams.set(team.name.toLowerCase(), team);
-            console.log(`[TEAM] Added team ${team.name} from ${this.server.guild.name} to ${this.name}`);
+            Logger.info(`[TEAM] Added team ${team.name} from ${this.server.guild.name} to ${this.name}`);
         }
     }
 
@@ -255,10 +236,6 @@ class Tier {
                     driver.team.removeDriver(id);
                     driver.setTeam(team);
                     team.setDriver(driver);
-                    const racer = this.server.serverManager.racers.get(id);
-                    if (racer) {
-                        racer.transferTeam(driver);
-                    }
                 }
             } else if (reserve) {
                 team.setDriver(reserve);
@@ -266,10 +243,6 @@ class Tier {
                 this.removeReserve(reserve.id);
                 reserve.toDriver(team);
                 reserve.setTeam(team);
-                // const racer = this.server.serverManager.racers.get(id);
-                // if (racer) {
-                //     racer.transferTeam(reserve);
-                // }
             } else {
                 return;
             }
@@ -285,10 +258,6 @@ class Tier {
                 this.addReserve(driver);
                 this.removeDriver(driver.id);
                 driver.toReserve();
-                // const racer = this.server.serverManager.racers.get(id);
-                // if (racer) {
-                //     racer.transferTeam(driver);
-                // }
                 this.server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                     if (advanced.tier === this) {
                         await advanced.fix();
@@ -302,42 +271,49 @@ class Tier {
     async loadJSON(object) {
         this.server = await this.client.manager.fetch(object.guild);
         if (this.server) {
+            this.server.getTierManager().addTier(this);
             this.name = object.name;
             this.teams.clear();
             this.drivers.clear();
             this.reserves.clear();
 
-            object.teams.forEach(teamJSON => {
+            for (const teamJSON of object.teams) {
                 const team = new Team(this.client, this.server, teamJSON.name, this);
                 this.addTeam(team);
-                teamJSON.drivers.forEach(async driverJSON => {
+                for (const driverJSON of teamJSON.drivers) {
                     try {
                         const member = await this.server.guild.members.fetch(driverJSON.id);
                         if (member) {
                             const driver = new Driver(this.client, member, this.server, team, driverJSON.number, this);
                             this.addDriver(driver);
                             team.setDriver(driver);
-                            console.log(`[DRIVER] Loaded driver ${driver.name} from ${driver.guild.name} into tier ${driver.tier.name} with team ${driver.team.name}`);
+                            Logger.info(`[DRIVER] Loaded driver ${driver.name} from ${driver.guild.name} into tier ${driver.tier.name} with team ${driver.team.name}`);
                         }
                     } catch(err) {
-                        console.log(`[TIER] Missing driver ${driverJSON.id}`);
+                        Logger.warn(`[TIER] Missing driver ${driverJSON.id}`);
                     }
-                });
-            });
-            this.server.getTierManager().addTier(this);
+                };
+            };
 
-            object.reserves.forEach(async reserveJSON => {
+            for (const reserveJSON of object.reserves) {
                 try {
                     const member = await this.server.guild.members.fetch(reserveJSON.id);
                     if (member) {
                         const reserve = new Reserve(this.client, member, this.server, reserveJSON.number, this);
                         this.addReserve(reserve);
-                        console.log(`[DRIVER] Loaded reserve ${reserve.name} from ${reserve.guild.name} into tier ${reserve.tier.name}`);
+                        Logger.info(`[DRIVER] Loaded reserve ${reserve.name} from ${reserve.guild.name} into tier ${reserve.tier.name}`);
                     }
                 } catch(err) {
-                    console.log(`[TIER] Missing reserve ${reserveJSON.id}`);
+                    Logger.warn(`[TIER] Missing reserve ${reserveJSON.id}`);
                 }
-            });
+            }
+
+            if (object.races) {
+                for (const raceObject of object.races) {
+                    const race = new Race(this, raceObject.name, new Date(raceObject.date));
+                    this.races.push(race);
+                }
+            }
         }
     }
 
@@ -350,11 +326,16 @@ class Tier {
         this.teams.forEach(team => {
             teamArray.push(team.toJSON());
         });
+        const racesArray = [];
+        this.races.forEach(race => {
+            racesArray.push(race.toJSON());
+        });
         return {
             name: this.name,
             guild: this.server.id,
             reserves: reservesArray,
             teams: teamArray,
+            races: racesArray,
         };
     }
 
