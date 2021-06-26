@@ -8,6 +8,7 @@ const Race = require('../items/Race');
 const Tier = require('../items/Tier');
 const RaceResult = require('../items/RaceResult');
 const Driver = require('../items/Driver');
+const QualiResult = require('../items/QualiResult');
 
 class ServerManager {
     /**
@@ -347,22 +348,48 @@ class ServerManager {
             }
             case 'new_raceresult': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                const race = tier.races.find(r => r.name === req.body.race);
+                const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
                 const result = new RaceResult(tier, driver, Number(req.body.position), Number(req.body.gap), Number(req.body.points), Number(req.body.stops), Number(req.body.penalties));
                 race.results.push(result);
+                race.results.sort((a, b) => a.position - b.position);
                 server.log(`Created new race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
+                break;
+            }
+            case 'new_qualiresult': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = tier.races[req.body.index];
+                const driver = tier.getDriver(req.body.driver);
+                const result = new QualiResult(tier, driver, Number(req.body.position));
+                race.qualifying.push(result);
+                race.qualifying.sort((a, b) => a.position - b.position);
+                server.log(`Created new qualifying result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
+                break;
+            }
+            case 'update_qualiresult': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = tier.races[req.body.index];
+                const result = race.qualifying.find(r => r.driver.id === req.body.driver);
+                if (result) {
+                    result.gap = Number(req.body.gap);
+                    race.qualifying.sort((a, b) => a.position - b.position);
+                    server.log(`Updated qualifying result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
+                }
+                break;
+            }
+            case 'delete_qualiresult': {
                 break;
             }
             case 'update_raceresult': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                const race = tier.races.find(r => r.name === req.body.race);
+                const race = tier.races[req.body.index];
                 const result = race.results.find(r => r.driver.id === req.body.driver);
                 if (result) {
                     result.gap = Number(req.body.gap);
                     result.penalties = Number(req.body.penalties);
                     result.points = Number(req.body.points);
                     result.stops = Number(req.body.stops);
+                    race.results.sort((a, b) => a.position - b.position);
                     server.log(`Updated race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
                 }
                 break;
@@ -398,6 +425,7 @@ class ServerManager {
                 const index = req.body.index;
                 const race = tier.races[index - 1];
                 if (race.results.length) break;
+                if (race.qualifying.length) break;
                 server.log(`Deleted race ${race.name} in tier ${tier.name}`);
                 break;
             }

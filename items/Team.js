@@ -80,15 +80,15 @@ class Team {
 
     async setName(newName) {
         if (newName) {
+            const oldName = this.name;
             this.tier.teams.delete(this.name.toLowerCase());
             this.name = newName;
             this.tier.teams.set(this.name.toLowerCase(), this);
             this.save();
             this.server.save();
             for (const attendance of this.server.getAttendanceManager().getAdvancedEvents().values()) {
-                if (attendance.tier == this) {
-                    attendance.embed.setFooter(this.name);
-                    await attendance.message.edit(attendance.embed);
+                if (attendance.tier == this.tier) {
+                    attendance.fixTeams(oldName, this.name);
                 }
             }
         }

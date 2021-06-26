@@ -90,6 +90,7 @@ module.exports = {
                                     tier.addDriver(newDriver);
                                     await newDriver.save();
                                 } else {
+                                    driver.team.removeDriver(driver.id);
                                     driver.setTeam(team);
                                 }
                                 if (index === mentions.last().id) resolve();
