@@ -63,7 +63,7 @@ class ServerManager {
                 if (server && req.headers.id) {
                     const members = await server.guild.members.fetch();
                     const member = members.get(req.headers.id);
-                    if (member && member.hasPermission('MANAGE_GUILD')) {
+                    if (member && member.hasPermission('MANAGE_CHANNELS')) {
                         return res.send(server.toJSON());
                     }
                     return res.status(403).send({
@@ -84,7 +84,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_GUILD')) {
+                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
                             const array = [];
                             for (const member of server.guild.members.cache.values()) {
                                 array.push(member.toJSON());
@@ -117,7 +117,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_GUILD')) {
+                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
                             const array = [];
                             for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
                                 array.push(attendance.toJSON());
@@ -150,7 +150,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_GUILD')) {
+                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
                             const attendance = server.getAttendanceManager().fetchAdvanced(attendanceID);
                             if (attendance) {
                                 return res.send(attendance.toJSON());
@@ -224,7 +224,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_GUILD')) {
+                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
                             const requestMember = members.get(memberID);
                             if (requestMember) {
                                 return res.send(requestMember.toJSON());
