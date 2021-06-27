@@ -45,6 +45,7 @@ class RaceResult {
         this.stops = object.stops;
         this.penalties = object.penalties;
         this.points = object.points;
+        this.position = object.position;
     }
 
     toJSON() {
