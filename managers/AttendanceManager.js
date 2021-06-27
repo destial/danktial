@@ -185,7 +185,7 @@ class AttendanceManager {
                                     await this.server.update();
                                     resolve(attendance);
                                 } catch (err) {
-                                    console.log(err);
+                                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                                     resolve(attendance);
                                 }
                             });
@@ -254,7 +254,7 @@ class AttendanceManager {
                     await a.save();
                     return a;
                 } catch (err) {
-                    console.log(err);
+                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                 }
             } else if (attendance.attendanceType === 'normal') {
                 const dateObject = new Date(attendance.next.date);
@@ -291,7 +291,7 @@ class AttendanceManager {
                     Logger.info(`[ATTENDANCE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                     return attendance;
                 } catch (err) {
-                    console.log(err);
+                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                 }
             }
         }
@@ -406,7 +406,7 @@ class AttendanceManager {
                                         Logger.info(`[ATTENDANCE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                                         resolve(attendance);
                                     } catch (err) {
-                                        console.log(err);
+                                        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                                         resolve(attendance);
                                     }
                                 });
@@ -414,7 +414,7 @@ class AttendanceManager {
                         }).catch((err) => {
                             embed.setAuthor(`There was an error while making an attendance!`);
                             member.user.send(embed);
-                            console.log(err);
+                            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                             resolve(undefined);
                         });
                     }
@@ -543,7 +543,7 @@ class AttendanceManager {
                                                 member.user.send(embed3);
                                                 await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
                                             } catch (err) {
-                                                console.log(err);
+                                                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                                             }
                                         });
                                     });
@@ -625,7 +625,7 @@ class AttendanceManager {
                                             await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
-                                            console.log(err);
+                                            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                                         }
                                     });
                                 } else if (emojiname === "🇩") {
@@ -641,7 +641,7 @@ class AttendanceManager {
                                             await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
-                                            console.log(err);
+                                            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                                         }
                                     });
                                 } else if (emojiname === "📆") {
@@ -666,7 +666,7 @@ class AttendanceManager {
                                                 await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                                 return;
                                             } catch (err) {
-                                                console.log(err);
+                                                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                                             }
                                         });
                                     }).catch((err) => {
@@ -691,6 +691,7 @@ class AttendanceManager {
         const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild, message, this.client);
         this.events.set(attendance.id, attendance);
         Logger.boot(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -703,6 +704,7 @@ class AttendanceManager {
         const attendance = new AdvancedAttendance(this.client, message, this.server, tier, date, this);
         this.advancedEvents.set(attendance.id, attendance);
         Logger.boot(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -805,7 +807,7 @@ class AttendanceManager {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
             } catch (err) {
-                console.log(err);
+                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
             }
         }
     }
@@ -828,7 +830,7 @@ class AttendanceManager {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
             } catch (err) {
-                console.log(err);
+                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
             }
         }
     }

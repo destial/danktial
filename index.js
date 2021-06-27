@@ -38,7 +38,7 @@ client.once('ready', () => {
             const loadServerData = new Promise(async (resolve, reject) => {
                 const rows = await Database.allNewDB('SELECT * FROM servers')
                 var size = 0;
-                for await (const row of rows) {
+                for (const row of rows) {
                     try {
                         const guild = await client.guilds.fetch(row.id);
                         const server = await client.manager.fetch(guild.id)
@@ -85,10 +85,18 @@ client.once('ready', () => {
             for (const file of listenerFiles) {
                 const listener = require(`./listeners/${file}`);
                 await listener.run(client, client.manager);
-                console.log(`[LISTENER] Registered ${file.replace('.js', '')}`);
+                Logger.boot(`[LISTENER] Registered ${file.replace('.js', '')}`);
             }
         });
     } catch(err) {
-        console.log(err);
+        client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
     } 
 });
+
+process.on('uncaughtException', (err) => {
+    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+});
+
+process.on('unhandledRejection', (err) => {
+    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err);
+})

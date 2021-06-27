@@ -28,6 +28,7 @@ module.exports = {
                     servers.addServer(server);
                     await server.save();
                     console.log(`[SERVER] Joined server ${guild.name}`);
+                    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Joined server ${guild.name}`);
                     if (guild.systemChannel) {
                         const embed = new Discord.MessageEmbed();
                         embed.setAuthor(`Thank you for inviting me!`);
@@ -39,7 +40,7 @@ module.exports = {
                     await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
                 }
             } catch (err) {
-                console.log('[ERROR] Something happened while trying to add a server!', err);
+                client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
             }
         });
 
@@ -48,11 +49,12 @@ module.exports = {
                 const server = await servers.fetch(guild.id);
                 if (server) {
                     await servers.removeServer(server);
+                    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Left server ${guild.name}`);
                     console.log(`[SERVER] Left server ${guild.name}`);
-                    await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
+                    //await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
                 }
             } catch (err) {
-                console.log('[ERROR] Something happened while trying to remove a server!', err);
+                client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
             }
         });
     }

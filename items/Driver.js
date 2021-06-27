@@ -37,6 +37,7 @@ class Driver {
         await Database.run(Database.driverUpdateQuery, [(this.team ? 0 : 1), (this.team ? this.team.name : ""), this.id, this.guild.id, this.number, this.tier.name]);
         await this.server.update();
         Logger.info(`[DRIVER] Updated ${this.team ? "driver" : "reserve"} ${this.name} from ${this.guild.name}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[DRIVER] Updated ${this.team ? "driver" : "reserve"} ${this.name} from ${this.guild.name}`);
     }
 
     async updateReserve() {

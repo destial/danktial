@@ -54,19 +54,19 @@ class Team {
     async save() {
         await Database.run(Database.teamSaveQuery, [this.server.id, this.name, this.tier.name]);
         await this.server.update();
-        console.log(`[TEAM] Saved team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Saved team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async delete() {
         await Database.run(Database.teamDeleteQuery, [this.server.id, this.name, this.tier.name]);
         await this.server.update();
-        console.log(`[TEAM] Deleted team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Deleted team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async update() {
         await Database.run(Database.teamUpdateQuery, [this.server.id, this.name, this.tier.name, this.server.id, this.name, this.tier.name]);
         await this.server.update();
-        console.log(`[TEAM] Updated team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Updated team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     /**
@@ -75,7 +75,7 @@ class Team {
      */
     async updateName(oldName) {
         await Database.run(Database.teamUpdateNameQuery, [this.name, this.server.id, oldName, this.tier.name]);
-        console.log(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async setName(newName) {
@@ -122,7 +122,7 @@ class Team {
                     if (driver) {
                         this.drivers.set(driver.id, driver);
                     }
-                };
+                }
             }
         }
     }

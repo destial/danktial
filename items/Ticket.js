@@ -77,7 +77,7 @@ class Ticket {
                         }
                     });
                 } catch (err) {
-                    console.log(err);
+                    this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                     resolve(false);
                 }
             } else {
@@ -120,7 +120,7 @@ class Ticket {
                         }
                     });
                 } catch (err) {
-                    console.log(err);
+                    this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                     resolve(false);
                 }
             } else {
@@ -154,10 +154,10 @@ class Ticket {
                     await Database.run(Database.ticketDeleteQuery, [this.id]);
                     this.ticketManager.opentickets.delete(this.id);
                     await this.ticketManager.server.update();
-                    console.log(`[TICKET] ${member.displayName} has closed ${this.channel.name} by ${this.member.displayName}`);
+                    this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TICKET] ${member.displayName} has closed ${this.channel.name} by ${this.member.displayName}`);
                 }, 5000);
             } catch (err) {
-                console.log(err);
+                this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                 resolve(false);
             }
         });

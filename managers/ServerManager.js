@@ -172,6 +172,7 @@ class ServerManager {
                         code: 404,
                     });
                 }
+                client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`${req.user.id} trying to access ${server.guild.name}`);
                 return res.status(403).send({
                     error: 'Unauthorized access',
                     code: 403,
@@ -258,6 +259,7 @@ class ServerManager {
                     this.servers.forEach(server => {
                         serverArray.push(server.toJSON());
                     });
+                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Sending ${serverArray.length} servers via GET request.`);
                     return res.send(serverArray);
                 }
                 return res.status(403).send({
@@ -280,6 +282,7 @@ class ServerManager {
             if (!s) {
                 this.servers.set(server.id, server);
                 console.log(`[SERVER] Added server ${server.guild.name} of id ${server.id}`);
+                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[SERVER] Added server ${server.guild.name} of id ${server.id}`);
                 resolve(server);
             } else {
                 reject();
@@ -317,6 +320,7 @@ class ServerManager {
      * @param {*} req 
      */
     async editServer(server, req) {
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(JSON.stringify(req));
         switch (req.headers.type) {
             case 'set_prefix': {
                 const oldPrefix = server.prefix;
@@ -382,7 +386,7 @@ class ServerManager {
                 const race = tier.races[req.body.index];
                 const result = race.results.find(r => r.driver.id === req.body.driver);
                 if (!result) break;
-                result.gap = Number(req.body.gap);
+                result.gap = req.body.gap;
                 result.penalties = Number(req.body.penalties);
                 result.points = Number(req.body.points);
                 result.stops = Number(req.body.stops);

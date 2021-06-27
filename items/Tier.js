@@ -274,6 +274,7 @@ class Tier {
                             this.addDriver(driver);
                             team.setDriver(driver);
                             Logger.info(`[DRIVER] Loaded driver ${driver.name} from ${driver.guild.name} into tier ${driver.tier.name} with team ${driver.team.name}`);
+                            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[DRIVER] Loaded driver ${driver.name} from ${driver.guild.name} into tier ${driver.tier.name} with team ${driver.team.name}`);
                         }
                     } catch(err) {
                         Logger.warn(`[TIER] Missing driver ${driverJSON.id}`);
