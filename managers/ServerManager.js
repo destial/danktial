@@ -488,6 +488,8 @@ class ServerManager {
                 break;
             }
             case 'new_tier': {
+                const existing = server.getTierManager().getTier(req.body.name);
+                if (existing) break;
                 const tier = new Tier(client, server, req.body.name);
                 server.getTierManager().addTier(tier);
                 server.log(`Created new tier ${tier.name}`);
