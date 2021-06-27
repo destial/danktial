@@ -439,6 +439,18 @@ class ServerManager {
                     const tier = server.getTierManager().getTier(req.body.tier);
                     if (!tier) break;
                     const team = tier.getTeam(req.body.team);
+                    if (tier.reserves.find(r => r.id === member.id) && team) {
+                        const reserve = tier.reserves.find(r => r.id === member.id);
+                        tier.transferDriver(reserve.id, team);
+                        break;
+                    }
+                    if (tier.teams.find(t => t.drivers.find(d => d.id === member.id))) {
+                        const oldTeam = tier.teams.find(t => t.drivers.find(d => d.id === member.id))
+                        if (oldTeam === team) break;
+                        const driver = oldTeam.getDriver(member.id);
+                        tier.transferDriver(driver, team);
+                        break;
+                    }
                     const driver = new Driver(this.client, member, server, team, req.body.number, tier);
                     if (team) {
                         team.setDriver(driver);
@@ -448,7 +460,7 @@ class ServerManager {
                     tier.addDriver(driver);
                     server.log(`Created new driver ${driver.name} in tier ${tier.name}`)
                 } catch (e) {
-                    console.log(e);
+                    server.log(e.message);
                 }
                 break;
             }
