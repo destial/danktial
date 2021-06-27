@@ -347,7 +347,7 @@ class ServerManager {
                 const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
                 if (!driver) break;
-                const result = new RaceResult(tier, driver, Number(req.body.position), Number(req.body.gap), Number(req.body.points), Number(req.body.stops), Number(req.body.penalties));
+                const result = new RaceResult(tier, driver, Number(req.body.position), req.body.gap, Number(req.body.points), Number(req.body.stops), Number(req.body.penalties));
                 race.results.push(result);
                 race.results.sort((a, b) => a.position - b.position);
                 server.log(`Created new race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
