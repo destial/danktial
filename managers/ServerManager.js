@@ -328,9 +328,8 @@ class ServerManager {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 if (!tier) break;
                 const team = tier.getTeam(req.body.team);
-                if (!team) break;
                 tier.transferDriver(req.body.driver, team);
-                server.log(`Transferred driver of id ${req.body.driver} to team ${team.name} in tier ${tier.name}`);
+                server.log(`Transferred driver of id ${req.body.driver} to ${team ? team.name : "Reserves"} in tier ${tier.name}`);
                 break;
             }
             case 'delete_race': {
@@ -540,6 +539,7 @@ class ServerManager {
                     const team = new Team(this.client, server, teamName, tier);
                     tier.addTeam(team);
                 }
+                server.log(`Created F1 teams in tier ${tier.name}`);
                 break;
             }
             case 'delete_team': {
