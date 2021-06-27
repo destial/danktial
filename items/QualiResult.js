@@ -6,14 +6,14 @@ class QualiResult {
      * 
      * @param {Tier} tier 
      * @param {Driver} driver 
-     * @param {number} gap 
+     * @param {number} time 
      * @param {number} position
      */
-     constructor(tier, driver, position) {
+     constructor(tier, driver, position, time) {
         this.position = position;
         this.tier = tier;
         this.driver = driver;
-        this.gap = gap;
+        this.time = time
     }
 
     /**
@@ -24,16 +24,29 @@ class QualiResult {
     load(tier, object) {
         this.tier = tier;
         this.driver = tier.getDriver(object.driver.id);
-        this.gap = object.gap;
+        if (!this.driver) {
+            this.driver = {
+                id: object.driver.id,
+                name: object.driver.name,
+                team: {
+                    name: object.driver.team
+                },
+            }
+        }
+        this.time = object.time;
         this.position = object.position;
     }
 
     toJSON() {
         return {
             tier: this.tier.name,
-            driver: this.driver.toJSON(),
+            driver: {
+                id: this.driver.id,
+                name: this.driver.name,
+                team: this.driver.team.name,
+            },
             position: this.position,
-            gap: this.gap,
+            time: this.time,
         }
     }
 }

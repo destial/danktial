@@ -326,30 +326,28 @@ class ServerManager {
             }
             case 'transfer_driver': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                if (tier) {
-                    const team = tier.getTeam(req.body.team);
-                    if (team) {
-                        tier.transferDriver(req.body.driver, team);
-                        server.log(`Transferred driver of id ${req.body.driver} to team ${team.name} in tier ${tier.name}`);
-                    }
-                }
+                if (!tier) break;
+                const team = tier.getTeam(req.body.team);
+                if (!team) break;
+                tier.transferDriver(req.body.driver, team);
+                server.log(`Transferred driver of id ${req.body.driver} to team ${team.name} in tier ${tier.name}`);
                 break;
             }
             case 'delete_race': {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races.find(r => r.name === req.body.name);
-                if (race) {
-                    if (race.results.length !== 0) break;
-                    const index = tier.races.indexOf(race);
-                    tier.races.splice(index, 1);
-                    server.log(`Deleted race ${race.name} from tier ${tier.name}`);
-                }
+                if (!race) break;
+                if (race.results.length !== 0) break;
+                const index = tier.races.indexOf(race);
+                tier.races.splice(index, 1);
+                server.log(`Deleted race ${race.name} from tier ${tier.name}`);
                 break;
             }
             case 'new_raceresult': {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
+                if (!driver) break;
                 const result = new RaceResult(tier, driver, Number(req.body.position), Number(req.body.gap), Number(req.body.points), Number(req.body.stops), Number(req.body.penalties));
                 race.results.push(result);
                 race.results.sort((a, b) => a.position - b.position);
@@ -360,6 +358,7 @@ class ServerManager {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
+                if (!driver) break;
                 const result = new QualiResult(tier, driver, Number(req.body.position));
                 race.qualifying.push(result);
                 race.qualifying.sort((a, b) => a.position - b.position);
@@ -370,11 +369,10 @@ class ServerManager {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races[req.body.index];
                 const result = race.qualifying.find(r => r.driver.id === req.body.driver);
-                if (result) {
-                    result.gap = Number(req.body.gap);
-                    race.qualifying.sort((a, b) => a.position - b.position);
-                    server.log(`Updated qualifying result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
-                }
+                if (!result) break;
+                result.time = Number(req.body.time);
+                race.qualifying.sort((a, b) => a.position - b.position);
+                server.log(`Updated qualifying result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
                 break;
             }
             case 'delete_qualiresult': {
@@ -384,14 +382,13 @@ class ServerManager {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races[req.body.index];
                 const result = race.results.find(r => r.driver.id === req.body.driver);
-                if (result) {
-                    result.gap = Number(req.body.gap);
-                    result.penalties = Number(req.body.penalties);
-                    result.points = Number(req.body.points);
-                    result.stops = Number(req.body.stops);
-                    race.results.sort((a, b) => a.position - b.position);
-                    server.log(`Updated race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
-                }
+                if (!result) break;
+                result.gap = Number(req.body.gap);
+                result.penalties = Number(req.body.penalties);
+                result.points = Number(req.body.points);
+                result.stops = Number(req.body.stops);
+                race.results.sort((a, b) => a.position - b.position);
+                server.log(`Updated race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
                 break;
             }
             case 'delete_raceresult': {
@@ -400,12 +397,11 @@ class ServerManager {
             case 'update_race': {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races.find(r => r.name === req.body.old_name);
-                if (race) {
-                    race.link = req.body.link;
-                    race.name = req.body.name;
-                    race.date = new Date(req.body.date);
-                    server.log(`Updated race ${race.name} in tier ${tier.name}`);
-                }
+                if (!race) break;
+                race.link = req.body.link;
+                race.name = req.body.name;
+                race.date = new Date(req.body.date);
+                server.log(`Updated race ${race.name} in tier ${tier.name}`);
                 break;
             }
             case 'new_race': {
@@ -437,21 +433,20 @@ class ServerManager {
             }
             case 'new_driver': {
                 const member = await server.guild.members.fetch(req.body.driver);
-                if (member) {
-                    const tier = server.getTierManager().getTier(req.body.tier);
-                    var team = undefined;
-                    if (req.body.team !== "Reserves") {
-                        team = tier.getTeam(req.body.team);
-                    }
-                    const driver = new Driver(client, member, server, team, req.body.number, tier);
-                    if (team) {
-                        team.setDriver(driver);
-                    } else {
-                        tier.addReserve(driver);
-                    }
-                    tier.addDriver(driver);
-                    server.log(`Created new driver ${driver.name} in tier ${tier.name}`)
+                if (!member) break;
+                const tier = server.getTierManager().getTier(req.body.tier);
+                var team = undefined;
+                if (req.body.team !== "Reserves") {
+                    team = tier.getTeam(req.body.team);
                 }
+                const driver = new Driver(client, member, server, team, req.body.number, tier);
+                if (team) {
+                    team.setDriver(driver);
+                } else {
+                    tier.addReserve(driver);
+                }
+                tier.addDriver(driver);
+                server.log(`Created new driver ${driver.name} in tier ${tier.name}`)
                 break;
             }
             case 'remove_driver': {
@@ -470,55 +465,48 @@ class ServerManager {
                 break;
             }
             case 'delete_tier': {
-                const tier = server.getTierManager().getTier(req.body.name.replace("_", " "));
-                if (tier) {
-                    if (tier.teams.size !== 0) break;
-                    if (tier.reserves.size !== 0) break;
-                    server.getTierManager().removeTier(tier);
-                    server.log(`Deleted tier ${tier.name}`);
-                }
+                const tier = server.getTierManager().getTier(req.body.name);
+                if (!tier) break;
+                if (tier.teams.size !== 0) break;
+                if (tier.reserves.size !== 0) break;
+                server.getTierManager().removeTier(tier);
+                server.log(`Deleted tier ${tier.name}`);
                 break;
             }
             case 'edit_tier': {
                 const oldTierName = req.body.old_name;
                 const newTierName = req.body.new_name;
                 const tier = server.getTierManager().getTier(oldTierName);
-                if (tier) {
-                    tier.setName(newTierName);
-                    server.log(`Updated tier ${oldTierName} to ${tier.name}`);
-                }
+                if (!tier) break;
+                tier.setName(newTierName);
+                server.log(`Updated tier ${oldTierName} to ${tier.name}`);
                 break;
             }
             case 'new_team': {
-                const tier = server.getTierManager().getTier(req.body.tier.replace("_", " "));
-                if (tier) {
-                    const team = new Team(client, server, req.body.team, tier);
-                    tier.addTeam(team);
-                    server.log(`Added team ${team.name} to tier ${tier.name}`);
-                }
+                const tier = server.getTierManager().getTier(req.body.tier);
+                if (!tier) break;
+                const team = new Team(client, server, req.body.team, tier);
+                tier.addTeam(team);
+                server.log(`Added team ${team.name} to tier ${tier.name}`);
                 break;
             }
             case 'delete_team': {
-                const tier = server.getTierManager().getTier(req.body.tier.replace("_", " "));
-                if (tier) {
-                    const team = tier.getTeam(req.body.team);
-                    if (team) {
-                        tier.removeTeam(team.name);
-                        server.log(`Removed team ${team.name} from tier ${tier.name}`);
-                    }
-                }
+                const tier = server.getTierManager().getTier(req.body.tier);
+                if (!tier) break;
+                const team = tier.getTeam(req.body.team);
+                if (!team) break;
+                tier.removeTeam(team.name);
+                server.log(`Removed team ${team.name} from tier ${tier.name}`);
                 break;
             }
             case 'edit_team' : {
-                const tier = server.getTierManager().getTier(req.body.tier.replace("_", " "));
-                if (tier) {
-                    const teamName = req.body.old_name;
-                    const team = tier.getTeam(teamName);
-                    if (team) {
-                        team.setName(req.body.new_name);
-                        server.log(`Updated team ${teamName} to ${team.name} in tier ${tier.name}`);
-                    }
-                }
+                const tier = server.getTierManager().getTier(req.body.tier);
+                if (!tier) break;
+                const teamName = req.body.old_name;
+                const team = tier.getTeam(teamName);
+                if (!team) break;
+                team.setName(req.body.new_name);
+                server.log(`Updated team ${teamName} to ${team.name} in tier ${tier.name}`);
                 break;
             }
             default: {

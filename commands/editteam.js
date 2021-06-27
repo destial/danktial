@@ -95,36 +95,30 @@ module.exports = {
                                     nameCollector.stop();
                                 });
                                 nameCollector.on('end', async mCol => {
-                                    const oldName = team.name;
                                     const updateName = mCol.first().content;
                                     if (updateName.length >= 256) {
                                         embed.setAuthor(`Team name cannot be longer than 256 characters!`);
                                         message.channel.send(embed);
                                         return;
                                     }
-                                    const existingTeam = tier.getTeam(updateName.toLowerCase());
+                                    const existingTeam = tier.getTeam(updateName);
                                     if (existingTeam) {
                                         embed.setAuthor('Team with that name already exists in that tier! Please try a different name!');
                                         message.channel.send(embed);
                                         return;
                                     }
-                                    var driverList1 = "";
-                                    team.name = updateName;
+                                    const oldName = team.name;
+                                    team.setName(updateName);
                                     embed.setAuthor(`Edited team ${team.name} under tier ${tier.name} with drivers:`);
+                                    var driverList1 = "";
                                     team.drivers.forEach(async driver => {
                                         driverList1 += (`- ${driver.member}\n`);
                                         await driver.update();
                                     });
-                                    await team.updateName(oldName);
                                     await server.update();
                                     embed.setDescription(driverList1);
                                     await message.channel.send(embed);
                                     await server.log(`${message.member.user.tag} has edited the name of team ${oldName} to ${team.name}`);
-                                    server.getAttendanceManager().getAdvancedEvents().forEach(async event => {
-                                        if (event.tier === tier) {
-                                            await event.fixTeams(oldName, team.name);
-                                        }
-                                    });
                                 });
                             } else if (messageReaction.emoji.name === "🏎️") {
                                 team.drivers.clear();

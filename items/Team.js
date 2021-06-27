@@ -91,6 +91,18 @@ class Team {
                     attendance.fixTeams(oldName, this.name);
                 }
             }
+            for (const race of this.tier.races) {
+                for (const result of race.results) {
+                    if (result.driver.team.name === oldName) {
+                        result.driver.team.name = this.name;
+                    }
+                }
+                for (const result of race.qualifying) {
+                    if (result.driver.team.name === oldName) {
+                        result.driver.team.name = this.name;
+                    } 
+                }
+            }
         }
     }
 
