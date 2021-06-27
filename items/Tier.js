@@ -177,14 +177,15 @@ class Tier {
      * @param {string} id 
      */
     getDriver(id) {
-        for (const reserve of this.reserves) {
-            if (reserve[1].id === id) return reserve[1];
+        for (const reserve of this.reserves.values()) {
+            if (reserve.id === id) return reserve;
         }
-        for (const team of this.teams) {
-            for (const driver of team[1].drivers) {
-                if (driver[1].id === id) return driver[1];
+        for (const team of this.teams.values()) {
+            for (const driver of team.drivers.values()) {
+                if (driver.id === id) return driver;
             }
         }
+        return;
     }
 
     /**

@@ -351,6 +351,7 @@ class ServerManager {
                 const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
                 if (!driver) break;
+                if (race.results.find(r => r.driver.id === driver.id)) break;
                 const result = new RaceResult(tier, driver, Number(req.body.position), req.body.gap, Number(req.body.points), Number(req.body.stops), Number(req.body.penalties));
                 race.results.push(result);
                 race.results.sort((a, b) => a.position - b.position);
@@ -362,6 +363,7 @@ class ServerManager {
                 const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
                 if (!driver) break;
+                if (race.qualifying.find(r => r.driver.id === driver.id)) break;
                 const result = new QualiResult(tier, driver, Number(req.body.position), req.body.time);
                 race.qualifying.push(result);
                 race.qualifying.sort((a, b) => a.position - b.position);
