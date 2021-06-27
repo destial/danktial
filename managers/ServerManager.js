@@ -358,7 +358,7 @@ class ServerManager {
                 const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
                 if (!driver) break;
-                const result = new QualiResult(tier, driver, Number(req.body.position));
+                const result = new QualiResult(tier, driver, Number(req.body.position), req.body.time);
                 race.qualifying.push(result);
                 race.qualifying.sort((a, b) => a.position - b.position);
                 server.log(`Created new qualifying result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
