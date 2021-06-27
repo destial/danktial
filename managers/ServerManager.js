@@ -432,7 +432,8 @@ class ServerManager {
                 break;
             }
             case 'new_driver': {
-                const member = await server.guild.members.fetch(req.body.driver);
+                const members = await server.guild.members.fetch();
+                const member = members.get(req.body.driver);
                 if (!member) break;
                 const tier = server.getTierManager().getTier(req.body.tier);
                 var team = undefined;
