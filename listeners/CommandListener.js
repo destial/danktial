@@ -21,7 +21,6 @@ module.exports = {
                     client.commands.set(alias.toLowerCase(), command);
                 });
             }
-            console.log(`[COMMAND] Registered ${command.name}`);
         }
         client.on('message', async (message) => {
             if (!message.author) return;
@@ -34,9 +33,12 @@ module.exports = {
                     const args = msg.slice(server.prefix.length).split(' ');
                     const command = args.shift().toLowerCase();
                     try {
-                        if (client.commands.get(command))
+                        if (client.commands.get(command)) {
                             await client.commands.get(command).run(client, server, command, args, message);
-                    } catch (err) {}
+                        }
+                    } catch (err) {
+                        client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                    }
                 }
             }
         });

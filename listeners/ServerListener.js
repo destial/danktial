@@ -21,7 +21,9 @@ module.exports = {
                             embed.setAuthor('I do not have enough permissions to function normally! Please allow me to manage the server and/or set me as administrator!');
                             try {
                                 await guild.systemChannel.send(embed);
-                            } catch(err) {}
+                            } catch(err) {
+                                client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                            }
                         }
                     }
                     const server = new Server(client, guild, undefined, '-', 0, servers);
