@@ -448,7 +448,7 @@ class ServerManager {
                         const oldTeam = tier.teams.find(t => t.drivers.find(d => d.id === member.id))
                         if (oldTeam === team) break;
                         const driver = oldTeam.getDriver(member.id);
-                        tier.transferDriver(driver, team);
+                        tier.transferDriver(driver.id, team);
                         break;
                     }
                     const driver = new Driver(this.client, member, server, team, req.body.number, tier);
@@ -465,6 +465,20 @@ class ServerManager {
                 break;
             }
             case 'remove_driver': {
+                try {
+                    const tier = server.getTierManager().getTier(req.body.tier);
+                    if (!tier) break;
+                    const driver = tier.getDriver(req.body.driver);
+                    if (driver.team) {
+                        driver.team.removeDriver(req.body.driver);
+                    } else {
+                        tier.removeReserve(req.body.driver);
+                    }
+                    tier.removeDriver(req.body.driver);
+                    server.log(`Removed driver ${driver.name} in tier ${tier.name}`)
+                } catch (e) {
+                    server.log(e.message);
+                }
                 break;
             }
             case 'new_advanced_attendance': {

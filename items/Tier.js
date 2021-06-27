@@ -217,24 +217,22 @@ class Tier {
      * @param {Team} team 
      */
     async transferDriver(id, team) {
-        const driver = this.getDriver(id);
         const reserve = this.getReserve(id);
+        const driver = this.getDriver(id);
         if (team) {
-            if (driver) {
-                if (team != driver.team) {
-                    driver.team.removeDriver(id);
-                    driver.setTeam(team);
-                    team.setDriver(driver);
-                }
-            } else if (reserve) {
+            if (reserve) {
                 team.setDriver(reserve);
                 this.addDriver(reserve);
                 this.removeReserve(reserve.id);
                 reserve.toDriver(team);
                 reserve.setTeam(team);
-            } else {
-                return;
-            }
+            } else if (driver) {
+                if (team != driver.team) {
+                    driver.team.removeDriver(id);
+                    driver.setTeam(team);
+                    team.setDriver(driver);
+                }
+            } else return;
             this.server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                 if (advanced.tier === this) {
                     await advanced.fix();
