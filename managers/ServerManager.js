@@ -432,24 +432,28 @@ class ServerManager {
                 break;
             }
             case 'new_driver': {
-                const members = await server.guild.members.fetch();
-                const member = members.get(req.body.driver);
-                if (!member) break;
-                await server.log('have member');
-                const tier = server.getTierManager().getTier(req.body.tier);
-                if (!tier) break;
-                await server.log('have tier');
-                const team = tier.getTeam(req.body.team);
-                const driver = new Driver(client, member, server, team, req.body.number, tier);
-                if (team) {
-                    team.setDriver(driver);
-                    await server.log('have team');
-                } else {
-                    tier.addReserve(driver);
-                    await server.log('is reserve');
+                try {
+                    const members = await server.guild.members.fetch();
+                    const member = members.get(req.body.driver);
+                    if (!member) break;
+                    await server.log('have member');
+                    const tier = server.getTierManager().getTier(req.body.tier);
+                    if (!tier) break;
+                    await server.log('have tier');
+                    const team = tier.getTeam(req.body.team);
+                    const driver = new Driver(client, member, server, team, req.body.number, tier);
+                    if (team) {
+                        team.setDriver(driver);
+                        await server.log('have team');
+                    } else {
+                        tier.addReserve(driver);
+                        await server.log('is reserve');
+                    }
+                    tier.addDriver(driver);
+                    server.log(`Created new driver ${driver.name} in tier ${tier.name}`)
+                } catch (e) {
+                    server.log(e.message);
                 }
-                tier.addDriver(driver);
-                server.log(`Created new driver ${driver.name} in tier ${tier.name}`)
                 break;
             }
             case 'remove_driver': {
