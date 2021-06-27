@@ -521,6 +521,27 @@ class ServerManager {
                 server.log(`Added team ${team.name} to tier ${tier.name}`);
                 break;
             }
+            case 'new_f1_teams': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                if (!tier) break;
+                const teamNames = [];
+                teamNames.push('Mercedes-AMG Petronas');
+                teamNames.push('Scuderia Ferrari');
+                teamNames.push('Redbull Racing');
+                teamNames.push('Aston Martin F1');
+                teamNames.push('Alpine F1');
+                teamNames.push('McLaren F1');
+                teamNames.push('Haas F1 Team');
+                teamNames.push('Scuderia Alpha Tauri');
+                teamNames.push('Alfa Romeo F1');
+                teamNames.push('Williams Racing');
+                for (const teamName of teamNames) {
+                    if (tier.getTeam(teamName)) continue;
+                    const team = new Team(this.client, server, teamName, tier);
+                    tier.addTeam(team);
+                }
+                break;
+            }
             case 'delete_team': {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 if (!tier) break;
