@@ -241,7 +241,7 @@ class Tier {
             });
             await this.server.update();
         } else {
-            if (driver) {
+            if (driver && !reserve) {
                 driver.team.removeDriver(driver.id);
                 this.addReserve(driver);
                 this.removeDriver(driver.id);
@@ -296,13 +296,13 @@ class Tier {
 
             if (object.races) {
                 for (const raceObject of object.races) {
-                    const race = new Race(this);
+                    const race = new Race(this.client, this);
                     race.load(this, raceObject);
                     this.races.push(race);
                     this.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 }
             }
-            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TIER] Loaded tier ${this.name} in ${this.server.guild.name}`);
+            //this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TIER] Loaded tier ${this.name} in ${this.server.guild.name}`);
         }
     }
 

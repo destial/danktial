@@ -17,7 +17,7 @@ module.exports = {
      * @param {Discord.Message} message
      */
     async run(client, server, command, args, message) {
-        if (message.member.id === '237492876374704128' && message.guild.id === '406814017743486976') {
+        if (message.member.id === '237492876374704128') {
             if (command === 'announce') {
                 if (!args.length) {
                     message.channel.send(`Usage is ${server.prefix}${this.name} ${this.usage}`);
@@ -44,21 +44,24 @@ module.exports = {
                         console.log(`[ANNOUNCEMENT] Sent announcement to ${server.guild.name}`);
                     }
                 });
-                message.channel.stopTyping();
-                await message.channel.send(embed);
+                message.channel.send(embed);
             } else if (command === 'backup') {
                 const embed = new Discord.MessageEmbed();
                 embed.setAuthor('Backing up data now!');
                 embed.setColor('RED');
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 const queries = [];
                 server.serverManager.servers.forEach(server => {
                     const query = new Query('REPLACE INTO servers (id,data) VALUES (?,?)', [server.id, JSON.stringify(server.toJSON())]);
                     queries.push(query);
                 });
-                await Database.multipleRunNewDB(queries);
-                embed.setAuthor('Successfully backed up data!');
-                await message.channel.send(embed);
+                const d = Database.multipleRunNewDB(queries);
+                d.then(() => { 
+                    embed.setAuthor('Successfully backed up data!');
+                    message.channel.send(embed);
+                }).catch((err) => {
+                    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                })
             }
         }
     }

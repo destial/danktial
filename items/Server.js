@@ -206,6 +206,7 @@ class Server {
             //     this.subbedChannels.push(user.id);
             // }
         });
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[SERVER] Loaded ${this.guild.name}`);
     }
 
     /**

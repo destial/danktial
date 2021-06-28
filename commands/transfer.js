@@ -61,17 +61,18 @@ module.exports = {
                     }
                     const team = teamCol.first();
                     const driver = tier.getDriver(member.id);
+                    if (!driver) return;
                     const reserve = tier.getReserve(member.id);
                     if (team) {
-                        if (driver) {
-                            driver.team.removeDriver(member.id);
-                            driver.setTeam(team);
-                            team.setDriver(driver);
-                        } else if (reserve) {
+                        if (reserve) {
                             team.setDriver(reserve);
                             tier.addDriver(reserve);
                             tier.removeReserve(reserve.id);
                             reserve.toDriver(team);
+                        } else if (driver) {
+                            driver.team.removeDriver(member.id);
+                            driver.setTeam(team);
+                            team.setDriver(driver);
                         } else {
                             embed.setAuthor('Unknown driver / reserve! Usage is:');
                             embed.setDescription(`${server.prefix}${command} ${this.usage}`);
@@ -88,7 +89,7 @@ module.exports = {
                         });
                         await server.update();
                     } else if (arguments[0].toLowerCase().includes('reserve')) {
-                        if (driver) {
+                        if (driver && !reserve) {
                             driver.team.removeDriver(driver.id);
                             tier.addReserve(driver);
                             tier.removeDriver(driver.id);

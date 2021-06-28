@@ -11,11 +11,18 @@ const Driver = require('../items/Driver');
 const QualiResult = require('../items/QualiResult');
 
 class ServerManager {
+
+    /**
+     * @type {ServerManager}
+     */
+    static instance;
+
     /**
      * 
      * @param {Discord.Client} client 
      */
     constructor(client) {
+        ServerManager.instance = this;
         /**
          * @type {Discord.Collection<string, Server>}
          */
@@ -253,6 +260,42 @@ class ServerManager {
                 });
             });
 
+            this.guildRoute.get('/:guildID/channels', async (req, res) => {
+                const { guildID } = req.params;
+                const server = this.servers.get(guildID);
+                if (server && req.headers.id) {
+                    try {
+                        const members = await server.guild.members.fetch();
+                        const member = members.get(req.headers.id);
+                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
+                            const array = [];
+                            for (const channel of server.guild.channels.cache.values()) {
+                                if (!channel.manageable || !channel.isText()) continue;
+                                array.push({
+                                    id: channel.id,
+                                    name: channel.name,
+                                });
+                            }
+                            return res.send(array);
+                        }
+                    } catch(err) {
+                        return res.status(404).send({
+                            error: 'Invalid channel',
+                            code: 404,
+                        });
+                    }
+                } else if (!server && req.headers.id) {
+                    res.status(404).send({
+                        error: 'Invalid guildID',
+                        code: 404,
+                    });
+                }
+                return res.status(403).send({
+                    error: 'Unauthorized access',
+                    code: 403,
+                });
+            });
+
             this.guildRoute.get('/', (req, res) => {
                 if (req.headers.token === this.client.token) {
                     const serverArray = [];
@@ -320,7 +363,7 @@ class ServerManager {
      * @param {*} req 
      */
     async editServer(server, req) {
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(JSON.stringify(req));
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(req.headers.type + " " + JSON.stringify(req.body));
         switch (req.headers.type) {
             case 'set_prefix': {
                 const oldPrefix = server.prefix;
@@ -401,11 +444,12 @@ class ServerManager {
             }
             case 'update_race': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                const race = tier.races.find(r => r.name === req.body.old_name);
+                const race = tier.races[req.body.index - 1];
                 if (!race) break;
                 race.link = req.body.link;
-                race.name = req.body.name;
-                race.date = new Date(req.body.date);
+                race.name = req.body.new_name;
+                race.attendanceChannel = req.body.channel;
+                race.update();
                 server.log(`Updated race ${race.name} in tier ${tier.name}`);
                 break;
             }
@@ -415,7 +459,8 @@ class ServerManager {
                 const date = new Date(req.body.date);
                 const existing = tier.races.find(r => r.name.toLowerCase() === name.toLowerCase() && r.date.getTime() === date.getTime());
                 if (existing) break;
-                const race = new Race(tier, name, date, req.body.timezone);
+                const race = new Race(this.client, tier, name, date, req.body.timezone);
+                race.attendanceChannel = req.body.channel;
                 tier.races.push(race);
                 tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 server.log(`Created new race ${race.name} in tier ${tier.name}`);
@@ -427,6 +472,10 @@ class ServerManager {
                 const race = tier.races[index - 1];
                 if (race.results.length) break;
                 if (race.qualifying.length) break;
+                if (race.schedule) {
+                    race.schedule.cancel();
+                }
+                tier.races.splice(index-1, 1);
                 server.log(`Deleted race ${race.name} in tier ${tier.name}`);
                 break;
             }

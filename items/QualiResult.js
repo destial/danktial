@@ -12,7 +12,16 @@ class QualiResult {
      constructor(tier, driver, position, time) {
         this.position = position;
         this.tier = tier;
-        this.driver = driver;
+        this.driver = undefined;
+        if (driver) {
+            this.driver = {
+                id: driver.id,
+                name: driver.name,
+                team: {
+                    name: driver.team ? driver.team.name : "Reserve"
+                },
+            }
+        }
         this.time = time
     }
 
@@ -22,19 +31,20 @@ class QualiResult {
      * @param {any} object 
      */
     load(tier, object) {
-        this.tier = tier;
-        this.driver = tier.getDriver(object.driver.id);
-        if (!this.driver) {
+        try {
+            this.tier = tier;
             this.driver = {
                 id: object.driver.id,
                 name: object.driver.name,
                 team: {
-                    name: object.driver.team
+                    name: object.driver.team ? object.driver.team : "Reserve"
                 },
             }
+            this.time = object.time;
+            this.position = object.position;
+        } catch(err) {
+            console.log(err);
         }
-        this.time = object.time;
-        this.position = object.position;
     }
 
     toJSON() {

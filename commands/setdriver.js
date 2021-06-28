@@ -27,12 +27,10 @@ module.exports = {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                     embed.setFooter(this.description);
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                     return;
                 }
                 args.shift();
-                //const id = arg1.replace('<@', '').replace('>', '').replace('!', '');
-                //const member = await server.guild.members.fetch(id);
                 const member = message.mentions.members.first()
                 if (member) {
                     var str = args.join(" ");
@@ -41,7 +39,7 @@ module.exports = {
                         embed.setAuthor('Usage is:');
                         embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                         embed.setFooter(this.description);
-                        await message.channel.send(embed);
+                        message.channel.send(embed);
                         return;
                     }
                     const tierName = arguments[1];
@@ -106,7 +104,7 @@ module.exports = {
                                         reserve.updateNumber(String(driverNumber));
                                     }
                                     reserve.setNumber(String(driverNumber));
-                                    await reserve.updateReserve();
+                                    reserve.updateReserve();
                                 } else if (driver) {
                                     if (driver.team) {
                                         driver.team.removeDriver(driver.id);
@@ -114,44 +112,44 @@ module.exports = {
                                     }
                                     tier.removeDriver(driver.id);
                                     if (driver.number != String(driverNumber)) {
-                                        await driver.updateNum(String(driverNumber));
+                                        driver.updateNum(String(driverNumber));
                                     }
                                     driver.toReserve();
                                 } else {
                                     const newReserve = new Reserve(client, member, server, String(driverNumber), tier);
                                     tier.addReserve(newReserve);
-                                    await newReserve.save();
+                                    newReserve.save();
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 message.channel.send(embed);
-                                await server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
+                                server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                                     if (advanced.tier.name === tier.name)
-                                        await advanced.fix();
+                                        advanced.fix();
                                 });
                                 server.save();
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);
                                 embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                                await message.channel.send(embed);
+                                message.channel.send(embed);
                                 return;
                             }
                         } else {
                             embed.setAuthor(`${driverNumber} is not a valid number! Usage is:`);
                             embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                            await message.channel.send(embed);
+                            message.channel.send(embed);
                             return;
                         }
                     } else {
                         embed.setAuthor(`${tierName} is not a valid tier! Usage is:`);
                         embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                        await message.channel.send(embed);
+                        message.channel.send(embed);
                         return;
                     }
                 } else {
                     embed.setAuthor(`No user was tagged! Usage is:`);
                     embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                     return;
                 }
             } catch(err) {
@@ -160,7 +158,7 @@ module.exports = {
                 embed.setAuthor(`Error, ${err}! Usage is:`);
                 embed.setColor('RED');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
         }

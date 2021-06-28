@@ -62,7 +62,9 @@ client.once('ready', () => {
                         const locale = formatDiscordRegion(server.guild.region);
                         const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
                         const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
-                        await server.modlog.setTopic(`danktial has been online since ${date} ${(time.startsWith('0') ? time.substring(1) : time)} ${server.guild.region.toLocaleUpperCase()}`);
+                        try {
+                            await server.modlog.setTopic(`danktial has been online since ${date} ${(time.startsWith('0') ? time.substring(1) : time)} ${server.guild.region.toLocaleUpperCase()}`);
+                        } catch(err) {}
                     }
                 });
                 client.guilds.cache.forEach(async (guild, id) => {
@@ -94,9 +96,11 @@ client.once('ready', () => {
 });
 
 process.on('uncaughtException', (err) => {
-    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+    console.log(err);
+    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message ? err.message : `Uncaught exception! ${err}`);
 });
 
 process.on('unhandledRejection', (err) => {
-    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err);
+    console.log(err);
+    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message ? err.message : `Uncaught rejection! ${err}`);
 })

@@ -16,7 +16,7 @@ class Database {
 
     static db() {
         if (Database.connection == null || Database.connection == undefined) {
-            Database.connection = new sql.Database('./bot.db', (err) => {
+            Database.connection = new sql.Database('./botdb.db', (err) => {
                 if (err) {
                 console.log(err.message);
                 }
@@ -45,7 +45,7 @@ class Database {
 
     static newDB() {
         if (Database.newConnection == null || Database.newConnection == undefined) {
-            Database.newConnection = new sql.Database('./database.db', (err) => {
+            Database.newConnection = new sql.Database('./datastore.db', (err) => {
                 if (err) {
                     console.log(err.message);
                 }

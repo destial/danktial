@@ -1,5 +1,4 @@
 const Driver = require("./Driver");
-const Team = require("./Team");
 const Tier = require("./Tier");
 
 class RaceResult {
@@ -17,7 +16,16 @@ class RaceResult {
     constructor(tier, driver, position, gap, points, stops, penalties) {
         this.position = position;
         this.tier = tier;
-        this.driver = driver;
+        this.driver = undefined;
+        if (driver) {
+            this.driver = {
+                id: driver.id,
+                name: driver.name,
+                team: {
+                    name: driver.team ? driver.team.name : "Reserve"
+                },
+            }
+        }
         this.gap = gap;
         this.points = points;
         this.stops = stops;
@@ -30,22 +38,23 @@ class RaceResult {
      * @param {any} object 
      */
     load(tier, object) {
-        this.tier = tier;
-        this.driver = tier.getDriver(object.driver.id);
-        if (!this.driver) {
+        try {
+            this.tier = tier;
             this.driver = {
                 id: object.driver.id,
                 name: object.driver.name,
                 team: {
-                    name: object.driver.team
+                    name: object.driver.team ? object.driver.team : "Reserve"
                 },
             }
+            this.gap = object.gap;
+            this.stops = object.stops;
+            this.penalties = object.penalties;
+            this.points = object.points;
+            this.position = object.position;
+        } catch(err) {
+            console.log(err);
         }
-        this.gap = object.gap;
-        this.stops = object.stops;
-        this.penalties = object.penalties;
-        this.points = object.points;
-        this.position = object.position;
     }
 
     toJSON() {

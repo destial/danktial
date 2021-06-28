@@ -39,7 +39,11 @@ module.exports = {
         embed.setAuthor(`Calendar of ${tier.name}`);
         for (var i = 0; i < 24 && i < tier.races.length; i++) {
             const race = tier.races[i];
-            embed.addField(race.name, `${race.date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(race.timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(race.date, race.timezone)}`, false);
+            var name = `${race.date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(race.timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(race.date, race.timezone)}`;
+            if (race.results.length || race.qualifying.length) {
+                name = `${name}\n[Link to results](https://www.destial.xyz/leagues/${server.id}/tiers/${tier.name.split(' ').join('_')}/races/${i+1})`;
+            }
+            embed.addField(race.name, name, false);
         }
         if (tier.races.length > 24) {
             embed.setFooter('More races not shown');
