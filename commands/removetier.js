@@ -23,7 +23,7 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             const name = args.join(' ');
@@ -45,11 +45,11 @@ module.exports = {
                     });
                     tier.reserves.clear();
 
-                    await Database.run(Database.tierDeleteQuery, [tier.server.id, tier.name]);
+                    Database.run(Database.tierDeleteQuery, [tier.server.id, tier.name]);
                     server.getTierManager().removeTier(tier);
                     embed.setAuthor(`Deleted tier ${tier.name}`);
-                    await server.log(`${message.member.user.tag} has deleted tier ${tier.name}`);
-                    await message.channel.send(embed);
+                    server.log(`${message.member.user.tag} has deleted tier ${tier.name}`);
+                    message.channel.send(embed);
                     console.log(`[TIER] Deleted tier ${tier.name} from server ${tier.server.guild.name}`);
                     server.save();
                 } catch(err) {
@@ -57,7 +57,7 @@ module.exports = {
                 }
             } else {
                 embed.setAuthor('Tier does not exist!');
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
         }

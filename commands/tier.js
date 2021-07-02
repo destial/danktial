@@ -21,33 +21,33 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             switch (args[0].toLowerCase()) {
                 case 'dupe': {
                     const setting = args.shift();
-                    await client.commands.get('dupetier').run(client, server, `${command} ${setting}`, args, message);
+                    client.commands.get('dupetier').run(client, server, `${command} ${setting}`, args, message);
                     break;
                 }
                 case 'add': {
                     const setting = args.shift();
-                    await client.commands.get('addtier').run(client, server, `${command} ${setting}`, args, message);
+                    client.commands.get('addtier').run(client, server, `${command} ${setting}`, args, message);
                     break;
                 }
                 case 'remove': {
                     const setting = args.shift();
-                    await client.commands.get('removetier').run(client, server, `${command} ${setting}`, args, message);
+                    client.commands.get('removetier').run(client, server, `${command} ${setting}`, args, message);
                     break;
                 }
                 case 'clear': {
                     const setting = args.shift();
-                    await client.commands.get('cleartier').run(client, server, `${command} ${setting}`, args, message);
+                    client.commands.get('cleartier').run(client, server, `${command} ${setting}`, args, message);
                     break;
                 }
                 case 'list': {
                     const setting = args.shift();
-                    await client.commands.get('tiers').run(client, server, `${command} ${setting}`, args, message);
+                    client.commands.get('tiers').run(client, server, `${command} ${setting}`, args, message);
                     break;
                 }
             }

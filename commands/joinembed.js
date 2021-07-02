@@ -20,9 +20,7 @@ module.exports = {
             if (!args.length) {
                 const embed = new Discord.MessageEmbed();
                 embed.setColor('RED');
-
                 embed.setAuthor(`This is the start of the embed creator. You will get to create custom embeds to send to individual member's DMs that join this server. Here is an example:`);
-
                 const exampleEmbed = new Discord.MessageEmbed();
                 exampleEmbed.setTitle(`This is an example title`);
                 exampleEmbed.setColor('BLUE');
@@ -34,14 +32,11 @@ module.exports = {
                 ]);
                 exampleEmbed.setThumbnail('https://media.discordapp.net/attachments/406814017743486978/809648422176948224/thumbnailexample.png');
                 exampleEmbed.setFooter('This is an example footer');
-
                 const createdEmbed = new Discord.MessageEmbed();
-
                 await message.member.user.send(embed);
                 await message.member.user.send(exampleEmbed);
                 embed.setAuthor(`Now, what would you like the title to be?`);
                 embed.setDescription(`You can't skip this part!`);
-
                 const dm = await message.member.user.send(embed);
                 let filter = (m) => m.author.id === message.member.id;
                 const titleCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
@@ -51,7 +46,6 @@ module.exports = {
                         embed.setAuthor(`What would you like the description to be?`);
                         embed.setDescription('Type `skip` to skip this');
                         await message.member.user.send(embed);
-
                         const descCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                         descCollector.once('end', async (descCollection) => {
                             if (descCollection.size !== 0 && descCollection.first().content) {
@@ -61,7 +55,6 @@ module.exports = {
                                 embed.setAuthor(`How many fields to you want?`);
                                 embed.setDescription('Type `skip` to skip this');
                                 await message.member.user.send(embed);
-
                                 const fieldAmount = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                                 fieldAmount.once('end', async (fieldAmountCollection) => {
                                     if (fieldAmountCollection.size !== 0 && fieldAmountCollection.first().content) {
@@ -74,11 +67,9 @@ module.exports = {
                                             console.log(embedFieldData);
                                             createdEmbed.addFields(embedFieldData);
                                         }
-                                        
                                         embed.setAuthor('What would you like the thumbnail to be?');
                                         embed.setDescription('You can enter in a valid URL or send an attachment image. Type `skip` to skip this');
                                         await message.member.user.send(embed);
-
                                         const thumbnailCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                                         thumbnailCollector.once('end', async (thumbnailCollection) => {
                                             if (thumbnailCollection.size !== 0 && thumbnailCollection.first()) {
@@ -89,18 +80,15 @@ module.exports = {
                                                     const attachment = getAttachment(thumbnailMessage.attachments);
                                                     createdEmbed.setThumbnail(attachment[0]);
                                                 }
-
                                                 embed.setAuthor('What would you like the footer to say?');
                                                 embed.setDescription('Type `skip` to skip this');
                                                 await message.member.user.send(embed);
-
                                                 const footerCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                                                 footerCollector.once('end', async (footerCollection) => {
                                                     if (footerCollection.size !== 0 && footerCollection.first().content) {
                                                         if (footerCollection.first().content !== 'skip') {
                                                             createdEmbed.setFooter(footerCollection.first().content.length > 2048 ? `${footerCollection.first().content.substring(0, 2044)}...` : footerCollection.first().content);
                                                         }
-
                                                         const colors = [
                                                             'DEFAULT', 'WHITE', 'AQUA', 'GREEN', 'BLUE', 'YELLOW', 
                                                             'PURPLE', 'LUMINOUS VIVID PINK', 'GOLD', 'ORANGE', 'RED',
@@ -117,7 +105,6 @@ module.exports = {
                                                         });
                                                         embed.setAuthor('You are almost done! The last one is the color! Choose what color should the embed be (Enter the number not the color!):');
                                                         embed.setDescription(colorList);
-
                                                         await message.member.user.send(embed);
                                                         const colorCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                                                         colorCollector.once('end', async (colorCollection) => {
@@ -126,13 +113,12 @@ module.exports = {
                                                                 if (colorNumber && (colorNumber >= 1 && colorNumber <= colors.length)) {
                                                                     createdEmbed.setColor(colors[colorNumber-1].replace(' ', '_'));
                                                                 }
-
                                                                 embed.setAuthor('All done!');
                                                                 embed.setDescription('This is what it looks like:');
-                                                                await message.member.user.send(embed);
-                                                                await message.member.user.send(createdEmbed);
+                                                                message.member.user.send(embed);
+                                                                message.member.user.send(createdEmbed);
                                                                 server.loadEmbed(createdEmbed);
-                                                                await Database.run(Database.serverEmbedSaveQuery, [message.guild.id, JSON.stringify(createdEmbed.toJSON())]);
+                                                                Database.run(Database.serverEmbedSaveQuery, [message.guild.id, JSON.stringify(createdEmbed.toJSON())]);
                                                                 console.log(`[EMBEDS] Saved embed from ${message.guild.id}`);
                                                             }
                                                         });
@@ -148,12 +134,12 @@ module.exports = {
                 });
             } else if (args[0].toLowerCase() === 'send') {
                 if (server.joinEmbed) {
-                    await message.member.user.send(server.joinEmbed);
+                    message.member.user.send(server.joinEmbed);
                 } else {
                     const embed = new Discord.MessageEmbed();
                     embed.setColor('RED');
                     embed.setAuthor(`You don't have a join embed set!`);
-                    await message.member.user.send(embed);
+                    message.member.user.send(embed);
                 }
             }
         }

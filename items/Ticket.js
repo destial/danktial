@@ -37,10 +37,10 @@ class Ticket {
                 }
             ]
         });
-        await this.channel.send(new Discord.MessageEmbed()
+        this.channel.send(new Discord.MessageEmbed()
             .setAuthor(`Added ${member.user.tag} to this ticket!`)
             .setColor('GREEN'));
-        await this.ticketManager.server.log(`Added ${member.user.tag} to ticket ${this.channel.name}`);
+        this.ticketManager.server.log(`Added ${member.user.tag} to ticket ${this.channel.name}`);
     }
 
     /**
@@ -68,11 +68,11 @@ class Ticket {
                     });
                     collector.once('end', async (collected) => {
                         if (yesdelete) {
-                            await this.close(member);
+                            this.close(member);
                             resolve(true);
                         } else {
-                            await a.remove();
-                            await b.remove();
+                            a.remove();
+                            b.remove();
                             resolve(false);
                         }
                     });
@@ -110,12 +110,12 @@ class Ticket {
                     });
                     collector.once('end', async (collected) => {
                         if (yesdelete) {
-                            await this.close(member);
+                             this.close(member);
                             resolve(true);
                         } else {
-                            await a.remove();
-                            await b.remove();
-                            await message.delete();
+                            a.remove();
+                            b.remove();
+                            message.delete();
                             resolve(false);
                         }
                     });
@@ -142,7 +142,7 @@ class Ticket {
                     .setColor('RED');
                 await this.channel.send(embed);
                 setTimeout(async () => {
-                    await this.channel.delete();
+                    this.channel.delete();
                     if (this.ticketManager.server.modlog) {
                         if (this.ticketManager.server.modlog) {
                             this.ticketManager.server.modlog.send(new Discord.MessageEmbed()
@@ -151,9 +151,9 @@ class Ticket {
                                 .setColor('RED'));
                         }
                     }
-                    await Database.run(Database.ticketDeleteQuery, [this.id]);
+                    Database.run(Database.ticketDeleteQuery, [this.id]);
                     this.ticketManager.opentickets.delete(this.id);
-                    await this.ticketManager.server.update();
+                    this.ticketManager.server.update();
                     this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TICKET] ${member.displayName} has closed ${this.channel.name} by ${this.member.displayName}`);
                 }, 5000);
             } catch (err) {
@@ -164,7 +164,8 @@ class Ticket {
     }
 
     async save() {
-        await Database.run(Database.ticketSaveQuery, this.id, this.member.id, this.number, this.base.id);
+        Database.run(Database.ticketSaveQuery, this.id, this.member.id, this.number, this.base.id);
+        this.server.update();
         Logger.info(`[TICKET] Created new ticket ${this.number}`);
     }
 

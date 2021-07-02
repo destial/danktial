@@ -46,7 +46,7 @@ module.exports = {
                     promise.then(async () => {
                         embed.setAuthor(`Purged ${size} messages`)
                         const reply = await message.channel.send(embed);
-                        await reply.delete({ timeout: 5000 });
+                        reply.delete({ timeout: 5000 });
                     });
                 } else {
                     embed.setAuthor('Did not purge this channel.');

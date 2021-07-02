@@ -81,13 +81,13 @@ module.exports = {
                         }
                         embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
                         message.channel.send(embed);
-                        await server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
+                        server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                             if (advanced.tier === tier) {
-                                await advanced.fix();
+                                advanced.fix();
                             }
                         });
-                        await server.update();
+                        server.update();
                     } else if (arguments[0].toLowerCase().includes('reserve')) {
                         if (driver && !reserve) {
                             driver.team.removeDriver(driver.id);
@@ -97,13 +97,13 @@ module.exports = {
                         }
                         embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
                         message.channel.send(embed);
-                        await server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
+                        server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                             if (advanced.tier === tier) {
-                                await advanced.fix();
+                                advanced.fix();
                             }
                         });
-                        await server.update();
+                        server.update();
                     } else {
                         embed.setAuthor('No team were matched! Usage is:');
                         embed.setDescription(`${server.prefix}${command} ${this.usage}`);

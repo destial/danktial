@@ -15,7 +15,7 @@ module.exports = {
      */
     async run(client, server, command, args, message) {
         if (server.enableTickets) {
-            await server.getTicketManager().newTicket(message.member, args.join(' '), client.user);
+            server.getTicketManager().newTicket(message.member, args.join(' '), client.user);
         }
     }
 };

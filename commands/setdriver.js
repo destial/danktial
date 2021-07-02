@@ -59,12 +59,12 @@ module.exports = {
                                     tier.addDriver(reserve);
                                     tier.removeReserve(reserve.id);
                                     if (reserve.number != String(driverNumber)) {
-                                        await reserve.updateNum(String(driverNumber));
+                                        reserve.updateNum(String(driverNumber));
                                     }
                                     reserve.toDriver(team);
                                 } else if (driver && team) {
                                     if (driver.number != String(driverNumber)) {
-                                        await driver.updateNum(String(driverNumber));
+                                        driver.updateNum(String(driverNumber));
                                     }
                                     driver.setNumber(String(driverNumber));
                                     if (driver.team) {
@@ -73,19 +73,19 @@ module.exports = {
                                     driver.setTeam(team);
                                     driver.setTier(tier);
                                     team.setDriver(driver);
-                                    await driver.update();
+                                    driver.update();
                                 } else if (team) {
                                     const newDriver = new Driver(client, member, server, team, driverNumber, tier);
                                     tier.addDriver(newDriver);
                                     team.setDriver(newDriver);
                                     newDriver.setTeam(team);
-                                    await newDriver.save();
+                                    newDriver.save();
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
                                 message.channel.send(embed);
-                                await server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
+                                server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
-                                    await advanced.fix();
+                                    advanced.fix();
                                 });
                                 server.save();
                             } else if (teamCol.size > 1) {

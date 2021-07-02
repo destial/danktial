@@ -23,12 +23,12 @@ module.exports = {
                     embed.setAuthor(`Usage is:`);
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     embed.setFooter(this.description);
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                     return;
                 }
-                await server.getTicketManager().addTicketPanel(client, message.channel, args.join(' '));
-                await message.delete({ timeout: 1000 });
-                await server.log(`${message.member.user.tag} has created a ticket panel`, `Jump to ${message.channel}`);
+                server.getTicketManager().addTicketPanel(client, message.channel, args.join(' '));
+                message.delete({ timeout: 1000 });
+                server.log(`${message.member.user.tag} has created a ticket panel`, `Jump to ${message.channel}`);
             }
         }
     }

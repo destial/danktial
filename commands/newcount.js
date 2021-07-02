@@ -40,8 +40,7 @@ module.exports = {
                                 parent: cat
                             }).then(async membercount => {
                                 server.getCountManager().setCount('member', membercount);
-                                await server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
-                                
+                                server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                                 server.guild.channels.create(`Channel Count: ${server.guild.channels.cache.size}`, {
                                     type: 'voice',
                                     permissionOverwrites: [
@@ -53,8 +52,7 @@ module.exports = {
                                     parent: cat
                                 }).then(async channelcount => {
                                     server.getCountManager().setCount('channel', channelcount);
-                                    await server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
-
+                                    server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                                     server.guild.channels.create(`Role Count: ${server.guild.roles.cache.size}`, {
                                         type: 'voice',
                                         permissionOverwrites: [
@@ -66,8 +64,7 @@ module.exports = {
                                         parent: cat
                                     }).then(async rolecount => {
                                         server.getCountManager().setCount('role', rolecount);
-                                        await server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
-                
+                                        server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                                         const embed = new Discord.MessageEmbed()
                                             .setAuthor('Created All Counts!')
                                             .setColor('RED');
@@ -88,8 +85,7 @@ module.exports = {
                             parent: category
                         }).then(async membercount => {
                             server.getCountManager().setCount('member', membercount);
-                            await server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
-
+                            server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                             server.guild.channels.create(`Channel Count: ${server.guild.channels.cache.size}`, {
                                 type: 'voice',
                                 permissionOverwrites: [
@@ -101,8 +97,7 @@ module.exports = {
                                 parent: category
                             }).then(async channelcount => {
                                 server.getCountManager().setCount('channel', channelcount);
-                                await server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
-
+                                server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                                 server.guild.channels.create(`Role Count: ${server.guild.roles.cache.size}`, {
                                     type: 'voice',
                                     permissionOverwrites: [
@@ -151,7 +146,7 @@ module.exports = {
                                         .setAuthor('Created Member Count!')
                                         .setColor('RED');
                                     message.channel.send(embed);
-                                    await server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
+                                    server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                                 });
                             });
                         } else {
@@ -170,7 +165,7 @@ module.exports = {
                                     .setAuthor('Created Member Count!')
                                     .setColor('RED');
                                 message.channel.send(embed);
-                                await server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
+                                server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                             });
                         }
                     }
@@ -201,7 +196,7 @@ module.exports = {
                                         .setAuthor('Created Role Count!')
                                         .setColor('RED');
                                     message.channel.send(embed);
-                                    await server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
+                                    server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                                 });
                             });
                         } else {
@@ -220,7 +215,7 @@ module.exports = {
                                     .setAuthor('Created Role Count!')
                                     .setColor('RED');
                                 message.channel.send(embed);
-                                await server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
+                                server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                             });
                         }
                     }
@@ -251,7 +246,7 @@ module.exports = {
                                         .setAuthor('Created Channel Count!')
                                         .setColor('RED');
                                     message.channel.send(embed);
-                                    await server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
+                                    server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                                 });
                             });
                         } else {
@@ -270,7 +265,7 @@ module.exports = {
                                     .setAuthor('Created Channel Count!')
                                     .setColor('RED');
                                 message.channel.send(embed);
-                                await server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
+                                server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                             });
                         }
                     } else {
@@ -279,7 +274,7 @@ module.exports = {
                             .setDescription(`${server.prefix}${this.name} ${this.usage}`)
                             .setColor('RED')
                             .setFooter(this.description);
-                        await message.channel.send(embed);
+                        message.channel.send(embed);
                     }
                 }
             } catch (err) {

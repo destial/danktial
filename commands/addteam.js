@@ -52,22 +52,26 @@ module.exports = {
             });
             collector.on('collect', async m => {
                 embed.setAuthor(questions[counter++]);
-                await message.channel.send(embed);
+                message.channel.send(embed);
             });
             collector.on('end', async (col) => {
+                if (!col.first()) {
+                    embed.setAuthor('No response! Exiting add mode!');
+                    message.channel.send(embed);
+                    return;
+                }
                 const tierName = col.first().content;
                 const reply = col.last();
-
                 const tier = server.getTierManager().getTier(tierName.toLowerCase());
                 if (!tier) {
                     embed.setAuthor('Invalid tier name! Did not match any tier. Please try again!');
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                     return;
                 } else {
                     const existingTeam = tier.getTeam(name.toLowerCase());
                     if (existingTeam) {
                         embed.setAuthor('Team name already exists in that tier! Please use a different name!');
-                        await message.channel.send(embed);
+                        message.channel.send(embed);
                         return;
                     } else {
                         const mentions = reply.mentions.members;
@@ -83,12 +87,12 @@ module.exports = {
                                     team.setDriver(newDriver);
                                     tier.removeReserve(reserve);
                                     tier.addDriver(newDriver);
-                                    await newDriver.update();
+                                    newDriver.update();
                                 } else if (!driver) {
                                     const newDriver = new Driver(client, mention, server, team, 0, tier);
                                     team.setDriver(newDriver);
                                     tier.addDriver(newDriver);
-                                    await newDriver.save();
+                                    newDriver.save();
                                 } else {
                                     driver.team.removeDriver(driver.id);
                                     driver.setTeam(team);
@@ -112,8 +116,8 @@ module.exports = {
                                 }
                             });
                             promise.then(async () => {
-                                await message.channel.send(embed);
-                                await team.save();
+                                message.channel.send(embed);
+                                team.save();
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async event => {
                                     if (event.tier === tier) {
                                         const lastField = event.embed.fields[event.embed.fields.length - 1];
@@ -135,10 +139,10 @@ module.exports = {
                                             };
                                             event.embed.fields.splice(event.embed.fields.length - 1, 0, newField);
                                         }
-                                        await event.edit();
+                                        event.edit();
                                     }
                                 });
-                                await server.log(`${message.member.user.tag} has created team ${team.name} under ${tier.name}`, driverList);
+                                server.log(`${message.member.user.tag} has created team ${team.name} under ${tier.name}`, driverList);
                             });
                         });
                     }

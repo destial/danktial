@@ -22,12 +22,12 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             if (message.mentions.members.size !== 1) {
                 embed.setAuthor(`Please only mention 1 driver!`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             const member = message.mentions.members.first();
@@ -38,48 +38,48 @@ module.exports = {
                 if (driver) {
                     switch (args[1].toLowerCase()) {
                         case 'in':
-                            await attendance.accept(driver);
+                            attendance.accept(driver);
                             embed.setAuthor(`Marked ${driver.member.user.username} as in!`);
                             break;
                         case 'out':
-                            await attendance.reject(driver);
+                            attendance.reject(driver);
                             embed.setAuthor(`Marked ${driver.member.user.username} as out!`);
                             break;
                         case 'maybe':
-                            await attendance.maybe(driver);
+                            attendance.maybe(driver);
                             embed.setAuthor(`Marked ${driver.member.user.username} as maybe!`);
                             break;
                         default:
                             embed.setAuthor(`Unknown mark ${args[1]}! Use 'in' / 'out' / 'maybe'`);
                             break;
                     }
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                 } else if (reserve) {
                     switch (args[1].toLowerCase()) {
                         case 'in':
-                            await attendance.accept(reserve);
+                            attendance.accept(reserve);
                             embed.setAuthor(`Marked ${reserve.member.user.username} as in!`);
                             break;
                         case 'out':
-                            await attendance.reject(reserve);
+                            attendance.reject(reserve);
                             embed.setAuthor(`Marked ${reserve.member.user.username} as out!`);
                             break;
                         case 'maybe':
-                            await attendance.maybe(reserve);
+                            attendance.maybe(reserve);
                             embed.setAuthor(`Marked ${reserve.member.user.username} as maybe!`);
                             break;
                         default:
                             embed.setAuthor(`Unknown mark ${args[1]}! Use 'in' / 'out' / 'maybe'`);
                             break;
                     }
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                 } else {
                     embed.setAuthor(`Unknown driver/reserve ${member.user.username}!`);
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                 }
             } else {
                 embed.setAuthor(`Unknown attendance of id ${args[2]}!`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
             }
         }
     }

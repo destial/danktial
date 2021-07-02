@@ -21,23 +21,23 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             switch (args[0].toLowerCase()) {
                 case 'set': {
                     const setting = args.shift();
-                    await client.commands.get('setdriver').run(client, server, `${command} ${setting}`, args, message);
+                    client.commands.get('setdriver').run(client, server, `${command} ${setting}`, args, message);
                     break;
                 }
                 case 'remove': {
                     const setting = args.shift();
-                    await client.commands.get('removedriver').run(client, server, `${command} ${setting}`, args, message);
+                    client.commands.get('removedriver').run(client, server, `${command} ${setting}`, args, message);
                     break;
                 }
                 case 'transfer': {
                     const setting = args.shift();
-                    await client.commands.get('transfer').run(client, server, `${command} ${setting}`, args, message);
+                    client.commands.get('transfer').run(client, server, `${command} ${setting}`, args, message);
                     break;
                 }
             }

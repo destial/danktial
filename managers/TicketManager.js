@@ -43,11 +43,11 @@ class TicketManager {
         embed.setDescription(`To create a report, react with ${TicketManager.emoji}`);
         try {
             const panelMessage = await channel.send(embed);
-            await panelMessage.react(TicketManager.emoji);
+            panelMessage.react(TicketManager.emoji);
             const ticketPanel = new TicketPanel(client, this, panelMessage.id, embed, channel);
             this.ticketpanels.set(ticketPanel.id, ticketPanel);
-            await Database.run(Database.ticketPanelSaveQuery, [panelMessage.id, channel.id]);
-            await this.server.update();
+            Database.run(Database.ticketPanelSaveQuery, [panelMessage.id, channel.id]);
+            this.server.update();
             Logger.info(`[TICKETPANEL] Added ticket panel ${ticketPanel.id}`);
         } catch (err) {
             Logger.warn(`[TICKETPANEL] Something happened while creating a ticket panel!`, err);
@@ -71,7 +71,7 @@ class TicketManager {
         const deleted = this.ticketpanels.delete(id);
         if (deleted) {
             try {
-                await Database.run(Database.ticketPanelDeleteQuery, [id]);
+                Database.run(Database.ticketPanelDeleteQuery, [id]);
                 Logger.info(`[TICKETPANEL] Deleted ticket panel ${id} from ${this.server.guild.name}`);
             } catch (err) {
                 Logger.warn(err);
@@ -141,11 +141,11 @@ class TicketManager {
                     .setAuthor(`${member.displayName} has created a ticket!`)
                     .setDescription(`Reason: ${reason ? reason: "None"}`)
                     .setColor('RED'));
-                await baseMessage.react(TicketManager.lock);
+                baseMessage.react(TicketManager.lock);
                 const ticket = new Ticket(member, this.totaltickets, ticketChannel, baseMessage, this);
                 this.opentickets.set(ticket.id, ticket);
-                await ticket.save();
-                await this.server.update();
+                ticket.save();
+                this.server.update();
                 Logger.info(`[TICKET] Created ${ticket.channel.name} by ${ticket.member.displayName}`);
                 resolve(ticket);
             } catch (err) {

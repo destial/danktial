@@ -5,7 +5,6 @@ const Tier = require('./Tier');
 const Driver = require('./Driver');
 const Database = require('../database/Database');
 const schedule = require('node-schedule');
-const Attendance = require('./Attendance');
 const { Logger } = require('../utils/Utils');
 
 class AdvancedAttendance {
@@ -124,10 +123,25 @@ class AdvancedAttendance {
                     embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                     embed.setColor('RED');
                     embed.setDescription(this.embed.title);
-                    participant.member.user.send(embed);
+                    try {
+                        participant.member.user.send(embed);
+                    } catch(err) {}
                 });
                 this.setLocked(true);
-                this.message.reactions.removeAll();
+                this.message.reactions.removeAll().then(async () => {
+                    if (!this.isLocked()) {
+                        await this.message.react(AttendanceManager.accept);
+                        await this.message.react(AttendanceManager.reject);
+                        await this.message.react(AttendanceManager.tentative);
+                    }
+                    await this.message.react(AttendanceManager.delete);
+                    await this.message.react(AdvancedAttendance.editEmoji);
+                    if (!this.isLocked()) {
+                        await this.message.react(AdvancedAttendance.lockEmoji);
+                    } else {
+                        await this.message.react(AdvancedAttendance.unlockEmoji);
+                    }
+                });
                 this.schedule.cancel();
             });
             Logger.info(`[ADATTENDANCE] Created new schedule for ${this.schedule.name} at ${new Date(fiveMinBefore).toString()}`);
@@ -190,6 +204,7 @@ class AdvancedAttendance {
      */
     async accept(driver) {
         const field = this.embed.fields.find(field => field.value.includes(driver.id));
+        if (!field) return;
         const value = field.value.replace('!', '');
         const index = value.indexOf(driver.id)-2;
         const firstHalf = value.substring(0, index-3);
@@ -215,6 +230,7 @@ class AdvancedAttendance {
      */
     async reject(driver) {
         const field = this.embed.fields.find(field => field.value.includes(driver.id));
+        if (!field) return;
         const value = field.value.replace('!', '');
         const index = value.indexOf(driver.id)-2;
         const firstHalf = value.substring(0, index-3);
@@ -240,6 +256,7 @@ class AdvancedAttendance {
      */
     async maybe(driver) {
         const field = this.embed.fields.find(field => field.value.includes(driver.id));
+        if (!field) return;
         const value = field.value.replace('!', '');
         const index = value.indexOf(driver.id)-2;
         const firstHalf = value.substring(0, index-3);
@@ -375,11 +392,18 @@ class AdvancedAttendance {
         }
         await this.message.edit(this.embed);
         this.message.reactions.removeAll().then(async () => {
-            await this.message.react(Attendance.accept);
-            await this.message.react(Attendance.reject);
-            await this.message.react(Attendance.tentative);
-            await this.message.react(Attendance.delete);
+            if (!this.isLocked()) {
+                await this.message.react(AttendanceManager.accept);
+                await this.message.react(AttendanceManager.reject);
+                await this.message.react(AttendanceManager.tentative);
+            }
+            await this.message.react(AttendanceManager.delete);
             await this.message.react(AdvancedAttendance.editEmoji);
+            if (!this.isLocked()) {
+                await this.message.react(AdvancedAttendance.lockEmoji);
+            } else {
+                await this.message.react(AdvancedAttendance.unlockEmoji);
+            }
         });
     }
 
@@ -394,16 +418,16 @@ class AdvancedAttendance {
                 field.name = newTeamName;
             }
         });
-        await this.message.edit(this.embed);
+        this.message.edit(this.embed);
     }
 
     async edit() {
-        await this.message.edit(this.embed);
+        this.message.edit(this.embed);
     }
 
     async update() {
-        await Database.run(Database.advancedAttendanceUpdateQuery, [String(this.date.getTime()), this.id, this.message.channel.id]);
-        await this.server.update();
+        Database.run(Database.advancedAttendanceUpdateQuery, [String(this.date.getTime()), this.id, this.message.channel.id]);
+        this.server.update();
         Logger.info(`[ADATTENDANCE] Updated attendance ${this.embed.title} from ${this.server.guild.name}`);
     }
 
@@ -411,14 +435,14 @@ class AdvancedAttendance {
         if (this.schedule) {
             this.schedule.cancel();
         }
-        await this.server.update();
-        await Database.run(Database.advancedAttendanceDeleteQuery, [this.id]);
+        this.server.update();
+        Database.run(Database.advancedAttendanceDeleteQuery, [this.id]);
         Logger.warn(`[ADATTENDANCE] Deleted attendance ${this.embed.title} from ${this.server.guild.name}`);
     }
 
     async save() {
-        await Database.run(Database.advancedAttendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id, this.tier.name]);
-        await this.server.update();
+        Database.run(Database.advancedAttendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id, this.tier.name]);
+        this.server.update();
         Logger.info(`[ADATTENDANCE] Saved attendance ${this.embed.title} from ${this.server.guild.name}`);
     }
 
@@ -438,7 +462,9 @@ class AdvancedAttendance {
                 embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                 embed.setColor('RED');
                 embed.setDescription(this.embed.title);
-                participant.member.user.send(embed);
+                try {
+                    participant.member.user.send(embed);
+                } catch(err) {}
             });
             this.setLocked(true);
             this.message.reactions.removeAll();
@@ -492,7 +518,9 @@ class AdvancedAttendance {
                                 embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                                 embed.setColor('RED');
                                 embed.setDescription(this.embed.title);
-                                participant.member.user.send(embed);
+                                try {
+                                    participant.member.user.send(embed);
+                                } catch(err) {}
                             });
                             this.schedule.cancel();
                         });

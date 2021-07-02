@@ -22,20 +22,20 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             const tierName = args.join(' ');
             const tier = server.getTierManager().getTier(tierName);
             if (tier) {
-                await tier.clear();
+                tier.clear();
                 embed.setAuthor(`Tier ${tier.name} has been cleared of all drivers and reserves!`);
-                await server.log(`Cleared tier ${tier.name} from all drivers and reserves`);
-                await message.channel.send(embed);
+                server.log(`Cleared tier ${tier.name} from all drivers and reserves`);
+                message.channel.send(embed);
                 return;
             } else {
                 embed.setAuthor(`Unknown tier "${tierName}"`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
         }

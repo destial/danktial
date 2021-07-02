@@ -28,7 +28,7 @@ module.exports = {
                 });
                 embed.setDescription(tierList);
                 embed.setFooter(`For more details on a tier, use ${server.prefix}${command} [name]`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
             } else {
                 const tierName = args.join(' ');
                 const tier = server.getTierManager().getTier(tierName.toLowerCase());
@@ -51,16 +51,14 @@ module.exports = {
                         });
                         embed.addField('Reserves', reserveNames, false);
                     }
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                 } else {
                     embed.setAuthor('Tier does not exist!');
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                 }
             }
         } catch (err) {
             console.log(err);
-            const user = await client.users.fetch("237492876374704128");
-            user.send(err);
         }
     }
 };

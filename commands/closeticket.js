@@ -16,7 +16,7 @@ module.exports = {
     async run(client, server, command, args, message) {
         const ticket = server.getTicketManager().fetchTicket(message.channel.id);
         if (ticket) {
-            await ticket.awaitCloseC(message, message.member);
+            ticket.awaitCloseC(message, message.member);
         }
     }
 };

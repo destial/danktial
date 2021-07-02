@@ -23,7 +23,7 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             var str = args.join(' ');
@@ -32,7 +32,7 @@ module.exports = {
             if (!tier) {
                 embed.setAuthor('Invalid tier name!');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             const teamCol = tier.searchTeam(arguments[0]);
@@ -50,10 +50,10 @@ module.exports = {
             if (!team) {
                 embed.setAuthor('Invalid team name!');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
-            await team.delete();
+            team.delete();
             tier.removeTeam(team.name);
             team.tier = undefined;
             team.drivers.forEach(driver => {
@@ -69,12 +69,12 @@ module.exports = {
                         const index = event.embed.fields.indexOf(teamField);
                         event.embed.fields.splice(index, 1);
                     }
-                    await event.edit();
+                    event.edit();
                 }
             });
             embed.setAuthor(`Successfully removed team ${team.name} from tier ${tier.name}`);
             server.log(`${message.member.displayName} has removed team ${team.name} from tier ${tier.name}`);
-            await message.channel.send(embed);
+            message.channel.send(embed);
         }
     }
 };

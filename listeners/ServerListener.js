@@ -20,7 +20,7 @@ module.exports = {
                             embed.setColor('RED');
                             embed.setAuthor('I do not have enough permissions to function normally! Please allow me to manage the server and/or set me as administrator!');
                             try {
-                                await guild.systemChannel.send(embed);
+                                guild.systemChannel.send(embed);
                             } catch(err) {
                                 client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                             }
@@ -28,7 +28,7 @@ module.exports = {
                     }
                     const server = new Server(client, guild, undefined, '-', 0, servers);
                     servers.addServer(server);
-                    await server.save();
+                    server.save();
                     console.log(`[SERVER] Joined server ${guild.name}`);
                     client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Joined server ${guild.name}`);
                     if (guild.systemChannel) {
@@ -37,9 +37,13 @@ module.exports = {
                         embed.setDescription(`To start setup, use ${"`-setup`"} to start the tier setup! ${"`-help`"} is available to see all the commands!`);
                         embed.setFooter(`Built by destiall#9640`);
                         embed.setColor('RED');
-                        await guild.systemChannel.send(embed);
+                        try {
+                            guild.systemChannel.send(embed);
+                        } catch(err) {
+                            client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                        }
                     }
-                    await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
+                    client.user.setActivity(`destial.xyz | ${client.manager.servers.size} leagues`);
                 }
             } catch (err) {
                 client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
@@ -53,7 +57,6 @@ module.exports = {
                     await servers.removeServer(server);
                     client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Left server ${guild.name}`);
                     console.log(`[SERVER] Left server ${guild.name}`);
-                    //await client.user.setActivity(`${servers.servers.size} leagues`, { type: 'COMPETING' });
                 }
             } catch (err) {
                 client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);

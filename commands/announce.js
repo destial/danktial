@@ -6,7 +6,7 @@ const formatDiscordRegion = require('../utils/formatDiscordRegion');
 
 module.exports = {
     name: 'announce',
-    aliases: ['backup'],
+    aliases: ['backup', 'issue'],
     usage: '[ title | description ]',
     description: '*ONLY FOR BOT OWNER*',
     /**
@@ -17,6 +17,28 @@ module.exports = {
      * @param {Discord.Message} message
      */
     async run(client, server, command, args, message) {
+        if (command === 'issue') {
+            if (!args.length) {
+                const embed = new Discord.MessageEmbed();
+                embed.setColor('RED');
+                embed.setAuthor(`Usage is:`);
+                embed.setDescription(`${server.prefix}issue <issue>`);
+                message.channel.send(embed);
+                return;
+            }
+            const issue = args.join(' ');
+            const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
+            embed.setAuthor(`${message.author.tag} in ${server.guild.name}`);
+            embed.setDescription(issue.length > 2048 ? `${issue.substr(0, 2044)}...` : issue);
+            embed.setTimestamp(new Date());
+            client.guilds.cache.get('406814017743486976').channels.cache.get('859412282257571880').send(`<@237492876374704128>`, embed);
+            const replyEmbed = new Discord.MessageEmbed();
+            replyEmbed.setColor('RED');
+            replyEmbed.setAuthor('Successfully reported an issue!');
+            message.channel.send(replyEmbed);
+            return;
+        }
         if (message.member.id === '237492876374704128') {
             if (command === 'announce') {
                 if (!args.length) {
@@ -40,7 +62,7 @@ module.exports = {
                         const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
                         const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
                         embed.setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${server.guild.region.toLocaleUpperCase()}`);
-                        await server.modlog.send(embed);
+                        server.modlog.send(embed);
                         console.log(`[ANNOUNCEMENT] Sent announcement to ${server.guild.name}`);
                     }
                 });

@@ -28,12 +28,12 @@ module.exports = {
         const tier = server.getTierManager().getTier(args.join(" "));
         if (!tier) {
             embed.setAuthor(`Invalid tier name of ${args.join(" ")}`);
-            await message.channel.send(embed);
+            message.channel.send(embed);
             return;
         }
         if (tier.races.length === 0) {
             embed.setAuthor(`This tier does not have a calendar set!`);
-            await message.channel.send(embed);
+            message.channel.send(embed);
             return;
         }
         embed.setAuthor(`Calendar of ${tier.name}`);
@@ -48,6 +48,6 @@ module.exports = {
         if (tier.races.length > 24) {
             embed.setFooter('More races not shown');
         }
-        await message.channel.send(embed);
+        message.channel.send(embed);
     }
 };

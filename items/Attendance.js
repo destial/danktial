@@ -85,7 +85,9 @@ class Attendance {
                         embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                         embed.setColor('RED');
                         embed.setDescription(this.title);
+                        try {
                         mem.user.send(embed);
+                        } catch(err) {}
                     }
                 });
                 this.schedule.cancel();
@@ -141,14 +143,14 @@ class Attendance {
 
 
     async delete() {
-        await Database.run(Database.attendanceDeleteQuery, [this.id]);
-        await this.server.update();
+        Database.run(Database.attendanceDeleteQuery, [this.id]);
+        this.server.update();
         Logger.warn(`[ATTENDANCE] Deleted attendance ${this.title} from ${this.guild.name}`);
     }
 
     async save() {
-        await Database.run(Database.attendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id]);
-        await this.server.update();
+        Database.run(Database.attendanceSaveQuery, [this.id, String(this.date.getTime()), this.message.channel.id]);
+        this.server.update();
         Logger.info(`[ATTENDANCE] Saved attendance ${this.title} from ${this.guild.name}`);
     }
 
@@ -262,7 +264,9 @@ class Attendance {
                     embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                     embed.setColor('RED');
                     embed.setDescription(this.title);
+                    try {
                     mem.user.send(embed);
+                    } catch(err) {}
                 }
             });
             this.schedule.cancel();
@@ -353,7 +357,9 @@ class Attendance {
                                 embed.setAuthor(`You have an event scheduled in 10 minutes!`);
                                 embed.setColor('RED');
                                 embed.setDescription(this.title);
+                                try {
                                 mem.user.send(embed);
+                                } catch(err) {}
                             }
                         });
                         this.schedule.cancel();

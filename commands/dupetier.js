@@ -24,7 +24,7 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             const name = args.join(' ');
@@ -68,7 +68,7 @@ module.exports = {
                             });
                             embed.setDescription(teamList);
                             message.channel.send(embed);
-                            await server.log(`${message.member.user.tag} has duplicated tier duplicated tier ${newTier.name} from ${existingTier.name}`);
+                            server.log(`${message.member.user.tag} has duplicated tier duplicated tier ${newTier.name} from ${existingTier.name}`);
                         });
                     } else {
                         embed.setAuthor('Ran out of time!');

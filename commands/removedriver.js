@@ -22,7 +22,7 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             args.shift();
@@ -32,7 +32,7 @@ module.exports = {
                 if (!tierName) {
                     embed.setAuthor('No tier was supplied! Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                     return;
                 }
                 const tier = server.getTierManager().getTier(tierName.toLowerCase());
@@ -41,29 +41,29 @@ module.exports = {
                     const reserve = tier.getReserve(member.id);
                     const embed2 = new Discord.MessageEmbed();
                     embed2.setColor('RED');
-                    if (driver) {
+                    if (reserve) {
+                        tier.removeReserve(member.id);
+                        reserve.delete();
+                        embed2.setAuthor(`Removed reserve ${reserve.member.user.tag} from tier ${tier.name}`);
+                        server.log(`${message.member.user.username} has removed reserve ${reserve.member.user.tag} from tier ${tier.name}`);
+                        server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
+                            if (advanced.tier.name === tier.name)
+                                advanced.fix();
+                        });
+                    } else if (driver) {
                         driver.team.removeDriver(member.id);
                         tier.removeDriver(member.id);
-                        await driver.delete();
+                        driver.delete();
                         embed2.setAuthor(`Removed driver ${driver.member.user.tag} from tier ${tier.name}`);
-                        await server.log(`${message.member.user.username} has removed driver ${driver.member.user.tag} from tier ${tier.name}`);
+                        server.log(`${message.member.user.username} has removed driver ${driver.member.user.tag} from tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                             if (advanced.tier.name === tier.name)
-                                await advanced.fix();
-                        });
-                    } else if (reserve) {
-                        tier.removeReserve(member.id);
-                        await reserve.delete();
-                        embed2.setAuthor(`Removed reserve ${reserve.member.user.tag} from tier ${tier.name}`);
-                        await server.log(`${message.member.user.username} has removed driver ${reserve.member.user.tag} from tier ${tier.name}`);
-                        server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
-                            if (advanced.tier.name === tier.name)
-                                await advanced.fix();
+                                advanced.fix();
                         });
                     } else {
                         embed2.setAuthor(`Unknown driver / reserve ${member.user.username}`);
                     }
-                    await message.channel.send(embed2);
+                    message.channel.send(embed2);
                     server.save();
                     return;
                 }
@@ -71,7 +71,7 @@ module.exports = {
                 embed.setAuthor('No user was tagged! Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
         }

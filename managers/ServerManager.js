@@ -40,23 +40,25 @@ class ServerManager {
         if (this.client.app) {
             this.guildRoute = Router();
             this.guildRoute.post('/:guildID', async (req, res) => {
-                const { guildID } = req.params;
-                const server = this.servers.get(guildID);
-                if (server && req.headers.id) {
-                    const members = await server.guild.members.fetch();
-                    const member = members.get(req.headers.id);
-                    if (member && member.hasPermission('MANAGE_GUILD')) {
-                        this.editServer(server, req);
-                        return res.status(200).send({
-                            success: 'Success!',
-                            code: 200,
+                if (req.headers.token === this.client.token) {
+                    const { guildID } = req.params;
+                    const server = this.servers.get(guildID);
+                    if (server && req.headers.id) {
+                        const members = await server.guild.members.fetch();
+                        const member = members.get(req.headers.id);
+                        if (member && (member.hasPermission('MANAGE_GUILD') || client.user.id === member.id)) {
+                            this.editServer(server, req);
+                            return res.status(200).send({
+                                success: 'Success!',
+                                code: 200,
+                            });
+                        }
+                    } else if (!server && req.headers.id) {
+                        return res.status(404).send({
+                            error: 'Invalid guildID',
+                            code: 404,
                         });
                     }
-                } else if (!server && req.headers.id) {
-                    return res.status(404).send({
-                        error: 'Invalid guildID',
-                        code: 404,
-                    });
                 }
                 return res.status(403).send({
                     error: 'Unauthorized access',
@@ -70,7 +72,7 @@ class ServerManager {
                 if (server && req.headers.id) {
                     const members = await server.guild.members.fetch();
                     const member = members.get(req.headers.id);
-                    if (member && member.hasPermission('MANAGE_CHANNELS')) {
+                    if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
                         return res.send(server.toJSON());
                     }
                     return res.status(403).send({
@@ -91,9 +93,10 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
                             const array = [];
                             for (const member of server.guild.members.cache.values()) {
+                                if (member.id === client.user.id) continue;
                                 array.push(member.toJSON());
                             }
                             return res.send(array);
@@ -124,7 +127,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
                             const array = [];
                             for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
                                 array.push(attendance.toJSON());
@@ -157,7 +160,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
                             const attendance = server.getAttendanceManager().fetchAdvanced(attendanceID);
                             if (attendance) {
                                 return res.send(attendance.toJSON());
@@ -232,7 +235,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
                             const requestMember = members.get(memberID);
                             if (requestMember) {
                                 return res.send(requestMember.toJSON());
@@ -267,15 +270,19 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && member.hasPermission('MANAGE_CHANNELS')) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
                             const array = [];
                             for (const channel of server.guild.channels.cache.values()) {
-                                if (!channel.manageable || !channel.isText()) continue;
+                                if (!channel.manageable) continue;
+                                if (channel.type === 'voice' || channel.type === 'store') continue;
                                 array.push({
                                     id: channel.id,
                                     name: channel.name,
+                                    pos: channel.rawPosition,
+                                    category: channel.type === 'category' ? true : false
                                 });
                             }
+                            array.sort((a, b) => a.pos - b.pos);
                             return res.send(array);
                         }
                     } catch(err) {
@@ -363,7 +370,8 @@ class ServerManager {
      * @param {*} req 
      */
     async editServer(server, req) {
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(req.headers.type + " " + JSON.stringify(req.body));
+        console.log(`${req.headers.type} ${JSON.stringify(req.body)}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`${req.headers.type} ${JSON.stringify(req.body)}`);
         switch (req.headers.type) {
             case 'set_prefix': {
                 const oldPrefix = server.prefix;
@@ -373,28 +381,18 @@ class ServerManager {
             }
             case 'transfer_driver': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                if (!tier) break;
+                if (!tier) return;
                 const team = tier.getTeam(req.body.team);
                 tier.transferDriver(req.body.driver, team);
                 server.log(`Transferred driver of id ${req.body.driver} to ${team ? team.name : "Reserves"} in tier ${tier.name}`);
-                break;
-            }
-            case 'delete_race': {
-                const tier = server.getTierManager().getTier(req.body.tier);
-                const race = tier.races.find(r => r.name === req.body.name);
-                if (!race) break;
-                if (race.results.length !== 0) break;
-                const index = tier.races.indexOf(race);
-                tier.races.splice(index, 1);
-                server.log(`Deleted race ${race.name} from tier ${tier.name}`);
                 break;
             }
             case 'new_raceresult': {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
-                if (!driver) break;
-                if (race.results.find(r => r.driver.id === driver.id)) break;
+                if (!driver) return;
+                if (race.results.find(r => r.driver.id === driver.id)) return;
                 const result = new RaceResult(tier, driver, Number(req.body.position), req.body.gap, Number(req.body.points), Number(req.body.stops), Number(req.body.penalties));
                 race.results.push(result);
                 race.results.sort((a, b) => a.position - b.position);
@@ -405,8 +403,8 @@ class ServerManager {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races[req.body.index];
                 const driver = tier.getDriver(req.body.driver);
-                if (!driver) break;
-                if (race.qualifying.find(r => r.driver.id === driver.id)) break;
+                if (!driver) return;
+                if (race.qualifying.find(r => r.driver.id === driver.id)) return;
                 const result = new QualiResult(tier, driver, Number(req.body.position), req.body.time);
                 race.qualifying.push(result);
                 race.qualifying.sort((a, b) => a.position - b.position);
@@ -417,20 +415,27 @@ class ServerManager {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races[req.body.index];
                 const result = race.qualifying.find(r => r.driver.id === req.body.driver);
-                if (!result) break;
-                result.time = Number(req.body.time);
+                if (!result) return;
+                result.time = req.body.time;
                 race.qualifying.sort((a, b) => a.position - b.position);
                 server.log(`Updated qualifying result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
                 break;
             }
             case 'delete_qualiresult': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = tier.races[req.body.index];
+                const result = race.qualifying.find(r => r.driver.id === req.body.driver);
+                if (!result) return;
+                const index = race.qualifying.indexOf(result);
+                race.qualifying.splice(index, 1);
+                server.log(`Deleted qualifying result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
                 break;
             }
             case 'update_raceresult': {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 const race = tier.races[req.body.index];
                 const result = race.results.find(r => r.driver.id === req.body.driver);
-                if (!result) break;
+                if (!result) return;
                 result.gap = req.body.gap;
                 result.penalties = Number(req.body.penalties);
                 result.points = Number(req.body.points);
@@ -440,12 +445,19 @@ class ServerManager {
                 break;
             }
             case 'delete_raceresult': {
+                const tier = server.getTierManager().getTier(req.body.tier);
+                const race = tier.races[req.body.index];
+                const result = race.results.find(r => r.driver.id === req.body.driver);
+                if (!result) return;
+                const index = race.results.indexOf(result);
+                race.results.splice(index, 1);
+                server.log(`Deleted race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
                 break;
             }
             case 'update_race': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                const race = tier.races[req.body.index - 1];
-                if (!race) break;
+                const race = tier.races[req.body.index];
+                if (!race) return;
                 race.link = req.body.link;
                 race.name = req.body.new_name;
                 race.attendanceChannel = req.body.channel;
@@ -458,9 +470,10 @@ class ServerManager {
                 const name = req.body.name;
                 const date = new Date(req.body.date);
                 const existing = tier.races.find(r => r.name.toLowerCase() === name.toLowerCase() && r.date.getTime() === date.getTime());
-                if (existing) break;
+                if (existing) return;
                 const race = new Race(this.client, tier, name, date, req.body.timezone);
                 race.attendanceChannel = req.body.channel;
+                race.update();
                 tier.races.push(race);
                 tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 server.log(`Created new race ${race.name} in tier ${tier.name}`);
@@ -468,14 +481,10 @@ class ServerManager {
             }
             case 'delete_race': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                const index = req.body.index;
-                const race = tier.races[index - 1];
-                if (race.results.length) break;
-                if (race.qualifying.length) break;
-                if (race.schedule) {
-                    race.schedule.cancel();
-                }
-                tier.races.splice(index-1, 1);
+                const race = tier.races[req.body.index];
+                if (!race) return;
+                if (race.schedule) race.schedule.cancel();
+                tier.races.splice(req.body.index, 1);
                 server.log(`Deleted race ${race.name} in tier ${tier.name}`);
                 break;
             }
@@ -489,18 +498,18 @@ class ServerManager {
                 try {
                     const members = await server.guild.members.fetch();
                     const member = members.get(req.body.driver);
-                    if (!member) break;
+                    if (!member) return;
                     const tier = server.getTierManager().getTier(req.body.tier);
-                    if (!tier) break;
+                    if (!tier) return;
                     const team = tier.getTeam(req.body.team);
                     if (tier.reserves.find(r => r.id === member.id) && team) {
                         const reserve = tier.reserves.find(r => r.id === member.id);
                         tier.transferDriver(reserve.id, team);
-                        break;
+                        return;
                     }
                     if (tier.teams.find(t => t.drivers.find(d => d.id === member.id))) {
                         const oldTeam = tier.teams.find(t => t.drivers.find(d => d.id === member.id))
-                        if (oldTeam === team) break;
+                        if (oldTeam === team) return;
                         const driver = oldTeam.getDriver(member.id);
                         tier.transferDriver(driver.id, team);
                         break;
@@ -512,7 +521,12 @@ class ServerManager {
                         tier.addReserve(driver);
                     }
                     tier.addDriver(driver);
-                    server.log(`Created new driver ${driver.name} in tier ${tier.name}`)
+                    for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
+                        if (attendance.tier === tier) {
+                            attendance.fix();
+                        }
+                    }
+                    server.log(`Created new driver ${driver.name} in tier ${tier.name}`);
                 } catch (e) {
                     server.log(e.message);
                 }
@@ -521,7 +535,7 @@ class ServerManager {
             case 'remove_driver': {
                 try {
                     const tier = server.getTierManager().getTier(req.body.tier);
-                    if (!tier) break;
+                    if (!tier) return;
                     const driver = tier.getDriver(req.body.driver);
                     if (driver.team) {
                         driver.team.removeDriver(req.body.driver);
@@ -529,21 +543,20 @@ class ServerManager {
                         tier.removeReserve(req.body.driver);
                     }
                     tier.removeDriver(req.body.driver);
-                    server.log(`Removed driver ${driver.name} in tier ${tier.name}`)
+                    for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
+                        if (attendance.tier === tier) {
+                            attendance.fix();
+                        }
+                    }
+                    server.log(`Removed driver ${driver.name} in tier ${tier.name}`);
                 } catch (e) {
                     server.log(e.message);
                 }
                 break;
             }
-            case 'new_advanced_attendance': {
-                break;
-            }
-            case 'new_attendance': {
-                break;
-            }
             case 'new_tier': {
                 const existing = server.getTierManager().getTier(req.body.name);
-                if (existing) break;
+                if (existing) return;
                 const tier = new Tier(this.client, server, req.body.name);
                 server.getTierManager().addTier(tier);
                 server.log(`Created new tier ${tier.name}`);
@@ -551,9 +564,9 @@ class ServerManager {
             }
             case 'delete_tier': {
                 const tier = server.getTierManager().getTier(req.body.name);
-                if (!tier) break;
-                if (tier.teams.size !== 0) break;
-                if (tier.reserves.size !== 0) break;
+                if (!tier) return;
+                if (tier.teams.size !== 0) return;
+                if (tier.reserves.size !== 0) return;
                 server.getTierManager().removeTier(tier);
                 server.log(`Deleted tier ${tier.name}`);
                 break;
@@ -562,22 +575,27 @@ class ServerManager {
                 const oldTierName = req.body.old_name;
                 const newTierName = req.body.new_name;
                 const tier = server.getTierManager().getTier(oldTierName);
-                if (!tier) break;
+                if (!tier) return;
                 tier.setName(newTierName);
                 server.log(`Updated tier ${oldTierName} to ${tier.name}`);
                 break;
             }
             case 'new_team': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                if (!tier) break;
+                if (!tier) return;
                 const team = new Team(this.client, server, req.body.team, tier);
                 tier.addTeam(team);
+                for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
+                    if (attendance.tier === tier) {
+                        attendance.fix();
+                    }
+                }
                 server.log(`Added team ${team.name} to tier ${tier.name}`);
                 break;
             }
             case 'new_f1_teams': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                if (!tier) break;
+                if (!tier) return;
                 const teamNames = [];
                 teamNames.push('Mercedes-AMG Petronas');
                 teamNames.push('Scuderia Ferrari');
@@ -599,25 +617,35 @@ class ServerManager {
             }
             case 'delete_team': {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                if (!tier) break;
+                if (!tier) return;
                 const team = tier.getTeam(req.body.team);
-                if (!team) break;
+                if (!team) return;
                 tier.removeTeam(team.name);
+                for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
+                    if (attendance.tier === tier) {
+                        attendance.fix();
+                    }
+                }
                 server.log(`Removed team ${team.name} from tier ${tier.name}`);
                 break;
             }
             case 'edit_team' : {
                 const tier = server.getTierManager().getTier(req.body.tier);
-                if (!tier) break;
+                if (!tier) return;
                 const teamName = req.body.old_name;
                 const team = tier.getTeam(teamName);
-                if (!team) break;
+                if (!team) return;
                 team.setName(req.body.new_name);
+                for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
+                    if (attendance.tier === tier) {
+                        attendance.fixTeams(teamName, team.name);
+                    }
+                }
                 server.log(`Updated team ${teamName} to ${team.name} in tier ${tier.name}`);
                 break;
             }
             default: {
-                break;
+                return;
             }
         }
         server.save();

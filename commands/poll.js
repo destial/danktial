@@ -48,7 +48,7 @@ module.exports = {
                                 messag.react(AttendanceManager.reject);
                             });
                             message.delete({ timeout: 1000 });
-                            await server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
+                            server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                             resolve();
                         });
                     } else {
@@ -67,7 +67,7 @@ module.exports = {
                                     await messag.react(reactions[i]);
                                 }
                                 message.delete({ timeout: 1000 });
-                                await server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
+                                server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                                 resolve();
                             });
                         } else if (arguments.length > 10) {
@@ -92,7 +92,7 @@ module.exports = {
                                         await mes.react(reactions[iiii]);
                                     }
                                     message.delete({ timeout: 1000 });
-                                    await server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
+                                    server.log(`${message.member.user.tag} has created a poll in #${message.channel.name}`, `[${question}](${messag.url})`);
                                     resolve();
                                 });
                             });

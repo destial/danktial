@@ -23,11 +23,12 @@ module.exports = {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     embed.setFooter(this.description);
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                     return;
                 }
                 if (server.getTierManager().tiers.size === 0) {
                     embed.setAuthor(`There are no tiers available! Create a new tier using ${server.prefix}addtier`);
+                    message.channel.send(embed);
                     return;
                 }
                 const name = args.join(' ');
@@ -61,17 +62,21 @@ module.exports = {
                         });
                         rCollector.on('end', async col => {
                             const messageReaction = col.first();
-            
+                            if (!messageReaction) {
+                                embed.setAuthor('No response! Exiting edit mode!');
+                                message.channel.send(embed);
+                                return;
+                            }
                             const tier = server.getTierManager().getTier(tierName.toLowerCase());
                             if (!tier) {
                                 embed.setAuthor('Invalid tier name! Did not match any tier. Please try again!');
-                                await message.channel.send(embed);
+                                message.channel.send(embed);
                                 return;
                             }
                             const teamCol = tier.searchTeam(name.toLowerCase());
                             if (teamCol.size === 0) {
                                 embed.setAuthor('Invalid team name! Did not match any team. Please try again!');
-                                await message.channel.send(embed);
+                                message.channel.send(embed);
                                 return;
                             } else if (teamCol.size > 1) {
                                 const embed5 = new Discord.MessageEmbed();
@@ -86,7 +91,6 @@ module.exports = {
                                 return;
                             }
                             const team = teamCol.first();
-
                             if (messageReaction.emoji.name === "📝") {
                                 embed.setAuthor('What would you like to rename this team to?');
                                 await message.channel.send(embed);
@@ -95,6 +99,11 @@ module.exports = {
                                     nameCollector.stop();
                                 });
                                 nameCollector.on('end', async mCol => {
+                                    if (mCol.size() === 0) {
+                                        embed.setAuthor(`No response! Exiting edit mode!`);
+                                        message.channel.send(embed);
+                                        return;
+                                    }
                                     const updateName = mCol.first().content;
                                     if (updateName.length >= 256) {
                                         embed.setAuthor(`Team name cannot be longer than 256 characters!`);
@@ -113,12 +122,12 @@ module.exports = {
                                     var driverList1 = "";
                                     team.drivers.forEach(async driver => {
                                         driverList1 += (`- ${driver.member}\n`);
-                                        await driver.update();
+                                        driver.update();
                                     });
-                                    await server.update();
+                                    server.update();
                                     embed.setDescription(driverList1);
-                                    await message.channel.send(embed);
-                                    await server.log(`${message.member.user.tag} has edited the name of team ${oldName} to ${team.name}`);
+                                    message.channel.send(embed);
+                                    server.log(`${message.member.user.tag} has edited the name of team ${oldName} to ${team.name}`);
                                 });
                             } else if (messageReaction.emoji.name === "🏎️") {
                                 team.drivers.clear();
@@ -145,7 +154,7 @@ module.exports = {
                                         } else {
                                             team.setDriver(driver);
                                             driver.setTeam(team);
-                                            await driver.update();
+                                            driver.update();
                                         }
                                     });
                                     embed.setAuthor(`Edited team ${name} under tier ${tier.name} with drivers:`);
@@ -154,9 +163,9 @@ module.exports = {
                                         driverList += (`- ${driver.member}\n`);
                                     });
                                     embed.setDescription(driverList);
-                                    await message.channel.send(embed);
-                                    await server.update();
-                                    await server.log(`${message.member.user.tag} has added drivers to team ${team.name}`, driverList);
+                                    message.channel.send(embed);
+                                    server.update();
+                                    server.log(`${message.member.user.tag} has added drivers to team ${team.name}`, driverList);
                                 });
                             }
                         });

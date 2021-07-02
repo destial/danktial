@@ -12,7 +12,19 @@ module.exports = {
             client.on('guildMemberRemove', async (member) => {
                 const server = await servers.fetch(member.guild.id);
                 if (server) {
-                    server.getTierManager().tiers.forEach(async tier => {
+                    for (const tier of server.getTierManager().tiers.values()) {
+                        const reserve = tier.getReserve(member.id);
+                        if (reserve) {
+                            await reserve.delete();
+                            tier.removeReserve(member.id);
+                            reserve.setTier(undefined);
+                            server.getAttendanceManager().getAdvancedEvents().forEach(async attendance => {
+                                if (attendance.tier === reserve.tier) {
+                                    await attendance.fix();
+                                }
+                            });
+                            continue;
+                        }
                         const driver = tier.getDriver(member.id);
                         if (driver) {
                             await driver.delete();
@@ -26,18 +38,8 @@ module.exports = {
                                 }
                             });
                         }
-                        const reserve = tier.getReserve(member.id);
-                        if (reserve) {
-                            await reserve.delete();
-                            tier.removeReserve(member.id);
-                            reserve.setTier(undefined);
-                            server.getAttendanceManager().getAdvancedEvents().forEach(async attendance => {
-                                if (attendance.tier === reserve.tier) {
-                                    await attendance.fix();
-                                }
-                            });
-                        }
-                    });
+                        
+                    }
                 }
             });
         } catch(err) {

@@ -201,6 +201,71 @@ class AttendanceManager {
     }
 
     /**
+     * 
+     * @param {string} title 
+     * @param {string} description 
+     * @param {Date} date 
+     * @param {string} timezone
+     * @param {Tier} t 
+     * @param {Discord.TextChannel} channel 
+     * @param {function} resolve 
+     */
+    async createAdvanced(title, description, date, timezone, t, channel, resolve) {
+        const attendanceembed = new Discord.MessageEmbed();
+        const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, timezone)}`;
+        attendanceembed.setTitle(title);
+        attendanceembed.setDescription(description);
+        if (formatTrack(title)) {
+            attendanceembed.setThumbnail(formatTrack(title));
+        } else if (formatTrack(description)) {
+            attendanceembed.setThumbnail(formatTrack(description));
+        }
+        attendanceembed.addFields(
+            { name: "Date & Time", value: dateString, inline: false }
+        );
+        t.teams.forEach(team => {
+            const driverNames = [];
+            if (team.drivers.size === 0) {
+                driverNames.push('-');
+            }
+            team.drivers.forEach(d => {
+                driverNames.push(`${AttendanceManager.unknown} ${d.member}`);
+            });
+            attendanceembed.addField(team.name, driverNames.join('\n'), false);
+        });
+        const reserveNames = [];
+        if (t.reserves.size !== 0) {
+            t.reserves.forEach(reserve => {
+                reserveNames.push(`${AttendanceManager.unknown} ${reserve.member}`);
+            });
+            attendanceembed.addField('Reserves', reserveNames.join('\n'), false);
+        }
+        attendanceembed.setFooter(t.name);
+        attendanceembed.setTimestamp(date);
+        attendanceembed.setColor('RED');
+        channel.send(attendanceembed).then(async (m) => {
+            m.react(AttendanceManager.accept).then(async() => {
+                await m.react(AttendanceManager.reject);
+                await m.react(AttendanceManager.tentative);
+                await m.react(AttendanceManager.delete);
+                await m.react(AdvancedAttendance.editEmoji);
+                await m.react(AdvancedAttendance.lockEmoji);
+            });
+            const attendance = new AdvancedAttendance(this.client, m, t.server, t, date, this);
+            attendance.timezone = timezone;
+            this.advancedEvents.set(attendance.id, attendance);
+            try {
+                attendance.save();
+                this.server.update();
+                resolve(attendance);
+            } catch (err) {
+                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                resolve(attendance);
+            }
+        });
+    }
+
+    /**
      * @param {Attendance | AdvancedAttendance} attendance 
      */
     async createSchedule(attendance) {
@@ -240,18 +305,20 @@ class AttendanceManager {
                 attendanceembed.setTimestamp(dateObject);
                 attendanceembed.setColor('RED');
                 const m = await attendance.message.channel.send(attendanceembed)
-                await m.react(AttendanceManager.accept);
-                await m.react(AttendanceManager.reject);
-                await m.react(AttendanceManager.tentative);
-                await m.react(AttendanceManager.delete);
-                await m.react(AdvancedAttendance.editEmoji);
+                m.react(AttendanceManager.accept).then(async () => {
+                    await m.react(AttendanceManager.reject);
+                    await m.react(AttendanceManager.tentative);
+                    await m.react(AttendanceManager.delete);
+                    await m.react(AdvancedAttendance.editEmoji);
+                    await m.react(AdvancedAttendance.lockEmoji);
+                });
                 const a = new AdvancedAttendance(attendance.client, m, attendance.server, attendance.tier, dateObject, this);
                 a.creator = attendance.creator;
                 a.type = attendance.type;
                 this.advancedEvents.set(a.id, a);
                 this.server.update();
                 try {
-                    await a.save();
+                    a.save();
                     return a;
                 } catch (err) {
                     this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
@@ -277,16 +344,17 @@ class AttendanceManager {
                 attendanceembed.setTimestamp(dateObject);
                 attendanceembed.setColor('RED');
                 const m = await channel.send(attendanceembed)
-                await m.react(AttendanceManager.accept);
-                await m.react(AttendanceManager.reject);
-                await m.react(AttendanceManager.tentative);
-                await m.react(AttendanceManager.delete);
+                m.react(AttendanceManager.accept).then(async () => {
+                    await m.react(AttendanceManager.reject);
+                    await m.react(AttendanceManager.tentative);
+                    await m.react(AttendanceManager.delete);
+                });
                 const a = new Attendance(attendanceembed, m.id, dateObject, this.server, m, this.client);
                 a.creator = attendance.creator;
                 a.timezone = attendance.timezone;
                 this.events.set(attendance.id, attendance);
                 try {
-                    await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
+                    Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
                     this.server.update();
                     Logger.info(`[ATTENDANCE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                     return attendance;
@@ -350,13 +418,13 @@ class AttendanceManager {
                     const date = answers[2];
                     if (!title || !description || !date) {
                         embed.setAuthor("Ran out of time!");
-                        await member.user.send(embed);
-                        resolve(undefined);
+                        member.user.send(embed);
+                        resolve();
                     } else if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
                         embed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY hh:mm TMZE)");
                         embed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
-                        await member.user.send(embed);
-                        resolve(undefined);
+                        member.user.send(embed);
+                        resolve();
                     } else {
                         const attendanceembed = new Discord.MessageEmbed();
                         formatDate(date.toUpperCase()).then((dateObject) => {
@@ -387,10 +455,11 @@ class AttendanceManager {
                                 attendanceembed.setTimestamp(dateObject);
                                 attendanceembed.setColor('RED');
                                 channel.send(attendanceembed).then(async (m) => {
-                                    await m.react(AttendanceManager.accept);
-                                    await m.react(AttendanceManager.reject);
-                                    await m.react(AttendanceManager.tentative);
-                                    await m.react(AttendanceManager.delete);
+                                    m.react(AttendanceManager.accept).then(async() => {
+                                        await m.react(AttendanceManager.reject);
+                                        await m.react(AttendanceManager.tentative);
+                                        await m.react(AttendanceManager.delete)
+                                    });
                                     const embed3 = new Discord.MessageEmbed();
                                     embed3.setAuthor(`Successfully created event ${title}`);
                                     embed3.setDescription(`[Click here to view the attendance](${m.url})`);
@@ -401,7 +470,7 @@ class AttendanceManager {
                                     attendance.timezone = date.substring(date.length-4).trim().toUpperCase();
                                     this.events.set(attendance.id, attendance);
                                     try {
-                                        await Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
+                                        Database.run(Database.attendanceSaveQuery, [attendance.id, String(attendance.date.getTime()), channel.id]);
                                         this.server.update();
                                         Logger.info(`[ATTENDANCE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                                         resolve(attendance);
@@ -536,12 +605,12 @@ class AttendanceManager {
                                             try {
                                                 const embed3 = new Discord.MessageEmbed();
                                                 embed3.setColor('RED');
-                                                await Database.run(Database.attendanceSaveQuery, [attendanceevent.id, String(attendanceevent.date.getTime()), attendanceevent.message.channel.id]);
+                                                Database.run(Database.attendanceSaveQuery, [attendanceevent.id, String(attendanceevent.date.getTime()), attendanceevent.message.channel.id]);
                                                 this.server.update();
                                                 Logger.info(`[ATTENDANCE] Edited attendance ${attendanceevent.title} of id: ${attendanceevent.id}`);
                                                 embed3.setAuthor("Successfully edited event!");
                                                 member.user.send(embed3);
-                                                await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
+                                                this.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
                                             } catch (err) {
                                                 this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
                                             }
@@ -619,10 +688,10 @@ class AttendanceManager {
                                     }
                                     attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                         try {
-                                            await attendanceevent.update();
+                                            attendanceevent.update();
                                             embed3.setAuthor(`Successfully edited attendance!`);
                                             member.user.send(embed3);
-                                            await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
+                                            this.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
                                             this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
@@ -638,7 +707,7 @@ class AttendanceManager {
                                             await attendanceevent.update();
                                             embed3.setAuthor(`Successfully edited attendance!`);
                                             member.user.send(embed3);
-                                            await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
+                                            this.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
                                             this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
@@ -659,11 +728,11 @@ class AttendanceManager {
                                         }
                                         attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                             try {
-                                                await attendanceevent.update();
+                                                attendanceevent.update();
                                                 this.server.update();
                                                 embed3.setAuthor(`Successfully edited attendance!`);
                                                 member.user.send(embed3);
-                                                await attendanceevent.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
+                                                this.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                                 return;
                                             } catch (err) {
                                                 this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
@@ -735,11 +804,11 @@ class AttendanceManager {
                         if (yesdelete) {
                             embed.setAuthor(`Deleted ${attendance.title}!`);
                             member.user.send(embed).then(async () => {
-                                await this.deleteAttendance(reaction.message);
+                                this.deleteAttendance(reaction.message);
                             });
                         } else {
                             embed.setAuthor(`Did not delete ${attendance.title}!`);
-                            await member.user.send(embed);
+                            member.user.send(embed);
                         }
                     });
                 });
@@ -775,11 +844,11 @@ class AttendanceManager {
                         if (yesdelete) {
                             embed.setAuthor(`Deleted ${attendance.embed.title}!`);
                             member.user.send(embed).then(async () => {
-                                await this.deleteAdvancedAttendance(reaction.message);
+                                this.deleteAdvancedAttendance(reaction.message);
                             });
                         } else {
                             embed.setAuthor(`Did not delete ${attendance.title}!`);
-                            await member.user.send(embed);
+                            member.user.send(embed);
                         }
                     });
                 });
@@ -799,9 +868,9 @@ class AttendanceManager {
                     attendanceevent.schedule.cancel();
                 this.events.delete(attendanceevent.id);
                 if (!message.deleted) {
-                    await message.delete({ timeout: 1000 });
+                    message.delete({ timeout: 1000 });
                 }
-                await attendanceevent.delete();
+                attendanceevent.delete();
                 this.server.update();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
@@ -822,9 +891,9 @@ class AttendanceManager {
             try {
                 this.advancedEvents.delete(attendanceevent.id);
                 if (!message.deleted) {
-                    await message.delete({ timeout: 1000 });
+                    message.delete({ timeout: 1000 });
                 }
-                await attendanceevent.delete();
+                attendanceevent.delete();
                 this.server.update();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);

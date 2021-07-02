@@ -28,10 +28,10 @@ module.exports = {
                 }
                 const attendance = server.getAttendanceManager().fetchAdvanced(args[0]);
                 if (attendance) {
-                    await attendance.reset();
+                    attendance.reset();
                     embed.setAuthor(`Attendance ${attendance.embed.title} has been reset!`);
                     message.channel.send(embed);
-                    await server.log(`${message.member.user.tag} has reset attendance ${attendance.embed.title}`);
+                    server.log(`${message.member.user.tag} has reset attendance ${attendance.embed.title}`);
                 } else {
                     embed.setAuthor('Attendance does not exist! Perhaps using the wrong message id?');
                     embed.setDescription('If you are in developer mode, right click the attendance and copy the id to get the message id');
@@ -47,15 +47,15 @@ module.exports = {
                 }
                 const attendance = server.getAttendanceManager().fetchAdvanced(args[0]);
                 if (attendance) {
-                    await attendance.fix();
+                    attendance.fix();
                     embed.setAuthor(`Attendance ${attendance.embed.title} has been fixed and updated!`);
-                    await message.channel.send(embed);
-                    await server.log(`${message.member.user.tag} has fixed attendance ${attendance.embed.title}`);
+                    message.channel.send(embed);
+                    server.log(`${message.member.user.tag} has fixed attendance ${attendance.embed.title}`);
                     return;
                 } else {
                     embed.setAuthor('Attendance does not exist! Perhaps using the wrong message id?');
                     embed.setDescription('If you are in developer mode, right click the attendance and copy the id to get the message id');
-                    await message.channel.send(embed);
+                    message.channel.send(embed);
                     return;
                 }
             }

@@ -57,7 +57,22 @@ class Logger {
     }
 }
 
+class Reacts {
+    static get check() { return "✅"; }
+    static get cross() { return "❌"; }
+    static get question() { return "❔"; }
+    static get delete() { return "🗑️"; }
+    static get unknown() { return "🟠"; }
+    static get accept() { return "🟢"; }
+    static get reject() { return "🔴"; }
+    static get maybe() { return "🔵"; }
+    static get edit() { return "✏️"; }
+    static get lock() { return "🔒"; }
+    static get unlock() { return "🔓"; }
+}
+
 module.exports = {
     Embed,
-    Logger
+    Logger,
+    Reacts
 };

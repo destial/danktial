@@ -25,13 +25,13 @@ module.exports = {
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             const name = args.join(' ');
             if (name.length >= 256) {
                 const embed6 = new Discord.MessageEmbed().setAuthor(`Tier name cannot be longer than 256 characters!`);
-                await message.channel.send(embed6);
+                message.channel.send(embed6);
                 return;
             }
             const tier = new Tier(client, server, name);
@@ -43,6 +43,11 @@ module.exports = {
             });
             collector.on('end', async (col) => {
                 const reply = col.first();
+                if (!reply) {
+                    embed.setAuthor('No response! Exiting add mode!');
+                    message.channel.send(embed);
+                    return;
+                }
                 const mentions = reply.mentions.members;
                 mentions.forEach(mention => {
                     const reserve = new Reserve(client, mention, server, 0, tier);
@@ -57,10 +62,9 @@ module.exports = {
                     reserve.save();
                 });
                 embed.setDescription(`${driverList}\nNext step is using ` + server.prefix + `setdriver`);
-                await message.channel.send(embed);
-                await server.log(`${message.member.user.tag} has added tier ${tier.name}`);
-                await Database.run(Database.tierSaveQuery, [server.id, name]);
-                message.channel.stopTyping(true);
+                message.channel.send(embed);
+                server.log(`${message.member.user.tag} has added tier ${tier.name}`);
+                Database.run(Database.tierSaveQuery, [server.id, name]);
             });
         }
     }

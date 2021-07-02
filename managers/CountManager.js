@@ -55,19 +55,19 @@ class CountManager {
             switch (name.toLowerCase()) {
                 case "member":
                     this.membercount = channel;
-                    await Database.run(Database.countSaveQuery, [channel.id, "membercount"]);
+                    Database.run(Database.countSaveQuery, [channel.id, "membercount"]);
                     Logger.info(`[COUNT] Created membercount channel ${channel.id}`);
                     resolve(this.membercount);
                     break;
                 case "channel":
                     this.channelcount = channel;
-                    await Database.run(Database.countSaveQuery, [channel.id, "channelcount"]);
+                    Database.run(Database.countSaveQuery, [channel.id, "channelcount"]);
                     Logger.info(`[COUNT] Created channelcount channel ${channel.id}`);
                     resolve(this.channelcount);
                     break;
                 case "role":
                     this.rolecount = channel;
-                    await Database.run(Database.countSaveQuery, [channel.id, "rolecount"]);
+                    Database.run(Database.countSaveQuery, [channel.id, "rolecount"]);
                     Logger.info(`[COUNT] Created rolecount channel ${channel.id}`);
                     resolve(this.rolecount);
                     break;
@@ -88,21 +88,21 @@ class CountManager {
             switch (name.toLowerCase()) {
                 case "member":
                     if (this.membercount) {
-                        await Database.run(Database.countDeleteQuery, [this.membercount.id]);
+                        Database.run(Database.countDeleteQuery, [this.membercount.id]);
                         Logger.warn(`[COUNT] Deleted membercount channel ${this.membercount.id}`);
                     }
                     resolve(this.membercount);
                     break;
                 case "channel":
                     if (this.channelcount) {
-                        await Database.run(Database.countDeleteQuery, [this.channelcount.id]);
+                        Database.run(Database.countDeleteQuery, [this.channelcount.id]);
                         Logger.warn(`[COUNT] Deleted channelcount channel ${this.channelcount.id}`);
                     }
                     resolve(this.channelcount);
                     break;
                 case "role":
                     if (this.rolecount) {
-                        await Database.run(Database.countDeleteQuery, [this.rolecount.id]);
+                        Database.run(Database.countDeleteQuery, [this.rolecount.id]);
                         Logger.warn(`[COUNT] Deleted rolecount channel ${this.rolecount.id}`);
                     }
                     resolve(this.rolecount);

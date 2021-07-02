@@ -58,11 +58,13 @@ class Tier {
     async update(newname) {
         await Database.run(Database.tierUpdateQuery, [newname, this.server.id, this.name]);
         this.name = newname;
+        this.server.update();
         Logger.info(`[TIER] Updated tier ${this.name} from ${this.server.guild.name}`);
     }
 
     async delete() {
-        await Database.run(Database.tierDeleteQuery, [this.server.id, this.name]);
+        Database.run(Database.tierDeleteQuery, [this.server.id, this.name]);
+        this.server.update();
         Logger.warn(`[TIER] Deleted tier ${this.name} from ${this.server.guild.name}`);
     }
 
@@ -71,7 +73,7 @@ class Tier {
             this.teams.forEach(team => {
                 const deleteDrivers = new Promise((resolve1, reject1) => {
                     team.drivers.forEach(async (driver, id) => {
-                        await driver.delete();
+                        driver.delete();
                         driver.setTeam(undefined);
                         driver.setTier(undefined);
                         team.removeDriver(driver.id);
@@ -83,7 +85,7 @@ class Tier {
             });
             const deleteReserves = new Promise((resolve1, reject1) => {
                 this.reserves.forEach(async (reserve, id) => {
-                    await reserve.delete();
+                    reserve.delete();
                     reserve.setTier(undefined);
                     if (id === this.reserves.lastKey()) resolve1();
                 });
@@ -206,7 +208,7 @@ class Tier {
             for (const attendance of this.server.getAttendanceManager().getAdvancedEvents().values()) {
                 if (attendance.tier == this) {
                     attendance.embed.setFooter(this.name);
-                    await attendance.message.edit(attendance.embed);
+                    attendance.message.edit(attendance.embed);
                 }
             }
         }
@@ -236,10 +238,10 @@ class Tier {
             } else return;
             this.server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                 if (advanced.tier === this) {
-                    await advanced.fix();
+                    advanced.fix();
                 }
             });
-            await this.server.update();
+            this.server.update();
         } else {
             if (driver && !reserve) {
                 driver.team.removeDriver(driver.id);
@@ -248,10 +250,10 @@ class Tier {
                 driver.toReserve();
                 this.server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                     if (advanced.tier === this) {
-                        await advanced.fix();
+                        advanced.fix();
                     }
                 });
-                await this.server.update();
+                this.server.update();
             }
         }
     }

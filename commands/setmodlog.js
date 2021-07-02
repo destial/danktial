@@ -18,16 +18,16 @@ module.exports = {
         embed.setColor('RED');
         const channel = message.mentions.channels.first();
         if (channel) {
-            await server.setModLog(channel);
+            server.setModLog(channel);
             embed.setAuthor(`Mod-log channel was set to:`);
             embed.setDescription(`${channel}`);
-            await server.log(`This is now the mod-log channel for this bot!`);
-            console.log(`[MODLOG] Set mod-log for server ${message.guild.name} to ${server.modlog.id}`);
+            server.log(`This is now the mod-log channel for this bot!`);
+            console.log(`[MODLOG] Set mod-log for server ${message.guild.name} to ${channel.id}`);
         } else {
             embed.setAuthor(`Usage is:`);
             embed.setDescription(`${server.prefix}${command} ${this.usage}`); 
             embed.setFooter(this.description);
         }
-        await message.channel.send(embed);
+        message.channel.send(embed);
     }
 };

@@ -28,21 +28,21 @@ class Driver {
     }
 
     async save() {
-        await Database.run(Database.driverSaveQuery, [this.id, this.guild.id, this.number, 0, (this.team ? this.team.name : ""), this.tier.name]);
-        await this.server.update();
+        Database.run(Database.driverSaveQuery, [this.id, this.guild.id, this.number, 0, (this.team ? this.team.name : ""), this.tier.name]);
+        this.server.update();
         Logger.info(`[DRIVER] Saved driver ${this.name} from ${this.guild.name}`);
     }
 
     async update() {
-        await Database.run(Database.driverUpdateQuery, [(this.team ? 0 : 1), (this.team ? this.team.name : ""), this.id, this.guild.id, this.number, this.tier.name]);
-        await this.server.update();
+        Database.run(Database.driverUpdateQuery, [(this.team ? 0 : 1), (this.team ? this.team.name : ""), this.id, this.guild.id, this.number, this.tier.name]);
+        this.server.update();
         Logger.info(`[DRIVER] Updated ${this.team ? "driver" : "reserve"} ${this.name} from ${this.guild.name}`);
         this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[DRIVER] Updated ${this.team ? "driver" : "reserve"} ${this.name} from ${this.guild.name}`);
     }
 
     async updateReserve() {
-        await Database.run(Database.driverUpdateQuery, [1, "", this.id, this.guild.id, this.number, this.tier.name]);
-        await this.server.update();
+        Database.run(Database.driverUpdateQuery, [1, "", this.id, this.guild.id, this.number, this.tier.name]);
+        this.server.update();
         Logger.info(`[DRIVER] Updated reserve ${this.name} from ${this.guild.name}`);
     }
 
@@ -51,13 +51,13 @@ class Driver {
      * @param {string} number 
      */
     async updateNum(number) {
-        await Database.run(Database.driverUpdateNumberQuery, [number, this.id, this.server.id]);
+        Database.run(Database.driverUpdateNumberQuery, [number, this.id, this.server.id]);
         this.setNumber(number);
         Logger.info(`[DRIVER] Updated driver number ${this.name} from ${this.guild.name}`);
     }
 
     async delete() {
-        await Database.run(Database.driversDeleteQuery, [this.id, this.guild.id, this.tier.name]);
+        Database.run(Database.driversDeleteQuery, [this.id, this.guild.id, this.tier.name]);
         Logger.warn(`[DRIVER] Deleted driver ${this.name} from ${this.guild.name}`);
     }
 
@@ -95,7 +95,7 @@ class Driver {
     async toReserve() {
         this.tier.removeDriver(this.id);
         this.team = undefined;
-        await this.updateReserve();
+        this.updateReserve();
         return this;
     }
 
@@ -108,7 +108,7 @@ class Driver {
         this.tier.removeReserve(this.id);
         this.tier.addDriver(this);
         team.setDriver(this);
-        await this.update();
+        this.update();
         return this;
     }
 
@@ -129,7 +129,7 @@ class Driver {
     }
 
     async DM(object) {
-        await this.member.user.send(object);
+        return await this.member.user.send(object);
     }
 }
 

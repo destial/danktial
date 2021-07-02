@@ -22,7 +22,7 @@ module.exports = {
             embed.setColor('RED');
             if (server.getTierManager().tiers.size !== 0) {
                 embed.setTitle('You already have at least 1 existing tier! This command is only used for setup!');
-                await message.channel.send(embed);
+                message.channel.send(embed);
                 return;
             }
             embed.setTitle(`This is the start of setup. React with 🇩 to setup a default league, or 🇨 for custom teams.`)
@@ -32,16 +32,13 @@ module.exports = {
             const reply = await message.channel.send(embed);
             await reply.react('🇩');
             await reply.react('🇨');
-
             let filter = (r, u) => (r.message.id === reply.id && u.id === message.member.id && (r.emoji.name === '🇨' || r.emoji.name === '🇩')); 
             const replyCollector = reply.createReactionCollector(filter, {
                 max: 1, time: 60000
             });
-
             replyCollector.on('collect', (reaction, user) => {
                 replyCollector.stop();
             });
-
             replyCollector.once('end', async (collection) => {
                 const reaction = collection.first();
 
@@ -92,20 +89,20 @@ module.exports = {
                                                 if (tierAmount > letters.length) {
                                                     const embed2 = new Discord.MessageEmbed().setTitle('Too many tiers! Use {number} placeholder instead!')
                                                     .setColor('RED');
-                                                    await message.channel.send(embed2);
+                                                    message.channel.send(embed2);
                                                     return;
                                                 }
                                             }
                                             if (!tierName.includes('{number}') && !tierName.includes('{letter}') && tierAmount > 1) {
                                                 const embed6 = new Discord.MessageEmbed().setTitle('Please include a {number} or {letter} placeholder in your tier names!')
                                                 .setColor('RED');
-                                                await message.channel.send(embed6);
+                                                message.channel.send(embed6);
                                                 return;
                                             }
                                             if (tierName.length >= 256) {
                                                 const embed6 = new Discord.MessageEmbed().setTitle(`Tier name cannot be longer than 256 characters!`)
                                                 .setColor('RED');
-                                                await message.channel.send(embed6);
+                                                message.channel.send(embed6);
                                                 return;
                                             }
                                             const promise = new Promise(async (resolve1, reject) => {
@@ -126,7 +123,7 @@ module.exports = {
                                                 for (var i = 1; i <= tierAmount; i++) {
                                                     const tierPromise = new Promise(async (resolve2, reject) => {
                                                         const tier = new Tier(client, server, tierName.replace('{number}', String(i)).replace('{letter}', letters[i]));
-                                                        await server.log(`${message.member.user.tag} has created tier ${tier.name}`);
+                                                        server.log(`${message.member.user.tag} has created tier ${tier.name}`);
                                                         const teamPromise = new Promise(async (resolve3, reject) => {
                                                             var addEmoji = false;
                                                             var numOfEmoji = 50;
@@ -187,25 +184,25 @@ module.exports = {
                                                     .setTitle(`You have successfully created ${tierAmount} tiers!`)
                                                     .setDescription(`To continue setup for drivers per team per tier, please use the ${server.prefix}setdriver command!`)
                                                     .setColor('RED');
-                                                await message.channel.send(embed4);
-                                                await server.save();
+                                                message.channel.send(embed4);
+                                                server.save();
                                                 server.getTierManager().tiers.sort((a, b) => a.name.localeCompare(b.name));
                                             });
                                         } else {
                                             const embed2 = new Discord.MessageEmbed().setTitle('Ran out of time!');
                                             embed2.setColor('RED');
-                                            await message.channel.send(embed2);
+                                            message.channel.send(embed2);
                                         }
                                     });
                                 } else {
                                     const embed2 = new Discord.MessageEmbed().setTitle('Not a number or cannot have 0 tiers!');
                                     embed2.setColor('RED');
-                                    await message.channel.send(embed2);
+                                    message.channel.send(embed2);
                                 }
                             } else {
                                 const embed2 = new Discord.MessageEmbed().setTitle('Ran out of time!');
                                 embed2.setColor('RED');
-                                await message.channel.send(embed2);
+                                message.channel.send(embed2);
                             }
                         });
                     } else if (reaction.emoji.name === '🇨') {
@@ -213,12 +210,12 @@ module.exports = {
                         embed6.setTitle('You currently do not have premium!');
                         embed6.setDescription('Only premium guilds have this option!');
                         embed6.setColor('RED');
-                        await message.channel.send(embed6);
+                        message.channel.send(embed6);
                     }
                 } else {
                     const embed2 = new Discord.MessageEmbed().setTitle('Ran out of time!');
                     embed2.setColor('RED');
-                    await message.channel.send(embed2);
+                    message.channel.send(embed2);
                 }
             });
         }

@@ -216,7 +216,7 @@ class Server {
     async setPrefix(prefix) { 
         this.prefix = prefix;
         try {
-            await this.update();
+            this.update();
         } catch (err) {
             this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
         }
@@ -229,7 +229,7 @@ class Server {
     async setModLog(channel) {
         this.modlog = channel;
         try {
-            await this.update();
+            this.update();
         } catch (err) {
             this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
         }
@@ -273,28 +273,28 @@ class Server {
     }
 
     async save() {
-        await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
-        await Database.run(Database.serverDataUpdateQuery, [this.id, JSON.stringify(this.toJSON())]);
-        await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
+        Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
+        Database.run(Database.serverDataUpdateQuery, [this.id, JSON.stringify(this.toJSON())]);
+        Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
         Logger.info(`[SERVER] Saved server ${this.guild.name}`);
     }
 
     async update() {
-        await Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
-        await Database.run(Database.serverDataUpdateQuery, [this.id, JSON.stringify(this.toJSON())]);
-        await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
+        Database.run(Database.serverSaveQuery, [this.id, this.prefix, this.ticketManager.totaltickets, (this.modlog ? this.modlog.id : 0)]);
+        Database.run(Database.serverDataUpdateQuery, [this.id, JSON.stringify(this.toJSON())]);
+        Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
         Logger.info(`[SERVER] Updated server ${this.guild.name}`);
     }
 
     async delete() {
-        await Database.run(Database.serverDeleteQuery, [this.id]);
-        await Database.run(Database.serverDataDeleteQuery, [this.id]);
-        await Database.runNewDB(Database.getStatement('delete'), [this.id]);
+        Database.run(Database.serverDeleteQuery, [this.id]);
+        Database.run(Database.serverDataDeleteQuery, [this.id]);
+        Database.runNewDB(Database.getStatement('delete'), [this.id]);
         Logger.warn(`[SERVER] Deleted server ${this.guild.name}`);
     }
 
     async backup() {
-        await Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
+        Database.runNewDB(Database.getStatement('update'), [this.id, JSON.stringify(this.toJSON())]);
         Logger.info(`[BACKUP] Backed up server ${this.guild.name}`);
     }
 

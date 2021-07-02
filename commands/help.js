@@ -34,7 +34,7 @@ module.exports = {
                 help += ("`" + server.prefix+commands[i] + "` => " + desc[i] + '\n');
             }
             embed.setDescription(help);
-            await message.channel.send(embed);
+            message.channel.send(embed);
         } else {
             const command = list.get(args[0].toLowerCase());
             if (command) {
@@ -46,7 +46,7 @@ module.exports = {
                 if (command.example) {
                     embed.addField('Example', `${server.prefix}${command.name} ${command.example}`, false);
                 }
-                await message.channel.send(embed);
+                message.channel.send(embed);
             }
         }
     }

@@ -41,7 +41,7 @@ module.exports = {
             const servers = client.manager.servers.size;
                 embed.setFooter(`Competing in ${servers} leagues! • Built by destiall#9640`)
                 .setColor('RED');
-            await message.channel.send(embed);
+            message.channel.send(embed);
         }
     }
 };
