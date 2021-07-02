@@ -20,6 +20,7 @@ module.exports = {
                 if (attendance && !attendance.locked) {
                     const type = button.id.substring('advanced_'.length);
                     const driver = attendance.tier.getDriver(button.clicker.member.id);
+                    if (!driver) return;
                     switch(type) {
                         case 'accept': {
                             attendance.accept(driver);

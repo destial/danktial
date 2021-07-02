@@ -278,7 +278,7 @@ class Attendance {
     }
 
     async edit() {
-        await this.message.edit(this.embed);
+        await this.message.edit({ embed: this.embed });
     }
 
     async loadJSON(object) {
