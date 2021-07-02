@@ -6,6 +6,7 @@ const Driver = require('./Driver');
 const Database = require('../database/Database');
 const schedule = require('node-schedule');
 const { Logger } = require('../utils/Utils');
+const { MessageButton, MessageActionRow } = require('discord-buttons');
 
 class AdvancedAttendance {
     /**
@@ -221,7 +222,7 @@ class AdvancedAttendance {
             this.accepted.delete(driver.id);
             this.unknown.set(driver.id, driver);
         }
-        await this.message.edit(this.embed);
+        this.edit();
     }
 
     /**
@@ -247,7 +248,7 @@ class AdvancedAttendance {
             this.rejected.delete(driver.id);
             this.unknown.set(driver.id, driver);
         }
-        await this.message.edit(this.embed);
+        this.edit();
     }
 
     /**
@@ -273,7 +274,7 @@ class AdvancedAttendance {
             this.tentative.delete(driver.id);
             this.unknown.set(driver.id, driver);
         }
-        await this.message.edit(this.embed);
+        this.edit();
     }
 
     async reset() {
@@ -298,7 +299,7 @@ class AdvancedAttendance {
 
         promise.then(() => {
             this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Reset attendance ${this.embed.title}`);
-            this.message.edit(this.embed);
+            this.edit();
         });
     }
 
@@ -390,13 +391,8 @@ class AdvancedAttendance {
             });
             this.embed.addField('Reserves', reserveList, false);
         }
-        await this.message.edit(this.embed);
+        await this.edit();
         this.message.reactions.removeAll().then(async () => {
-            if (!this.isLocked()) {
-                await this.message.react(AttendanceManager.accept);
-                await this.message.react(AttendanceManager.reject);
-                await this.message.react(AttendanceManager.tentative);
-            }
             await this.message.react(AttendanceManager.delete);
             await this.message.react(AdvancedAttendance.editEmoji);
             if (!this.isLocked()) {
@@ -418,11 +414,27 @@ class AdvancedAttendance {
                 field.name = newTeamName;
             }
         });
-        this.message.edit(this.embed);
+        this.edit();
     }
 
     async edit() {
-        this.message.edit(this.embed);
+        if (!this.locked) {
+            const acceptButton = new MessageButton()
+                .setStyle('green')
+                .setID('advanced_accept')
+                .setLabel('Accept');
+            const rejectButton = new MessageButton()
+                .setStyle('red')
+                .setID('advanced_reject')
+                .setLabel('Reject');
+            const tentativeButton = new MessageButton()
+                .setStyle('blurple')
+                .setID('advanced_tentative')
+                .setLabel('Tentative');
+            const row = new MessageActionRow().addComponents(acceptButton, rejectButton, tentativeButton);
+            return await this.message.edit({embed: this.embed, component: row });
+        }
+        return await this.message.edit({ embed: this.embed });
     }
 
     async update() {
@@ -471,9 +483,10 @@ class AdvancedAttendance {
             this.schedule.cancel();
         });
         this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Edited schedule for ${this.schedule.name} to ${new Date(fiveMinBefore).toString()}`);
-        this.message.edit(this.embed.spliceFields(0, 1, {
+        this.embed.spliceFields(0, 1, {
             name: "Date & Time", value: (dateString), inline: false
-        }));
+        });
+        this.edit();
         this.update();
     }
 
@@ -606,8 +619,10 @@ class AdvancedAttendance {
         return this.locked;
     }
 
-    setLocked(lock) {
+    async setLocked(lock) {
         this.locked = lock;
+        await this.edit();
+        this.message.reactions.removeAll();
     }
 
     toString() {

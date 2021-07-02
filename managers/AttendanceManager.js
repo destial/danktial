@@ -9,6 +9,7 @@ const Tier = require('../items/Tier');
 const formatTrack = require('../utils/formatTrack');
 const { timezones, timezoneNames } = require('../utils/timezones');
 const { Logger } = require('../utils/Utils');
+const { MessageActionRow, MessageButton } = require('discord-buttons');
 
 class AttendanceManager {
     /**
@@ -166,13 +167,28 @@ class AttendanceManager {
                             attendanceembed.setFooter(t.name);
                             attendanceembed.setTimestamp(dateObject);
                             attendanceembed.setColor('RED');
-                            channel.send(attendanceembed).then(async (m) => {
-                                await m.react(AttendanceManager.accept);
-                                await m.react(AttendanceManager.reject);
-                                await m.react(AttendanceManager.tentative);
-                                await m.react(AttendanceManager.delete);
-                                await m.react(AdvancedAttendance.editEmoji);
-                                await m.react(AdvancedAttendance.lockEmoji);
+                            const acceptButton = new MessageButton()
+                                .setStyle('green')
+                                .setID('advanced_accept')
+                                .setLabel('Accept');
+                            const rejectButton = new MessageButton()
+                                .setStyle('red')
+                                .setID('advanced_reject')
+                                .setLabel('Reject');
+                            const tentativeButton = new MessageButton()
+                                .setStyle('blurple')
+                                .setID('advanced_tentative')
+                                .setLabel('Tentative');
+                            const row = new MessageActionRow().addComponents(acceptButton, rejectButton, tentativeButton);
+                            channel.send({ component: row, embed: attendanceembed }).then(async (m) => {
+                                m.react(AttendanceManager.delete).then(async () => {
+                                    await m.react(AdvancedAttendance.editEmoji);
+                                    if (!attendance.isLocked()) {
+                                        await m.react(AdvancedAttendance.lockEmoji);
+                                    } else {
+                                        await m.react(AdvancedAttendance.unlockEmoji);
+                                    }
+                                })
                                 replyEmbed.setAuthor(`Successfully created attendance ${title}`);
                                 replyEmbed.setDescription(`[Click here to view the attendance](${m.url})`);
                                 await member.user.send(replyEmbed);

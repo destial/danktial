@@ -26,24 +26,24 @@ module.exports = {
                 if (attendance) {
                     switch (reaction.emoji.name) {
                         case AttendanceManager.accept:
-                            await reaction.message.edit(attendance.accept(user));
+                            reaction.message.edit(attendance.accept(user));
                             break;
                         case AttendanceManager.reject:
-                            await reaction.message.edit(attendance.reject(user));
+                            reaction.message.edit(attendance.reject(user));
                             break;
                         case AttendanceManager.tentative:
-                            await reaction.message.edit(attendance.maybe(user));
+                            reaction.message.edit(attendance.maybe(user));
                             break;
                         case AttendanceManager.delete:
                             const member = await server.guild.members.fetch(user.id);
                             if (member && isStaff(member)) {
-                                await server.getAttendanceManager().awaitDeleteAttendance(reaction, user);
+                                server.getAttendanceManager().awaitDeleteAttendance(reaction, user);
                             }
                             break;
                         default:
                             break;
                     }
-                    await reaction.users.remove(user);
+                    reaction.users.remove(user);
                 }
             }
         });

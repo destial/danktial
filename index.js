@@ -11,6 +11,7 @@ const express = require('express');
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
 });
+require('discord-buttons')(client);
 
 client.login(process.env.DISCORD_TOKEN);
 client.setMaxListeners(15);
