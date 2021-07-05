@@ -407,9 +407,9 @@ class Database {
      * @param {string} query
      * @returns {Promise<any[]>} 
      */
-    static all(query) {
+    static all(query, ...args) {
         return new Promise((resolve, reject) => {
-            Database.db().all(query, [], (err, rows) => {
+            Database.db().all(query, ...args, (err, rows) => {
                 if (!err) {
                     resolve(rows);
                 } else {
@@ -424,9 +424,9 @@ class Database {
      * @param {string} query
      * @returns {Promise<any[]>} 
      */
-    static allNewDB(query) {
+    static allNewDB(query, ...args) {
         return new Promise((resolve, reject) => {
-            Database.newDB().all(query, [], (err, rows) => {
+            Database.newDB().all(query, ...args || [], (err, rows) => {
                 if (!err) {
                     resolve(rows);
                 } else {

@@ -15,23 +15,23 @@ module.exports = {
                 const server = await servers.fetch(channel.guild.id);
                 if (server) {
                     if (server.getCountManager().getCount('channel') && channel.id === server.getCountManager().getCount('channel').id) {
-                        await server.getCountManager().deleteCount('channel');
+                        server.getCountManager().deleteCount('channel');
 
                     } else if (channel.id === server.getCountManager().getCount('member') && channel.id === server.getCountManager().getCount('member').id) {
-                        await server.getCountManager().deleteCount('member');
+                        server.getCountManager().deleteCount('member');
 
                     } else if (channel.id === server.getCountManager().getCount('role') && channel.id === server.getCountManager().getCount('role').id) {
-                        await server.getCountManager().deleteCount('role');
+                        server.getCountManager().deleteCount('role');
                     }
 
                     if (server.getCountManager().getCount('channel')) {
                         if (server.getCountManager().getCount('channel')) {
-                            await server.getCountManager().getCount('channel').edit({
+                            server.getCountManager().getCount('channel').edit({
                                 name: `Channel Count: ${server.guild.channels.cache.size}`
                             });
                         }
                     }
-                    await server.log(`Channel deleted!`, `#${channel.name}`);
+                    server.log(`Channel deleted!`, `#${channel.name}`);
                 }
             });
 
@@ -40,11 +40,11 @@ module.exports = {
                 const server = await servers.fetch(channel.guild.id);
                 if (server) {
                     if (server.getCountManager().getCount('channel')) {
-                        await server.getCountManager().getCount('channel').edit({
+                        server.getCountManager().getCount('channel').edit({
                             name: `Channel Count: ${server.guild.channels.cache.size}`
                         });
                     }
-                    await server.log('Channel created!', `${channel} - #${channel.name}`);
+                    server.log('Channel created!', `${channel} - #${channel.name}`);
                 }
             });
 
@@ -52,11 +52,11 @@ module.exports = {
                 const server = await servers.fetch(role.guild.id);
                 if (server) {
                     if (server.getCountManager().getCount('role')) {
-                        await server.getCountManager().getCount('role').edit({
+                        server.getCountManager().getCount('role').edit({
                             name: `Role Count: ${server.guild.roles.cache.size}`
                         });
                     }
-                    await server.log('Role created!', `${role} - @${role.name}`);
+                    server.log('Role created!', `${role} - @${role.name}`);
                 }
             });
 
@@ -64,11 +64,11 @@ module.exports = {
                 const server = await servers.fetch(role.guild.id);
                 if (server) {
                     if (server.getCountManager().getCount('role')) {
-                        await server.getCountManager().getCount('role').edit({
+                        server.getCountManager().getCount('role').edit({
                             name: `Role Count: ${server.guild.roles.cache.size}`
                         });
                     }
-                    await server.log('Role deleted!', `@${role.name}`);
+                    server.log('Role deleted!', `@${role.name}`);
                 }
             });
 
@@ -76,13 +76,12 @@ module.exports = {
                 const server = await servers.fetch(member.guild.id);
                 if (server) {
                     if (server.getCountManager().getCount('member')) {
-                        await server.getCountManager().getCount('member').edit({
+                        server.getCountManager().getCount('member').edit({
                             name: `Member Count: ${server.guild.memberCount}`
                         });
                     }
-                    await server.log(`Member joined!`, `${member} - ${member.user.tag}`, (member.user.createdAt ? [{ name: `Account Age`, value: `${formatAccountAge(member.user.createdAt)} old`, inline: false}] : undefined));
-                    if (server.joinEmbed)
-                        member.user.send(server.joinEmbed);
+                    server.log(`Member joined!`, `${member} - ${member.user.tag}`, (member.user.createdAt ? [{ name: `Account Age`, value: `${formatAccountAge(member.user.createdAt)} old`, inline: false}] : undefined));
+                    if (server.joinEmbed) member.user.send(server.joinEmbed);
                 }
             });
 
@@ -90,11 +89,11 @@ module.exports = {
                 const server = await servers.fetch(member.guild.id);
                 if (server) {
                     if (server.getCountManager().getCount('member')) {
-                        await server.getCountManager().getCount('member').edit({
+                        server.getCountManager().getCount('member').edit({
                             name: `Member Count: ${server.guild.memberCount}`
                         });
                     }
-                    await server.log('Member left!', `${member.user.tag}`, (member.joinedAt ? [{ name: `Joined Since`, value: `${formatAccountAge(member.joinedAt)} ago`, inline: false}] : undefined));
+                    server.log('Member left!', `${member.user.tag}`, (member.joinedAt ? [{ name: `Joined Since`, value: `${formatAccountAge(member.joinedAt)} ago`, inline: false}] : undefined));
                 }
             });
         } catch(err) {

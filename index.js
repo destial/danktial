@@ -7,9 +7,11 @@ const fs = require('fs');
 const { Logger } = require('./utils/Utils');
 const formatDiscordRegion = require('./utils/formatDiscordRegion');
 const express = require('express');
-
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
+    ws: {
+        intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MEMBERS', 'DIRECT_MESSAGES' ,'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES']
+    }
 });
 require('discord-buttons')(client);
 

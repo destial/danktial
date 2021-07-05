@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const AttendanceManager = require('../managers/AttendanceManager');
 const Server = require('./Server');
 const Tier = require('./Tier');
 const Driver = require('./Driver');
@@ -16,7 +15,6 @@ class AdvancedAttendance {
      * @param {Server} server
      * @param {Tier} tier
      * @param {Date} date
-     * @param {AttendanceManager} attendanceManager 
      */
     constructor(client, message, server, tier, date, attendanceManager) {
         this.type = '';
@@ -129,20 +127,7 @@ class AdvancedAttendance {
                     } catch(err) {}
                 });
                 this.setLocked(true);
-                this.message.reactions.removeAll().then(async () => {
-                    if (!this.isLocked()) {
-                        await this.message.react(AttendanceManager.accept);
-                        await this.message.react(AttendanceManager.reject);
-                        await this.message.react(AttendanceManager.tentative);
-                    }
-                    await this.message.react(AttendanceManager.delete);
-                    await this.message.react(AdvancedAttendance.editEmoji);
-                    if (!this.isLocked()) {
-                        await this.message.react(AdvancedAttendance.lockEmoji);
-                    } else {
-                        await this.message.react(AdvancedAttendance.unlockEmoji);
-                    }
-                });
+                this.message.reactions.removeAll();
                 this.schedule.cancel();
             });
             Logger.info(`[ADATTENDANCE] Created new schedule for ${this.schedule.name} at ${new Date(fiveMinBefore).toString()}`);
@@ -392,15 +377,7 @@ class AdvancedAttendance {
             this.embed.addField('Reserves', reserveList, false);
         }
         await this.edit();
-        this.message.reactions.removeAll().then(async () => {
-            await this.message.react(AttendanceManager.delete);
-            await this.message.react(AdvancedAttendance.editEmoji);
-            if (!this.isLocked()) {
-                await this.message.react(AdvancedAttendance.lockEmoji);
-            } else {
-                await this.message.react(AdvancedAttendance.unlockEmoji);
-            }
-        });
+        this.message.reactions.removeAll();
     }
 
     /**
@@ -432,9 +409,9 @@ class AdvancedAttendance {
                 .setID('advanced_tentative')
                 .setLabel('Tentative');
             const row = new MessageActionRow().addComponents(acceptButton, rejectButton, tentativeButton);
-            return await this.message.edit({embed: this.embed, component: row });
+            return await this.message.edit({ embed: this.embed, component: row });
         }
-        return await this.message.edit({ embed: this.embed });
+        return await this.message.edit({ embed: this.embed, component: null });
     }
 
     async update() {
@@ -535,6 +512,7 @@ class AdvancedAttendance {
                                     participant.member.user.send(embed);
                                 } catch(err) {}
                             });
+                            this.setLocked(true);
                             this.schedule.cancel();
                         });
                         Logger.boot(`[ADATTENDANCE] Created schedule for ${this.embed.title}`);

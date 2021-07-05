@@ -345,7 +345,7 @@ class ServerManager {
      * @param {Server} server 
      */
     async removeServer(server) {
-        //const deleted = this.servers.delete(server.id);
+        // this.servers.delete(server.id);
         //if (deleted) {
         //    await Database.runNewDB('DELETE FROM servers WHERE id=(?)', [server.id]);
         //    console.log(`[DELETED SERVER] Deleted server ${server.guild.name}`);

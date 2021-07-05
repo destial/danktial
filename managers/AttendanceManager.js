@@ -51,7 +51,7 @@ class AttendanceManager {
         if (server.getTierManager().tiers.size === 0) {
             return new Promise(async (resolve, reject) => {
                 embed.setAuthor(`You do not have any tiers! Please create a tier using ${server.prefix}addtier`);
-                await channel.send(embed);
+                channel.send(embed);
                 resolve(undefined);
             });
         }
@@ -96,7 +96,7 @@ class AttendanceManager {
                     if (counter === questions.length) {
                         embed3.setDescription(tierNames.join('\n'));
                     } 
-                    await member.user.send(embed3);
+                    member.user.send(embed3);
                 }
             });
 
@@ -112,17 +112,17 @@ class AttendanceManager {
                 replyEmbed.setColor('RED');
                 if (!title || !description || !date || !tier) {
                     replyEmbed.setAuthor("Ran out of time or no valid inputs!");
-                    await member.user.send(replyEmbed);
+                    member.user.send(replyEmbed);
                     resolve(undefined);
                 } else if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
                     replyEmbed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY hh:mm TMZE)");
                     replyEmbed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
-                    await member.user.send(embed);
+                    member.user.send(embed);
                     resolve(undefined);
                 } else if (!server.getTierManager().getTier(tier.toLowerCase())) {
                     replyEmbed.setAuthor("Tier is invalid! Did not match any tier of:");
                     replyEmbed.setDescription(tierNames.join('\n'));
-                    await member.user.send(replyEmbed);
+                    member.user.send(replyEmbed);
                     resolve(undefined);
                 } else {
                     const t = server.getTierManager().getTier(tier.toLowerCase());
@@ -180,7 +180,7 @@ class AttendanceManager {
                                 .setID('advanced_tentative')
                                 .setLabel('Tentative');
                             const row = new MessageActionRow().addComponents(acceptButton, rejectButton, tentativeButton);
-                            channel.send({ component: row, embed: attendanceembed }).then(async (m) => {
+                            channel.send(attendanceembed, { component: row }).then(async (m) => {
                                 m.react(AttendanceManager.delete).then(async () => {
                                     await m.react(AdvancedAttendance.editEmoji);
                                     if (!attendance.isLocked()) {
@@ -191,14 +191,14 @@ class AttendanceManager {
                                 })
                                 replyEmbed.setAuthor(`Successfully created attendance ${title}`);
                                 replyEmbed.setDescription(`[Click here to view the attendance](${m.url})`);
-                                await member.user.send(replyEmbed);
+                                member.user.send(replyEmbed);
                                 const attendance = new AdvancedAttendance(client, m, server, t, dateObject, this);
                                 attendance.creator = member;
                                 attendance.timezone = date.substring(date.length-4).trim().toUpperCase();
                                 this.advancedEvents.set(attendance.id, attendance);
                                 try {
-                                    await attendance.save();
-                                    await this.server.update();
+                                    attendance.save();
+                                    this.server.update();
                                     resolve(attendance);
                                 } catch (err) {
                                     this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
@@ -208,7 +208,7 @@ class AttendanceManager {
                         }
                     }).catch(async (dateo) => {
                         replyEmbed.setAuthor(`There was an error while making an attendance! Perhaps there are no drivers in this tier?`);
-                        await member.user.send(replyEmbed);
+                        member.user.send(replyEmbed);
                         resolve(undefined);
                     });
                 }
@@ -259,13 +259,27 @@ class AttendanceManager {
         attendanceembed.setFooter(t.name);
         attendanceembed.setTimestamp(date);
         attendanceembed.setColor('RED');
-        channel.send(attendanceembed).then(async (m) => {
-            m.react(AttendanceManager.accept).then(async() => {
-                await m.react(AttendanceManager.reject);
-                await m.react(AttendanceManager.tentative);
-                await m.react(AttendanceManager.delete);
+        const acceptButton = new MessageButton()
+            .setStyle('green')
+            .setID('advanced_accept')
+            .setLabel('Accept');
+        const rejectButton = new MessageButton()
+            .setStyle('red')
+            .setID('advanced_reject')
+            .setLabel('Reject');
+        const tentativeButton = new MessageButton()
+            .setStyle('blurple')
+            .setID('advanced_tentative')
+            .setLabel('Tentative');
+        const row = new MessageActionRow().addComponents(acceptButton, rejectButton, tentativeButton);
+        channel.send(attendanceembed, { component: row }).then(async (m) => {
+            m.react(AttendanceManager.delete).then(async () => {
                 await m.react(AdvancedAttendance.editEmoji);
-                await m.react(AdvancedAttendance.lockEmoji);
+                if (!attendance.isLocked()) {
+                    await m.react(AdvancedAttendance.lockEmoji);
+                } else {
+                    await m.react(AdvancedAttendance.unlockEmoji);
+                }
             });
             const attendance = new AdvancedAttendance(this.client, m, t.server, t, date, this);
             attendance.timezone = timezone;
@@ -609,6 +623,7 @@ class AttendanceManager {
                                                     const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(edit.substring(edit.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
                                                     mcollector.stop();
                                                     attendanceevent.updateDate(date, dateString);
+                                                    attendanceevent.edit();
                                                 }
                                             }).catch((err) => {
                                                 embed2.setAuthor("Invalid date! Please try again! (Format is DD/MM/YYYY hh:mm TMZE)");
@@ -720,7 +735,7 @@ class AttendanceManager {
                                     }
                                     attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                         try {
-                                            await attendanceevent.update();
+                                            attendanceevent.update();
                                             embed3.setAuthor(`Successfully edited attendance!`);
                                             member.user.send(embed3);
                                             this.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
