@@ -3,7 +3,6 @@ const TicketManager = require("../managers/TicketManager");
 const AttendanceManager = require("../managers/AttendanceManager");
 const CountManager = require("../managers/CountManager");
 const Database = require("../database/Database");
-const ServerManager = require("../managers/ServerManager");
 const TierManager = require('../managers/TierManager');
 const TriggerManager = require('../managers/TriggerManager');
 const ReactionRoleManager = require('../managers/ReactionRoleManager');
@@ -16,15 +15,6 @@ const TicketPanel = require('./TicketPanel');
 const { Logger } = require('../utils/Utils');
 
 class Server {
-    /**
-     * @param {Discord.Client} client
-     * @param {Discord.Guild} guild 
-     * @param {Discord.TextChannel} modlog
-     * @param {string} prefix
-     * @param {number} tickets
-     * @param {ServerManager} serverManager
-     * @param {Discord.TextChannel} alertChannel
-     */
     constructor(client, guild, modlog, prefix, tickets, serverManager, alertChannel) {
         this.client = client;
         this.id = guild.id;
@@ -101,12 +91,6 @@ class Server {
         // });
     }
 
-    /**
-     * 
-     * @param {string} title 
-     * @param {string} description 
-     * @param {Discord.EmbedFieldData[]} fields
-     */
     async log(title, description, fields) {
         if (this.modlog) {
             try {
@@ -209,10 +193,6 @@ class Server {
         this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[SERVER] Loaded ${this.guild.name}`);
     }
 
-    /**
-     * 
-     * @param {string} prefix 
-     */
     async setPrefix(prefix) { 
         this.prefix = prefix;
         try {
@@ -222,10 +202,6 @@ class Server {
         }
     }
 
-    /**
-     * 
-     * @param {Discord.TextChannel} channel 
-     */
     async setModLog(channel) {
         this.modlog = channel;
         try {
@@ -235,33 +211,21 @@ class Server {
         }
     }
 
-    /**
-     * 
-     * @param {string} string 
-     */
     async addChannel(string) {
         //this.alerts.addChannel(string);
         //const user = await this.alerts.getUser(string.toLowerCase());
-        this.subbedChannels.push(user.id);
+        //this.subbedChannels.push(user.id);
     }
 
-    /**
-     * 
-     * @param {string} string 
-     */
     async removeChannel(string) {
         //this.alerts.removeChannel(string);
         //const user = await this.alerts.getUser(string.toLowerCase());
-        const index = this.subbedChannels.indexOf(user.id);
-        if (index !== -1) {
-            this.subbedChannels.splice(index, 1);
-        }
+        //const index = this.subbedChannels.indexOf(user.id);
+        //if (index !== -1) {
+        //    this.subbedChannels.splice(index, 1);
+        //}
     }
 
-    /**
-     * 
-     * @param {Discord.TextChannel} channel 
-     */
     setAlerts(channel) {
         this.alertChannel = channel;
         this.update();
@@ -298,12 +262,6 @@ class Server {
         Logger.info(`[BACKUP] Backed up server ${this.guild.name}`);
     }
 
-    /**
-     * @param {Discord.Guild} guild 
-     * @param {Discord.TextChannel} modlog
-     * @param {string} prefix
-     * @param {number} tickets
-     */
     load(guild, modlog, prefix, tickets) {
         this.guild = guild;
         this.id = guild.id;
@@ -313,10 +271,6 @@ class Server {
         Logger.boot(`[SERVER] Loaded server ${this.guild.name}`);
     }
 
-    /**
-     * 
-     * @param {Discord.MessageEmbed} joinEmbed 
-     */
     loadEmbed(joinEmbed) {
         this.joinEmbed = joinEmbed;
         Logger.boot(`[SERVER] Loaded embed from server ${this.guild.name}`);
@@ -339,7 +293,6 @@ class Server {
     }
 
     toJSON() {
-        // this.
         // this.alerts.allChannels().forEach(tc => {
         //     channels.push(tc.user.id);
         // });

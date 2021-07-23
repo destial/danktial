@@ -10,7 +10,7 @@ const express = require('express');
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
     ws: {
-        intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MEMBERS', 'DIRECT_MESSAGES' ,'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES']
+        intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MEMBERS', 'DIRECT_MESSAGES' ,'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'DIRECT_MESSAGE_REACTIONS', 'GUILD_BANS']
     }
 });
 require('discord-buttons')(client);

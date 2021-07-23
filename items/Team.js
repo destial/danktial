@@ -1,33 +1,16 @@
 const Discord = require('discord.js');
-const Server = require("./Server");
-const Driver = require('./Driver');
-const Tier = require("./Tier");
 const Database = require("../database/Database");
 
 class Team {
-    /**
-     * 
-     * @param {Discord.Client} client 
-     * @param {Server} server 
-     * @param {string} name 
-     * @param {Tier} tier
-     */
     constructor(client, server, name, tier) {
         this.client = client;
         this.server = server;
-        /**
-         * @type {Discord.Collection<string, Driver>}
-         */
         this.drivers = new Discord.Collection();
         this.name = name;
         this.tier = tier;
         this.logo = undefined;
     }
 
-    /**
-     * 
-     * @param {Driver} driver 
-     */
     setDriver(driver) {
         if (!this.drivers.get(driver.id)) {
             this.drivers.set(driver.id, driver);
@@ -35,18 +18,10 @@ class Team {
         }
     }
 
-    /**
-     * 
-     * @param {string} id 
-     */
     removeDriver(id) {
         this.drivers.delete(id);
     }
 
-    /**
-     * 
-     * @param {string} id 
-     */
     getDriver(id) {
         this.drivers.get(id);
     }
@@ -69,10 +44,6 @@ class Team {
         this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Updated team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
-    /**
-     * 
-     * @param {string} oldName 
-     */
     async updateName(oldName) {
         Database.run(Database.teamUpdateNameQuery, [this.name, this.server.id, oldName, this.tier.name]);
         this.server.update();
@@ -107,11 +78,6 @@ class Team {
         }
     }
 
-    /**
-     * 
-     * @param {Tier} tier 
-     * @param {any} object 
-     */
     async loadJSON(tier, object) {
         this.server = await this.client.manager.fetch(object.guild);
         if (this.server) {

@@ -139,6 +139,11 @@ module.exports = {
                                 });
                                 driverCollector.once('end', async dCol => {
                                     const mentions = dCol.first().mentions.members;
+                                    if (!mentions) {
+                                        embed.setAuthor(`No users were mentioned!`);
+                                        message.channel.send(embed);
+                                        return;
+                                    }
                                     team.drivers.forEach(driver => {
                                         driver.setTeam(undefined);
                                     });

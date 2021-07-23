@@ -5,31 +5,14 @@ const { Logger } = require('../utils/Utils');
 const Driver = require('./Driver');
 const Race = require('./Race');
 const Reserve = require('./Reserve');
-const Server = require('./Server');
 const Team = require('./Team');
 
 class Tier {
-    /**
-     * 
-     * @param {Discord.Client} client 
-     * @param {Server} server
-     * @param {string} name
-     */
     constructor(client, server, name) {
         this.client = client;
         this.server = server;
-        /**
-         * @type {Discord.Collection<string, Reserve>}
-         */
         this.reserves = new Discord.Collection();
-        /**
-         * @type {Discord.Collection<string, Team>}
-         */
         this.teams = new Discord.Collection();
-
-        /**
-         * @type {Race[]}
-         */
         this.races = [];
 
         this.name = name;
@@ -51,10 +34,6 @@ class Tier {
         await Database.multipleRun(queries);
     }
 
-    /**
-     * 
-     * @param {string} newname 
-     */
     async update(newname) {
         await Database.run(Database.tierUpdateQuery, [newname, this.server.id, this.name]);
         this.name = newname;
@@ -99,52 +78,28 @@ class Tier {
         return promise;
     }
 
-    /**
-     * 
-     * @param {Driver} driver 
-     */
     addDriver(driver) {
         
     }
 
-    /**
-     * 
-     * @param {Driver} driver 
-     */
     loadDriver(driver) {
         
     }
 
-    /**
-     * 
-     * @param {string} id 
-     */
     removeDriver(id) {
         
     }
 
-    /**
-     * 
-     * @param {Reserve | Driver} reserve 
-     */
     addReserve(reserve) {
         if (!this.reserves.get(reserve.id)) {
             this.reserves.set(reserve.id, reserve);
         }
     }
 
-    /**
-     * 
-     * @param {string} id 
-     */
     removeReserve(id) {
         this.reserves.delete(id);
     }
 
-    /**
-     * 
-     * @param {Team} team 
-     */
     addTeam(team) {
         if (!this.teams.get(team.name.toLowerCase())) {
             this.teams.set(team.name.toLowerCase(), team);
@@ -152,32 +107,18 @@ class Tier {
         }
     }
 
-    /**
-     * 
-     * @param {string} name 
-     */
     removeTeam(name) {
         this.teams.delete(name.toLowerCase());
     }
 
-    /**
-     * @param {string} name
-     */
     getTeam(name) {
         return this.teams.get(name.toLowerCase());
     }
 
-    /**
-     * @param {string} name
-     */
     searchTeam(name) {
         return this.teams.filter(team => team.name.toLowerCase().includes(name.toLowerCase()));
     }
 
-    /**
-     * 
-     * @param {string} id 
-     */
     getDriver(id) {
         for (const reserve of this.reserves.values()) {
             if (reserve.id === id) return reserve;
@@ -190,10 +131,6 @@ class Tier {
         return;
     }
 
-    /**
-     * 
-     * @param {string} id 
-     */
     getReserve(id) {
         return this.reserves.get(id);
     }
@@ -214,11 +151,6 @@ class Tier {
         }
     }
 
-    /**
-     * 
-     * @param {string} id 
-     * @param {Team} team 
-     */
     async transferDriver(id, team) {
         const reserve = this.getReserve(id);
         const driver = this.getDriver(id);
@@ -304,7 +236,6 @@ class Tier {
                     this.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 }
             }
-            //this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TIER] Loaded tier ${this.name} in ${this.server.guild.name}`);
         }
     }
 

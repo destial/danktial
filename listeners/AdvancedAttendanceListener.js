@@ -145,11 +145,7 @@ module.exports = {
             if (!message.guild) return;
             const server = await servers.fetch(message.guild.id);
             if (server) {
-                const attendance = server.getAttendanceManager().fetchAdvanced(message.id);
-                if (attendance) {
-                    attendance.delete();
-                    server.getAttendanceManager().getAdvancedEvents().delete(attendance.id);
-                }
+                server.getAttendanceManager().deleteAdvancedAttendance(message);
             }
         });
     }

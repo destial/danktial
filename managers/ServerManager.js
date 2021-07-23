@@ -1,8 +1,6 @@
 const Discord = require('discord.js');
-const Server = require('../items/Server');
 const QueueWorker = require('../database/QueueWorker');
 const { Router } = require('express');
-const AdvancedAttendance = require('../items/AdvancedAttendance');
 const Team = require('../items/Team');
 const Race = require('../items/Race');
 const Tier = require('../items/Tier');
@@ -11,21 +9,10 @@ const Driver = require('../items/Driver');
 const QualiResult = require('../items/QualiResult');
 
 class ServerManager {
-
-    /**
-     * @type {ServerManager}
-     */
     static instance;
 
-    /**
-     * 
-     * @param {Discord.Client} client 
-     */
     constructor(client) {
         ServerManager.instance = this;
-        /**
-         * @type {Discord.Collection<string, Server>}
-         */
         this.servers = new Discord.Collection();
 
         this.queueWorker = new QueueWorker(this);
@@ -322,10 +309,6 @@ class ServerManager {
         }
     }
 
-    /**
-     * 
-     * @param {Server} server
-     */
     async addServer(server) {
         return new Promise(async (resolve, reject)  => {
             const s = await this.fetch(server.id);
@@ -340,10 +323,6 @@ class ServerManager {
         });
     }
 
-    /**
-     * 
-     * @param {Server} server 
-     */
     async removeServer(server) {
         // this.servers.delete(server.id);
         //if (deleted) {
@@ -352,11 +331,6 @@ class ServerManager {
         //}
     }
 
-    /**
-     * 
-     * @param {string} id 
-     * @returns {Promise<Server>}
-     */
     fetch(id) {
         return new Promise((resolve, reject) => {
             const server = this.servers.get(id);
@@ -364,11 +338,6 @@ class ServerManager {
         });
     }
 
-    /**
-     * 
-     * @param {Server} server 
-     * @param {*} req 
-     */
     async editServer(server, req) {
         console.log(`${req.headers.type} ${JSON.stringify(req.body)}`);
         this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`${req.headers.type} ${JSON.stringify(req.body)}`);
@@ -565,9 +534,15 @@ class ServerManager {
             case 'delete_tier': {
                 const tier = server.getTierManager().getTier(req.body.name);
                 if (!tier) return;
-                if (tier.teams.size !== 0) return;
                 if (tier.reserves.size !== 0) return;
-                server.getTierManager().removeTier(tier);
+                var hasDrivers = false;
+                for (const team of tier.teams.values()) {
+                    if (team.drivers.size !== 0) {
+                        hasDrivers = true;
+                        break;
+                    }
+                }
+                if (hasDrivers) return;
                 server.log(`Deleted tier ${tier.name}`);
                 break;
             }
@@ -651,14 +626,6 @@ class ServerManager {
         server.save();
     }
 
-    /**
-     * 
-     * @param {string} userID 
-     * @param {AdvancedAttendance} attendance
-     * @param {string} tier
-     * @param {Server} server 
-     * @param {*} req 
-     */
     attendanceMark(userID, attendance, tier, server, req) {
         var driver = server.getTierManager().getTier(tier).getDriver(userID);
         if (!driver) {

@@ -820,9 +820,10 @@ class AttendanceManager {
             if (attendance) {
                 embed.setAuthor(`Are you sure you want to delete ${attendance.title}?`);
                 member.user.send(embed).then(async (mes) => {
-                    await mes.react(AttendanceManager.accept);
-                    await mes.react(AttendanceManager.reject);
-                    let filter = r => r.message.id === mes.id;
+                    mes.react(AttendanceManager.accept).then(async () => {
+                        await mes.react(AttendanceManager.reject);
+                    });
+                    let filter = (r, u) =>  { return r.message.id === mes.id && u.id === user.id };
                     const collector = mes.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
                     collector.on('collect', async (r, u) => {
@@ -860,9 +861,10 @@ class AttendanceManager {
             if (attendance) {
                 embed.setAuthor(`Are you sure you want to delete ${attendance.embed.title}?`);
                 member.user.send(embed).then(async (mes) => {
-                    await mes.react(AttendanceManager.accept);
-                    await mes.react(AttendanceManager.reject);
-                    let filter = r => r.message.id === mes.id;
+                    mes.react(AttendanceManager.accept).then(async () => {
+                        await mes.react(AttendanceManager.reject);
+                    });
+                    let filter = (r, u) =>  { return r.message.id === mes.id && u.id === user.id };
                     const collector = mes.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
                     collector.on('collect', async (r, u) => {
@@ -878,7 +880,7 @@ class AttendanceManager {
                                 this.deleteAdvancedAttendance(reaction.message);
                             });
                         } else {
-                            embed.setAuthor(`Did not delete ${attendance.title}!`);
+                            embed.setAuthor(`Did not delete ${attendance.embed.title}!`);
                             member.user.send(embed);
                         }
                     });

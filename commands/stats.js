@@ -29,7 +29,9 @@ module.exports = {
                 ]);
             var totalDrivers = 0; var totalReserves = 0; var totalTeams = 0;
             server.getTierManager().tiers.forEach(tier => {
-                totalDrivers += tier.drivers.size;
+                tier.teams.forEach(t => {
+                    totalDrivers += t.drivers.size;
+                });
                 totalReserves += tier.reserves.size;
                 totalTeams += tier.teams.size;
             });
@@ -39,7 +41,7 @@ module.exports = {
                 { name: 'Total Teams', value: totalTeams, inline: true }
             ]);
             const servers = client.manager.servers.size;
-                embed.setFooter(`Competing in ${servers} leagues! • Built by destiall#9640`)
+                embed.setFooter(`Competing in ${servers} leagues! • https://www.destial.xyz • Built by destiall#9640`)
                 .setColor('RED');
             message.channel.send(embed);
         }

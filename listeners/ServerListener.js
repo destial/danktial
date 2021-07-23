@@ -38,7 +38,7 @@ module.exports = {
                         if (guild.systemChannel) {
                             const embed = new Discord.MessageEmbed();
                             embed.setAuthor(`Thank you for inviting me!`);
-                            embed.setDescription(`To start setup, use ${"`-setup`"} to start the tier setup! ${"`-help`"} is available to see all the commands!`);
+                            embed.setDescription(`To start setup, use ${"`-setup`"} to start the tier setup! ${"`-help`"} is available to see all the commands!\nYou can also visit the website https://www.destial.xyz/ to access danktial's GUI feature!`);
                             embed.setFooter(`Built by destiall#9640`);
                             embed.setColor('RED');
                             try {
