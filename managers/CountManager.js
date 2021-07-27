@@ -52,6 +52,9 @@ class CountManager {
      */
     setCount(name, channel) {
         return new Promise(async (resolve, reject) => {
+            if (!channel) {
+                return resolve(undefined);
+            }
             switch (name.toLowerCase()) {
                 case "member":
                     this.membercount = channel;
