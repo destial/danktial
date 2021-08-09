@@ -1,15 +1,9 @@
-const ServerManager = require('../managers/ServerManager');
 const Discord = require('discord.js');
 const fs = require('fs');
 
 require('../utils/ExtendedMessage');
 
 module.exports = {
-    /**
-     * 
-     * @param {Discord.Client} client 
-     * @param {ServerManager} servers 
-     */
     async run(client, servers) {
         const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
         client.commands = new Discord.Collection();

@@ -50,20 +50,24 @@ module.exports = {
                 const title = titleDesc[0];
                 const desc = titleDesc[1];
                 const embed = new Discord.MessageEmbed();
-                embed.setAuthor(message.member.user.username, message.member.user.avatarURL(), 'http://danktial.destial.xyz');
-                embed.setTitle(title)
-                    .setColor('RED');
+                embed.setAuthor(message.member.user.username, message.member.user.avatarURL(), 'https://www.destial.xyz');
+                embed.setTitle(title).setColor('RED');
                 if (desc) {
                     embed.setDescription(desc);
                 }
-                server.serverManager.servers.forEach(async server => {
-                    if (server.modlog) {
-                        const locale = formatDiscordRegion(server.guild.region);
-                        const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-                        const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
-                        embed.setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${server.guild.region.toLocaleUpperCase()}`);
-                        server.modlog.send(embed);
-                        console.log(`[ANNOUNCEMENT] Sent announcement to ${server.guild.name}`);
+                server.serverManager.servers.forEach(sv => {
+                    try {
+                        if (sv.guild.publicUpdatesChannel) {
+                            const locale = formatDiscordRegion(sv.guild.region);
+                            const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                            const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
+                            embed.setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${sv.guild.region.toLocaleUpperCase()}`);
+                            sv.guild.publicUpdatesChannel.send(embed);
+                            console.log(`[ANNOUNCEMENT] Sent announcement to ${sv.guild.name}`);
+                        }
+                    } catch (err) {
+                        message.channel.send(`Error sending announcement to ${sv.guild.name}`);
+                        console.err(err);
                     }
                 });
                 message.channel.send(embed);

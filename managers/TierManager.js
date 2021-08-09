@@ -22,6 +22,7 @@ class TierManager {
      * @param {Tier} tier 
      */
     addTier(tier) {
+        if (!tier) return;
         if (!this.tiers.get(tier.name.toLowerCase())) {
             this.tiers.set(tier.name.toLowerCase(), tier);
         }
@@ -32,6 +33,7 @@ class TierManager {
      * @param {Tier} tier 
      */
     removeTier(tier) {
+        if (!tier) return;
         this.tiers.delete(tier.name.toLowerCase());
     }
 
@@ -40,6 +42,7 @@ class TierManager {
      * @param {string} name
      */
     getTier(name) {
+        if (!name) return;
         return this.tiers.get(name.toLowerCase());
     }
 }

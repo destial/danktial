@@ -1,15 +1,8 @@
-const ServerManager = require('../managers/ServerManager');
-const Discord = require('discord.js');
 const AttendanceManager = require('../managers/AttendanceManager');
 const isStaff = require('../utils/isStaff');
 const AdvancedAttendance = require('../items/AdvancedAttendance');
 
 module.exports = {
-    /**
-     * 
-     * @param {Discord.Client} client 
-     * @param {ServerManager} servers 
-     */
     async run(client, servers) {
         
         client.on('clickButton', async(button) => {

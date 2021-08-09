@@ -1,14 +1,7 @@
-const ServerManager = require('../managers/ServerManager');
-const Discord = require('discord.js');
 const AttendanceManager = require('../managers/AttendanceManager');
 const isStaff = require('../utils/isStaff');
 
 module.exports = {
-    /**
-     * 
-     * @param {Discord.Client} client 
-     * @param {ServerManager} servers 
-     */
     async run(client, servers) {
         client.on('messageReactionAdd', async (reaction, user) => {
             if (user.bot) return;

@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const schedule = require('node-schedule');
 const Database = require('../database/Database');
+const formatDateURL = require('../utils/formatDateURL');
 const { Logger } = require('../utils/Utils');
 const Server = require('./Server');
 
@@ -273,7 +274,7 @@ class Attendance {
         });
         Logger.info(`[ATTENDANCE] Edited schedule for ${this.schedule.name}`);
         return this.embed.spliceFields(0, 1, {
-            name: "Date & Time", value: (dateString), inline: false
+            name: "Date & Time", value: `[${dateString}](${formatDateURL(date)})`, inline: false
         });
     }
 

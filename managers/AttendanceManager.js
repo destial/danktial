@@ -10,6 +10,7 @@ const formatTrack = require('../utils/formatTrack');
 const { timezones, timezoneNames } = require('../utils/timezones');
 const { Logger } = require('../utils/Utils');
 const { MessageActionRow, MessageButton } = require('discord-buttons');
+const formatDateURL = require('../utils/formatDateURL');
 
 class AttendanceManager {
     /**
@@ -145,7 +146,7 @@ class AttendanceManager {
                                 attendanceembed.setThumbnail(formatTrack(description));
                             }
                             attendanceembed.addFields(
-                                { name: "Date & Time", value: dateString, inline: false }
+                                { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false }
                             );
                             t.teams.forEach(team => {
                                 const driverNames = [];
@@ -237,7 +238,7 @@ class AttendanceManager {
             attendanceembed.setThumbnail(formatTrack(description));
         }
         attendanceembed.addFields(
-            { name: "Date & Time", value: dateString, inline: false }
+            { name: "Date & Time", value: `[${dateString}](${formatDateURL(date)})`, inline: false }
         );
         t.teams.forEach(team => {
             const driverNames = [];
@@ -312,7 +313,7 @@ class AttendanceManager {
                     attendanceembed.setThumbnail(formatTrack(attendance.next.description));
                 }
                 attendanceembed.addFields(
-                    { name: "Date & Time", value: dateString, inline: false }
+                    { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false }
                 );
                 attendance.tier.teams.forEach(team => {
                     const driverNames = [];
@@ -365,7 +366,7 @@ class AttendanceManager {
                     attendanceembed.setThumbnail(formatTrack(attendance.next.description));
                 }
                 attendanceembed.addFields(
-                    { name: "Date & Time", value: dateString, inline: false },
+                    { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false },
                     { name: `${AttendanceManager.accept} Accepted (0)`, value: ">>> -", inline: true },
                     { name: `${AttendanceManager.reject} Rejected (0)`, value: ">>> -", inline: true },
                     { name: `${AttendanceManager.tentative} Tentative (0)`, value: ">>> -", inline: true }
@@ -476,7 +477,7 @@ class AttendanceManager {
                                     attendanceembed.setThumbnail(formatTrack(description));
                                 }
                                 attendanceembed.addFields(
-                                    { name: "Date & Time", value: dateString, inline: false },
+                                    { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false },
                                     { name: `${AttendanceManager.accept} Accepted (0)`, value: ">>> -", inline: true },
                                     { name: `${AttendanceManager.reject} Rejected (0)`, value: ">>> -", inline: true },
                                     { name: `${AttendanceManager.tentative} Tentative (0)`, value: ">>> -", inline: true }

@@ -72,9 +72,10 @@ class TicketManager {
         if (deleted) {
             try {
                 Database.run(Database.ticketPanelDeleteQuery, [id]);
+                this.server.update();
                 Logger.info(`[TICKETPANEL] Deleted ticket panel ${id} from ${this.server.guild.name}`);
             } catch (err) {
-                Logger.warn(err);
+                Logger.warn(`[TICKETPANEL] Something happened while removing a ticket panel!`, err);
             }
         }
     }
@@ -145,7 +146,6 @@ class TicketManager {
                 const ticket = new Ticket(member, this.totaltickets, ticketChannel, baseMessage, this);
                 this.opentickets.set(ticket.id, ticket);
                 ticket.save();
-                this.server.update();
                 Logger.info(`[TICKET] Created ${ticket.channel.name} by ${ticket.member.displayName}`);
                 resolve(ticket);
             } catch (err) {
@@ -161,7 +161,6 @@ class TicketManager {
      */
     async loadTicket(ticket) {
         this.opentickets.set(ticket.id, ticket);
-        this.totaltickets = this.opentickets.size;
         Logger.boot(`[TICKET] Loaded ticket ${ticket.channel.name} from ${this.server.guild.name}`);
     }
 

@@ -28,6 +28,13 @@ module.exports = {
             }
             var str = args.join(' ');
             const arguments = parseQuotations(str);
+            if (arguments.length < 2) {
+                embed.setAuthor('Usage is:');
+                embed.setDescription(`${server.prefix}${command} ${this.usage}`);
+                embed.setFooter(this.description);
+                message.channel.send(embed);
+                return;
+            }
             const tier = server.getTierManager().getTier(arguments[1]);
             if (!tier) {
                 embed.setAuthor('Invalid tier name!');

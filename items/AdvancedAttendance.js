@@ -6,6 +6,7 @@ const Database = require('../database/Database');
 const schedule = require('node-schedule');
 const { Logger } = require('../utils/Utils');
 const { MessageButton, MessageActionRow } = require('discord-buttons');
+const formatDateURL = require('../utils/formatDateURL');
 
 class AdvancedAttendance {
     /**
@@ -119,7 +120,7 @@ class AdvancedAttendance {
             this.schedule = schedule.scheduleJob(`reminderchecked${this.id}`, new Date(fiveMinBefore), () => {
                 this.accepted.forEach((participant) => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                    embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!`);
                     embed.setColor('RED');
                     embed.setDescription(this.embed.title);
                     try {
@@ -137,7 +138,7 @@ class AdvancedAttendance {
             this.reminder = schedule.scheduleJob(`reminderunchecked${this.id}`, new Date(twoHoursBefore), () => {
                 this.unknown.forEach(participant => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`You have not responded yet!`);
+                    embed.setAuthor(`You have not responded in ${this.server.guild.name} yet!`);
                     embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
@@ -146,7 +147,7 @@ class AdvancedAttendance {
                 });
                 this.tentative.forEach(participant => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`Are you racing?`);
+                    embed.setAuthor(`Are you racing in ${this.server.guild.name}?`);
                     embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
@@ -312,9 +313,9 @@ class AdvancedAttendance {
         });
     }
 
-    async fix() {
+    async fix(remove_R) {
         var hasReserves = false;
-        this.embed.fields.forEach(field => {
+        for (const field of this.embed.fields) {
             const team = this.tier.getTeam(field.name);
             if (team) {
                 const driverArray = field.value.split('\n');
@@ -336,10 +337,10 @@ class AdvancedAttendance {
                 const driverIDValidArray = team.drivers.keyArray();
                 const differenceCache = driverIDValidArray.filter(a => !driverIDArray.includes(a) && (a !== '' || a !== '-'));
                 const differencePost = driverIDArray.filter(a => !driverIDValidArray.includes(a) &&  (a !== '-'));
-                differenceCache.forEach(diff => {
+                for (const diff of differenceCache) {
                     driverArray.push(`${AdvancedAttendance.unknownEmoji} <@${diff}>`);
-                });
-                differencePost.forEach(diff => {
+                }
+                for (const diff of differencePost) {
                     const index = driverIDArray.indexOf(diff);
                     if (index > -1) {
                         driverArray.splice(index, 1);
@@ -349,7 +350,7 @@ class AdvancedAttendance {
                         this.tentative.delete(id);
                         this.unknown.delete(id);
                     }
-                });
+                }
                 if (differenceCache.length || differencePost.length) {
                     field.value = (driverArray.length ? driverArray.join('\n') : '-');
                 }
@@ -374,10 +375,10 @@ class AdvancedAttendance {
                 const driverIDValidArray = this.tier.reserves.keyArray();
                 const differenceCache = driverIDValidArray.filter(a => !driverIDArray.includes(a) && (a !== '' || a !== '-'));
                 const differencePost = driverIDArray.filter(a => !driverIDValidArray.includes(a) &&  (a !== '-'));
-                differenceCache.forEach(diff => {
+                for (const diff of differenceCache) {
                     driverArray.push(`${AdvancedAttendance.unknownEmoji} <@${diff}>`);
-                });
-                differencePost.forEach(diff => {
+                }
+                for (const diff of differencePost) {
                     const index = driverIDArray.indexOf(diff);
                     if (index > -1) {
                         driverArray.splice(index, 1);
@@ -387,21 +388,23 @@ class AdvancedAttendance {
                         this.tentative.delete(id);
                         this.unknown.delete(id);
                     }
-                });
+                }
                 if (differenceCache.length || differencePost.length) {
                     field.value = (driverArray.length ? driverArray.join('\n') : '-');
                 }
             }
-        });
+        }
         if (!hasReserves && this.tier.reserves.size !== 0) {
             var reserveList = '';
-            this.tier.reserves.forEach(reserve => {
+            for (const reserve of this.tier.reserves.values()) {
                 reserveList += `${AdvancedAttendance.unknownEmoji} ${reserve.member}\n`;
-            });
+            }
             this.embed.addField('Reserves', reserveList, false);
         }
         await this.edit();
-        this.message.reactions.removeAll();
+        if (remove_R) {
+            this.message.reactions.removeAll();
+        }
     }
 
     /**
@@ -410,11 +413,11 @@ class AdvancedAttendance {
      * @param {string} newTeamName 
      */
     async fixTeams(oldTeamName, newTeamName) {
-        this.embed.fields.forEach(field => {
+        for (const field of this.embed.fields) {
             if (field.name === oldTeamName) {
                 field.name = newTeamName;
             }
-        });
+        }
         this.edit();
     }
 
@@ -478,7 +481,7 @@ class AdvancedAttendance {
             this.schedule = schedule.scheduleJob(`reminderchecked${this.id}`, new Date(fiveMinBefore), () => {
                 this.accepted.forEach((participant) => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                    embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!`);
                     embed.setColor('RED');
                     embed.setDescription(this.embed.title);
                     try {
@@ -498,7 +501,7 @@ class AdvancedAttendance {
             this.reminder = schedule.scheduleJob(`reminderunchecked${this.id}`, new Date(twoHoursBefore), () => {
                 this.unknown.forEach(participant => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`You have not responded yet!`);
+                    embed.setAuthor(`You have not responded in ${this.server.guild.name} yet!`);
                     embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
@@ -507,7 +510,7 @@ class AdvancedAttendance {
                 });
                 this.tentative.forEach(participant => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`Are you racing?`);
+                    embed.setAuthor(`Are you racing in ${this.server.guild.name}?`);
                     embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
@@ -519,7 +522,7 @@ class AdvancedAttendance {
         }
         this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Edited schedule for ${this.schedule.name} to ${new Date(fiveMinBefore).toString()}`);
         this.embed.spliceFields(0, 1, {
-            name: "Date & Time", value: (dateString), inline: false
+            name: "Date & Time", value: `[${dateString}]${formatDateURL(date)}`, inline: false
         });
         this.edit();
         this.update();
@@ -563,7 +566,7 @@ class AdvancedAttendance {
                         this.schedule = schedule.scheduleJob(`reminderchecked${this.id}`, new Date(fiveMinBefore), () => {
                             this.accepted.forEach((participant) => {
                                 const embed = new Discord.MessageEmbed();
-                                embed.setAuthor(`You have an event scheduled in 10 minutes!`);
+                                embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!`);
                                 embed.setColor('RED');
                                 embed.setDescription(this.embed.title);
                                 try {
@@ -575,12 +578,15 @@ class AdvancedAttendance {
                         });
                         Logger.boot(`[ADATTENDANCE] Created schedule for ${this.embed.title}`);
                     }
+                    if (this.reminder) {
+                        this.reminder.cancel();
+                    }
                     const twoHoursBefore = this.date.getTime() - 7200000;
                     if (twoHoursBefore > new Date().getTime()) {
                         this.reminder = schedule.scheduleJob(`reminderunchecked${this.id}`, new Date(twoHoursBefore), () => {
                             this.unknown.forEach(participant => {
                                 const embed = new Discord.MessageEmbed();
-                                embed.setAuthor(`You have not responded yet!`);
+                                embed.setAuthor(`You have not responded in ${this.server.guild.name} yet!`);
                                 embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
                                 embed.setColor('RED');
                                 try {
@@ -589,7 +595,7 @@ class AdvancedAttendance {
                             });
                             this.tentative.forEach(participant => {
                                 const embed = new Discord.MessageEmbed();
-                                embed.setAuthor(`Are you racing?`);
+                                embed.setAuthor(`Are you racing in ${this.server.guild.name}?`);
                                 embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
                                 embed.setColor('RED');
                                 try {

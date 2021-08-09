@@ -1,13 +1,6 @@
-const ServerManager = require('../managers/ServerManager');
-const Discord = require('discord.js');
 const formatAccountAge = require('../utils/formatAccountAge');
 
 module.exports = {
-    /**
-     * 
-     * @param {Discord.Client} client 
-     * @param {ServerManager} servers 
-     */
     async run(client, servers) {
         try {
             client.on('channelDelete', async (channel) => {

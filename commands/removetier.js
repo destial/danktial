@@ -31,26 +31,19 @@ module.exports = {
             if (tier) {
                 try {
                     tier.teams.forEach(async team => {
-                        await Database.run(Database.teamDeleteQuery, [team.server.id, team.name, tier.name]);
+                        await Database.run(Database.teamDeleteQuery, [server.id, team.name, tier.name]);
                     });
                     tier.teams.clear();
-
-                    tier.drivers.forEach(async driver => {
-                        await Database.run(Database.driversDeleteQuery, [driver.id, driver.guild.id, tier.name]);
-                    });
-                    tier.drivers.clear();
-
                     tier.reserves.forEach(async reserve => {
-                        await Database.run(Database.driversDeleteQuery, [reserve.id, reserve.guild.id, tier.name]);
+                        await Database.run(Database.driversDeleteQuery, [reserve.id, server.id, tier.name]);
                     });
                     tier.reserves.clear();
-
                     Database.run(Database.tierDeleteQuery, [tier.server.id, tier.name]);
                     server.getTierManager().removeTier(tier);
                     embed.setAuthor(`Deleted tier ${tier.name}`);
                     server.log(`${message.member.user.tag} has deleted tier ${tier.name}`);
                     message.channel.send(embed);
-                    console.log(`[TIER] Deleted tier ${tier.name} from server ${tier.server.guild.name}`);
+                    console.log(`[TIER] Deleted tier ${tier.name} from server ${server.guild.name}`);
                     server.save();
                 } catch(err) {
                     console.log(err);

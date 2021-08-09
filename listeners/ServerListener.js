@@ -1,14 +1,8 @@
-const ServerManager = require('../managers/ServerManager');
 const Discord = require('discord.js');
 const Server = require('../items/Server');
 const Database = require('../database/Database');
 
 module.exports = {
-    /**
-     * 
-     * @param {Discord.Client} client 
-     * @param {ServerManager} servers 
-     */
     async run(client, servers) {
         client.on('guildCreate', async (guild) => {
             try {

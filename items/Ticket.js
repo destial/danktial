@@ -29,13 +29,11 @@ class Ticket {
      * @param {Discord.GuildMember} member 
      */
     async addUser(member) {
-        await this.channel.edit({
-            permissionOverwrites: [
-                {
-                    id: member.id,
-                    allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'ATTACH_FILES']
-                }
-            ]
+        await this.channel.createOverwrite(member, {
+            VIEW_CHANNEL: true,
+            SEND_MESSAGES: true,
+            READ_MESSAGE_HISTORY: true,
+            ATTACH_FILES: true,
         });
         this.channel.send(new Discord.MessageEmbed()
             .setAuthor(`Added ${member.user.tag} to this ticket!`)
@@ -110,7 +108,7 @@ class Ticket {
                     });
                     collector.once('end', async (collected) => {
                         if (yesdelete) {
-                             this.close(member);
+                            this.close(member);
                             resolve(true);
                         } else {
                             a.remove();
@@ -153,6 +151,7 @@ class Ticket {
                     }
                     Database.run(Database.ticketDeleteQuery, [this.id]);
                     this.ticketManager.opentickets.delete(this.id);
+                    Logger.log(`[TICKET] Deleted ticket ${this.channel.name} from ${this.channel.guild.name} by ${this.member.user.username}`);
                     this.ticketManager.server.update();
                     this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TICKET] ${member.displayName} has closed ${this.channel.name} by ${this.member.displayName}`);
                 }, 5000);
@@ -165,7 +164,7 @@ class Ticket {
 
     async save() {
         Database.run(Database.ticketSaveQuery, this.id, this.member.id, this.number, this.base.id);
-        this.server.update();
+        this.ticketManager.server.update();
         Logger.info(`[TICKET] Created new ticket ${this.number}`);
     }
 
