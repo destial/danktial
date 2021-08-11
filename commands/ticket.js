@@ -4,7 +4,7 @@ const Server = require('../items/Server');
 module.exports = {
     name: 'ticket',
     aliases: ['new', 'newticket'],
-    usage: '[ add @user | < reason > ]',
+    usage: '[ add @user | < reason > | close ]',
     description: 'Opens a support ticket',
     /**
      * @param {Discord.Client} client 

@@ -5,7 +5,7 @@ const { Collection } = require('discord.js');
  * @returns {string | undefined} thumbnail url
  */
 function formatTrack(string) {
-    const countries = ['australia', 'bahrain', 'china', 'azerbaijan', 'vietnam', 'spain', 'netherlands', 'monaco', 'canada', 
+    const countries = ['australia', 'bahrain', 'portugal', 'china', 'azerbaijan', 'vietnam', 'spain', 'netherlands', 'monaco', 'canada', 
                         'france', 'austria', 'great britain', 'hungary', 'belgium', 'italy', 'singapore', 
                         'russia', 'japan', 'mexico', 'united states', 'brazil', 'abu dhabi', 'saudi arabia'];
 
@@ -28,7 +28,7 @@ function formatTrack(string) {
     countryAlias.set('dutch', 'netherlands');
     countryAlias.set('french', 'france');
     countryAlias.set('paul ricard', 'france');
-    countryAlias.set('styrian', 'austria');
+    countryAlias.set('styria', 'austria');
     countryAlias.set('redbull ring', 'austria');
     countryAlias.set('british', 'great britain');
     countryAlias.set('britain', 'great britain');
@@ -42,6 +42,7 @@ function formatTrack(string) {
     countryAlias.set('marina bay', 'singapore');
     countryAlias.set('monza', 'italy');
     countryAlias.set('italian', 'italy');
+    countryAlias.set('imola', 'italy');
     countryAlias.set('suzuka', 'japan');
     countryAlias.set('mexican', 'mexico');
     countryAlias.set('usa g', 'united states');
@@ -49,6 +50,12 @@ function formatTrack(string) {
     countryAlias.set('sao paolo', 'brazil');
     countryAlias.set('yas marina', 'abu dhabi');
     countryAlias.set('arabian', 'saudi arabia');
+    countryAlias.set('saudi', 'saudi arabia');
+    countryAlias.set('portuguese', 'portugal');
+    countryAlias.set('algarve', 'portugal');
+    countryAlias.set('portimao', 'portugal');
+    countryAlias.set('emilia romagna', 'italy');
+    countryAlias.set('emilia', 'italy');
 
     const thumbnailUrl = 'https://www.formula1.com/content/dam/fom-website/2018-redesign-assets/Flags%2016x9/{COUNTRY}-flag.png.transform/2col/image.png';
 

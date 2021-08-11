@@ -1,6 +1,9 @@
 const QualiResult = require("./QualiResult");
 const RaceResult = require("./RaceResult");
 const schedule = require('node-schedule');
+const formatFormalTime = require("../utils/formatFormatTime");
+const { timezoneNames } = require("../utils/timezones");
+const { Logger } = require("../utils/Utils");
 
 class Race {
     constructor(client, tier, name, date, timezone) {
@@ -62,7 +65,7 @@ class Race {
         this.tier.server.getAttendanceManager().createAdvanced(this.name, `Automagically Created!`, this.date, this.timezone, this.tier, channel, (attendance) => {
             if (attendance) {
                 this.attendance = attendance.id;
-                console.log(`[RACE SCHEDULE] Created attendance for ${this.name}`);
+                Logger.log(`[RACE SCHEDULE] Created attendance for ${this.name}`);
                 this.tier.server.log(`[RACE SCHEDULE] Scheduled attendance for ${this.name}`);
                 this.tier.server.save();
             }
@@ -80,7 +83,7 @@ class Race {
                 days6.setTime(this.date.getTime() - (1000 * 60 * 60 * 24 * 6));
                 if (days6.getTime() > today.getTime()) {
                     this.schedule = schedule.scheduleJob(days6, () => {
-                        console.log(`[RACE SCHEDULE] Scheduling attendance for race ${this.name}`);
+                        Logger.log(`[RACE SCHEDULE] Scheduling attendance for race ${this.name}`);
                         this.createAttendance();
                         this.schedule.cancel();
                     });
@@ -88,6 +91,38 @@ class Race {
                 }
                 this.schedule = null;
                 this.createAttendance();
+            }
+        }
+    }
+
+    updateDate(date) {
+        if (date) {
+            if (this.schedule) {
+                this.schedule.cancel();
+            }
+            this.date = date;
+            if (this.attendance) {
+                const attendance = this.tier.server.getAttendanceManager().fetchAdvanced(this.attendance);
+                if (attendance) {
+                    const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(this.timezone.toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, this.timezone.toUpperCase())}`;
+                    attendance.updateDate(date, dateString);
+                }
+            } else {
+                const today = new Date();
+                if (this.date.getTime() > today.getTime()) {
+                    const days6 = new Date(this.date);
+                    days6.setTime(this.date.getTime() - (1000 * 60 * 60 * 24 * 6));
+                    if (days6.getTime() > today.getTime()) {
+                        this.schedule = schedule.scheduleJob(days6, () => {
+                            Logger.log(`[RACE SCHEDULE] Scheduling attendance for race ${this.name}`);
+                            this.createAttendance();
+                            this.schedule.cancel();
+                        });
+                        return;
+                    }
+                    this.schedule = null;
+                    this.createAttendance();
+                }
             }
         }
     }

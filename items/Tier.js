@@ -14,6 +14,7 @@ class Tier {
         this.reserves = new Discord.Collection();
         this.teams = new Discord.Collection();
         this.races = [];
+        this.open = false;
 
         this.name = name;
         Logger.info(`[TIER] Added tier ${this.name} from ${this.server.guild.name}`);
@@ -197,7 +198,9 @@ class Tier {
             this.name = object.name;
             this.teams.clear();
             this.reserves.clear();
-
+            if (object.open) {
+                this.open = object.open;
+            }
             for (const teamJSON of object.teams) {
                 const team = new Team(this.client, this.server, teamJSON.name, this);
                 this.addTeam(team);
@@ -258,6 +261,7 @@ class Tier {
             reserves: reservesArray,
             teams: teamArray,
             races: racesArray,
+            open: this.open,
         };
     }
 

@@ -431,6 +431,11 @@ class ServerManager {
                 race.name = req.body.new_name;
                 race.attendanceChannel = req.body.channel;
                 race.update();
+                if (req.body.date) {
+                    const date = new Date(req.body.date);
+                    race.updateDate(date);
+                }
+                tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 server.log(`Updated race ${race.name} in tier ${tier.name}`);
                 break;
             }

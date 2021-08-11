@@ -11,6 +11,7 @@ const { timezones, timezoneNames } = require('../utils/timezones');
 const { Logger } = require('../utils/Utils');
 const { MessageActionRow, MessageButton } = require('discord-buttons');
 const formatDateURL = require('../utils/formatDateURL');
+const OpenAttendance = require('../items/OpenAttendance');
 
 class AttendanceManager {
     /**
@@ -29,6 +30,12 @@ class AttendanceManager {
          * @private
          */
         this.advancedEvents = new Discord.Collection();
+
+        /**
+         * @type {Discord.Collection<string, OpenAttendance>}
+         * @private
+         */
+        this.openEvents = new Discord.Collection();
         this.server = server;
         this.client = client;
     }
@@ -38,20 +45,20 @@ class AttendanceManager {
     static get tentative() { return "❔"; }
     static get delete() { return "🗑️"; }
     static get unknown() { return "🟠"; }
+    static get numbers() { return ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🇦", "🇧","🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯"]; }
 
     /**
-     * @param {Discord.Client} client
+     * 
+     * @param {Server} server 
      * @param {Discord.GuildMember} member 
-     * @param {Server} server
-     * @param {Discord.TextChannel} channel 
-     * @returns {Promise<AdvancedAttendance>} 
+     * @param {Discord.TextChannel} channel
+     * @returns {Promise<OpenAttendance>} 
      */
-    async newAdvancedAttendance(client, server, member, channel) {
-        const embed = new Discord.MessageEmbed();
-        embed.setColor('RED');
+    async newOpenAttendance(server, member, channel) {
+        const embed = new Discord.MessageEmbed().setColor('RED');
         if (server.getTierManager().tiers.size === 0) {
             return new Promise(async (resolve, reject) => {
-                embed.setAuthor(`You do not have any tiers! Please create a tier using ${server.prefix}addtier`);
+                embed.setAuthor(`You do not have any tiers! Please setup using ${server.prefix}setup`);
                 channel.send(embed);
                 resolve(undefined);
             });
@@ -68,10 +75,159 @@ class AttendanceManager {
             server.getTierManager().tiers.forEach(tier => {
                 tierNames.push("`" + tier.name + "`");
             });
-            /**
-             * @type {string}
-             */
-            var answers = [];
+            const answers = [];
+            const dateformat = "DD/MM/YYYY hh:mm TMZE";
+
+            embed.setAuthor(questions[counter++]);
+            const dm = await member.user.send(embed);
+            const filter = m => m.author.id === member.id;
+            const collector = dm.channel.createMessageCollector(filter, {
+                max: questions.length,
+                time: 5*60000
+            });
+
+            collector.on('collect', async (message, col) => {
+                const embed3 = new Discord.MessageEmbed();
+                embed3.setColor('RED');
+                if (counter < questions.length) {
+                    embed3.setAuthor(questions[counter++]);
+                    if (counter === questions.length-1) {
+                        var allTimezones = 'Here are your choices for timezones:\n';
+                        timezones.keyArray().forEach(tmze => {
+                            allTimezones += "`" + tmze + "`\n";
+                        });
+                        embed3.setDescription(allTimezones);
+                    }
+                    if (counter === questions.length) {
+                        embed3.setDescription(tierNames.join('\n'));
+                    } 
+                    member.user.send(embed3);
+                }
+            });
+
+            collector.on('end', async (collected) => {
+                collected.forEach((collect) => {
+                    answers.push(collect.content);
+                });
+                const title = answers[0];
+                const description = answers[1];
+                const date = answers[2];
+                const tier = answers[3];
+                const replyEmbed = new Discord.MessageEmbed();
+                replyEmbed.setColor('RED');
+                if (!title || !description || !date || !tier) {
+                    replyEmbed.setAuthor("Ran out of time or no valid inputs!");
+                    member.user.send(replyEmbed);
+                    return resolve();
+                }
+                const t = server.getTierManager().getTier(tier);
+                if (!t) {
+                    replyEmbed.setAuthor("Tier is invalid! Did not match any tier of:");
+                    replyEmbed.setDescription(tierNames.join('\n'));
+                    member.user.send(replyEmbed);
+                    return resolve();
+                }
+                if (date.length !== dateformat.length && date.length !== dateformat.length-1) {
+                    replyEmbed.setAuthor("Invalid date! Formatting error! (DD/MM/YYYY hh:mm TMZE)");
+                    replyEmbed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 09:30 AEDT`);
+                    member.user.send(embed);
+                    return resolve();
+                }
+                const attendanceembed = new Discord.MessageEmbed();
+                try {
+                    const dateObject = await formatDate(date.toUpperCase());
+                    if (dateObject < Date.now()) {
+                        const dateNow = new Date();
+                        const difference = dateNow.getTime() - dateObject.getTime();
+                        replyEmbed.setAuthor("Invalid date! Date cannot be in the past!");
+                        replyEmbed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
+                        member.user.send(replyEmbed);
+                        return resolve();
+                    }
+                    const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(date.substring(date.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
+                    attendanceembed.setTitle(title);
+                    attendanceembed.setDescription(description);
+                    if (formatTrack(title)) {
+                        attendanceembed.setThumbnail(formatTrack(title));
+                    } else if (formatTrack(description)) {
+                        attendanceembed.setThumbnail(formatTrack(description));
+                    }
+                    attendanceembed.addFields(
+                        { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false }
+                    );
+                    var i = 0;
+                    t.teams.forEach(team => {
+                        attendanceembed.addField(`${AttendanceManager.numbers[i++]}  ${team.name}`, '-', false);
+                    });
+                    attendanceembed.addField(`🇷 Reserves`, '-', false);
+                    attendanceembed.setFooter(t.name);
+                    attendanceembed.setTimestamp(dateObject);
+                    attendanceembed.setColor('RED');
+                    const m = await channel.send(attendanceembed);
+                    const reactionsPromise = new Promise(async (re, rej) => {
+                        for (var ii = 0; ii < i; ++i) {
+                            await m.react(AttendanceManager.numbers[ii]);
+                        }
+                        await m.react(AdvancedAttendance.editEmoji);
+                        await m.react(AdvancedAttendance.lockEmoji);
+                        return re();
+                    });
+                    reactionsPromise.then(() => {});
+                    replyEmbed.setAuthor(`Successfully created attendance ${title}`);
+                    replyEmbed.setDescription(`[Click here to view the attendance](${m.url})`);
+                    member.user.send(replyEmbed);
+                    const attendance = new OpenAttendance(client, m, server, t, dateObject, this);
+                    attendance.creator = member;
+                    attendance.timezone = date.substring(date.length-4).trim().toUpperCase();
+                    this.openEvents.set(attendance.id, attendance);
+                    try {
+                        attendance.save();
+                        this.server.update();
+                        resolve(attendance);
+                    } catch (err) {
+                        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                        resolve(attendance);
+                    }
+                } catch(err) {
+                    replyEmbed.setAuthor(`Invalid date! ${date.toUpperCase()} is an incorrect input!`);
+                    replyEmbed.setDescription(`E.g: 01/01/2021 10:45 SGT or 20/04/2021 04:20 AEDT`);
+                    member.user.send(embed);
+                    return resolve();
+                }
+            });
+        });
+    }
+
+    /**
+     * @param {Discord.Client} client
+     * @param {Discord.GuildMember} member 
+     * @param {Server} server
+     * @param {Discord.TextChannel} channel 
+     * @returns {Promise<AdvancedAttendance>} 
+     */
+    async newAdvancedAttendance(client, server, member, channel) {
+        const embed = new Discord.MessageEmbed();
+        embed.setColor('RED');
+        if (server.getTierManager().tiers.size === 0) {
+            return new Promise(async (resolve, reject) => {
+                embed.setAuthor(`You do not have any tiers! Please setup using ${server.prefix}setup`);
+                channel.send(embed);
+                resolve(undefined);
+            });
+        }
+        return new Promise(async (resolve, reject) => {
+            let counter = 0;
+            const questions = [
+                "What is the title of this event?",
+                "What is the description of the event?",
+                "What is the date of this event? Format should be: DD/MM/YYYY hh:mm TMZE",
+                "What is the tier of this event? Reply with the following:"
+            ];
+            const tierNames = [];
+            server.getTierManager().tiers.forEach(tier => {
+                tierNames.push("`" + tier.name + "`");
+            });
+            const answers = [];
             const dateformat = "DD/MM/YYYY hh:mm TMZE";
 
             embed.setAuthor(questions[counter++]);
@@ -189,7 +345,7 @@ class AttendanceManager {
                                     } else {
                                         await m.react(AdvancedAttendance.unlockEmoji);
                                     }
-                                })
+                                });
                                 replyEmbed.setAuthor(`Successfully created attendance ${title}`);
                                 replyEmbed.setDescription(`[Click here to view the attendance](${m.url})`);
                                 member.user.send(replyEmbed);
@@ -801,10 +957,23 @@ class AttendanceManager {
      * @param {Tier} tier
      * @param {Date} date
      */
-    async loadAdvancedAttendance(message, tier, date) {
+    loadAdvancedAttendance(message, tier, date) {
         const attendance = new AdvancedAttendance(this.client, message, this.server, tier, date, this);
         this.advancedEvents.set(attendance.id, attendance);
         Logger.boot(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
+    }
+
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {Tier} tier
+     * @param {Date} date
+     */
+    loadOpenAttendance(message, tier, date) {
+        const attendance = new OpenAttendance(this.client, message, this.server, tier, date, this);
+        this.openEvents.set(attendance.id, attendance);
+        Logger.boot(`[ADATTENDANCE] Loaded openattendance ${attendance.embed.title} from ${this.server.guild.name}`);
         this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
     }
 
@@ -892,9 +1061,50 @@ class AttendanceManager {
 
     /**
      * 
+     * @param {Discord.MessageReaction} reaction
+     * @param {Discord.User} user
+     */
+    async awaitDeleteOpenAttendance(reaction, user) {
+        reaction.message.guild.members.fetch(user.id).then((member) => {
+            const embed = new Discord.MessageEmbed();
+            embed.setColor('RED');
+            const attendance = this.fetchOpen(reaction.message.id);
+            if (attendance) {
+                embed.setAuthor(`Are you sure you want to delete ${attendance.embed.title}?`);
+                member.user.send(embed).then(async (mes) => {
+                    mes.react(AttendanceManager.accept).then(async () => {
+                        await mes.react(AttendanceManager.reject);
+                    });
+                    let filter = (r, u) =>  { return r.message.id === mes.id && u.id === user.id };
+                    const collector = mes.createReactionCollector(filter, { time: 60000 });
+                    var yesdelete = false;
+                    collector.on('collect', async (r, u) => {
+                        if (r.emoji.name === AttendanceManager.accept) {
+                            yesdelete = true;
+                        }
+                        collector.stop();
+                    });
+                    collector.on('end', async (collected) => {
+                        if (yesdelete) {
+                            embed.setAuthor(`Deleted ${attendance.embed.title}!`);
+                            member.user.send(embed).then(async () => {
+                                this.deleteOpenAttendance(reaction.message);
+                            });
+                        } else {
+                            embed.setAuthor(`Did not delete ${attendance.embed.title}!`);
+                            member.user.send(embed);
+                        }
+                    });
+                });
+            }
+        });
+    }
+
+    /**
+     * 
      * @param {Discord.Message} message 
      */
-    async deleteAttendance(message) {
+    deleteAttendance(message) {
         const attendanceevent = this.fetch(message.id);
         if (attendanceevent) {
             try {
@@ -905,7 +1115,6 @@ class AttendanceManager {
                     message.delete({ timeout: 1000 });
                 }
                 attendanceevent.delete();
-                this.server.update();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
@@ -919,7 +1128,7 @@ class AttendanceManager {
      * 
      * @param {Discord.Message} message 
      */
-    async deleteAdvancedAttendance(message) {
+    deleteAdvancedAttendance(message) {
         const attendanceevent = this.fetchAdvanced(message.id);
         if (attendanceevent) {
             try {
@@ -928,7 +1137,28 @@ class AttendanceManager {
                     message.delete({ timeout: 1000 });
                 }
                 attendanceevent.delete();
-                this.server.update();
+                if (this.server.modlog) {
+                    this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
+                }
+            } catch (err) {
+                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {Discord.Message} message 
+     */
+    deleteOpenAttendance(message) {
+        const attendanceevent = this.fetchOpen(message.id);
+        if (attendanceevent) {
+            try {
+                this.openEvents.delete(attendanceevent.id);
+                if (!message.deleted) {
+                    message.delete({ timeout: 1000 });
+                }
+                attendanceevent.delete();
                 if (this.server.modlog) {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
@@ -954,12 +1184,24 @@ class AttendanceManager {
         return this.advancedEvents.get(id);
     }
 
+    /**
+     * 
+     * @param {string} id 
+     */
+    fetchOpen(id) {
+        return this.openEvents.get(id);
+    }
+
     getEvents() {
         return this.events;
     }
 
     getAdvancedEvents() {
         return this.advancedEvents;
+    }
+
+    getOpenEvents() {
+        return this.openEvents;
     }
 }
 

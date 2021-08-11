@@ -4,6 +4,7 @@ const TicketManager = require('../managers/TicketManager');
 
 const Discord = require('discord.js');
 const { Logger } = require('../utils/Utils');
+const formatTicket = require('../utils/formatTicket');
 
 class Ticket {
     /**
@@ -139,6 +140,7 @@ class Ticket {
                     .setAuthor('This ticket will close in 5 seconds!')
                     .setColor('RED');
                 await this.channel.send(embed);
+                await this.export();
                 setTimeout(async () => {
                     this.channel.delete();
                     if (this.ticketManager.server.modlog) {
@@ -184,6 +186,116 @@ class Ticket {
 
     toString() {
         return `${this.channel}`;
+    }
+
+    async export() {
+        const messages = await this.channel.messages.fetch({ limit: 100 }, false);
+        messages.sort((a, b) => {
+            return a.createdTimestamp - b.createdTimestamp
+        });
+        const users = new Discord.Collection();
+        const messageJson = []
+        for (const m of messages.values()) {
+            var u = users.get(m.member);
+            if (u) {
+                users.set(m.member, ++u);
+            } else {
+                users.set(m.member, 1);
+            }
+            const attachments = [];
+            for (const a of m.attachments.values()) {
+                attachments.push({
+                    url: a.url,
+                    name: a.name,
+                    size: a.size,
+                    height: a.height,
+                    width: a.width
+                });
+            }
+            const reactions = [];
+            for (const r of m.reactions.cache.values()) {
+                if (r.partial) {
+                    await r.fetch();
+                }
+                const rusers = await r.users.fetch();
+                reactions.push({
+                    id: r.emoji.id ? r.emoji.id : r.emoji.name,
+                    name: r.emoji.name,
+                    animated: r.emoji.animated,
+                    count: rusers.size
+                });
+            }
+            const embeds = [];
+            for (const e of m.embeds) {
+                let eObject = {}
+                if (e.title) eObject.title = e.title;
+                if (e.description) eObject.description = e.description;
+                if (e.author) eObject.author = { name: e.author.name, url: e.author.url, iconURL: e.author.iconURL }
+                if (e.fields.length) eObject.fields = e.fields;
+                if (e.url) eObject.url = e.url;
+                if (e.footer) eObject.footer = { text: e.footer.text, iconURL: e.footer.iconURL }
+                if (e.thumbnail) eObject.thumbnail = { url: e.thumbnail.url, width: e.thumbnail.width }
+                if (e.image) eObject.image = { url: e.image.url, height: e.image.height, width: e.image.height }
+                if (e.timestamp) eObject.timestamp = e.timestamp;
+                if (e.color) eObject.color = `#${e.color.toString(16)}`;
+                embeds.push(eObject);
+            }
+            const components = [];
+            for (const c of m.components) {
+                components.push(c.toJSON());
+            }
+            let mObject = {
+                discordData: {},
+                attachments,
+                reactions,
+                embeds,
+                components,
+                user_id: m.author.id,
+                bot: m.author.bot,
+                verified: true,
+                username: m.author.username,
+                nick: m.member.nickname ? m.member.nickname : m.author.username,
+                tag: m.author.tag,
+                avatar: m.author.avatar,
+                id: m.id,
+                created: m.createdTimestamp,
+                edited: m.edits.length > 1 ? m.edits[m.edits.length - 1].createdTimestamp : null,
+            }
+            if (m.content && m.content.length !== 0) {
+                mObject.content = m.content;
+            }
+            messageJson.push(JSON.stringify(mObject));
+        }
+        users.sort((a, b) => {
+            return b - a;
+        });
+        var format = 
+`<league-info>
+    League: ${this.guild.name} (${this.guild.id})
+    Channel: ${this.channel.name} (${this.channel.id})
+    Messages: ${messages.size}
+<users> 
+`;
+        users.forEach((amt, mem) => {
+            format += `    ${amt} - ${mem.user.tag} (${mem.id})\n`;
+        })
+        const channelExport = `let channel = ${JSON.stringify({
+            name: this.channel.name,
+            id: this.channel.id
+        })};`;
+        const serverExport = `let server = ${JSON.stringify({
+            name: this.guild.name,
+            id: this.guild.id,
+            icon: this.guild.icon
+        })};`;
+        const messagesExport = `let messages = [${messageJson.join(',')}];`;
+        format += `<script src="https://tickettool.xyz/transcript/transcript.bundle.min.obv.js"></script><script type="text/javascript">${channelExport}${serverExport}${messagesExport}window.Convert(messages, channel, server);</script>`
+
+        const attachment = new Discord.MessageAttachment(Buffer.from(format, 'utf-8'), `ticket-${formatTicket(this.number)}.html`);
+        if (this.ticketManager.server.modlog) {
+            this.ticketManager.server.modlog.send(`Exported ticket-${formatTicket(this.number)}`, attachment);
+        }
+        await this.channel.send(`Exported ticket-${formatTicket(this.number)}`, attachment);
     }
 }
 

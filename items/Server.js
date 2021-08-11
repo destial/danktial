@@ -13,6 +13,7 @@ const Attendance = require('./Attendance');
 const AdvancedAttendance = require('./AdvancedAttendance');
 const TicketPanel = require('./TicketPanel');
 const { Logger } = require('../utils/Utils');
+const OpenAttendance = require('./OpenAttendance');
 
 class Server {
     constructor(client, guild, modlog, prefix, tickets, serverManager, alertChannel) {
@@ -129,7 +130,7 @@ class Server {
                     const base = await channel.messages.fetch(ticket.base);
                     const t = new Ticket(member, ticket.number, channel, base, this.ticketManager);
                     this.ticketManager.loadTicket(t);
-                    Logger.boot(`[LOAD] Loaded ticket ${t.number}`);
+                    Logger.boot(`[TICKET] Loaded ticket ${t.number}`);
                 }
             } catch(err) {
                 Logger.warn(`[TICKET] Missing ticket member ${ticket.member} or channel ${ticket.id} under ${this.guild.name}`);
@@ -179,6 +180,12 @@ class Server {
             const a = new AdvancedAttendance(this.client, undefined, this, undefined, new Date(attendance.date), this.attendanceManager);
             a.loadJSON(attendance);
         });
+        if (data.openAttendances) {
+            data.openAttendances.forEach(attendance => {
+                const a = new OpenAttendance(this.client, undefined, this, undefined, new Date(attendance.date), this.attendanceManager);
+                a.loadJSON(attendance);
+            });
+        }
         this.alertChannel = this.guild.channels.cache.get(data.twitch.alertChannel);
 
         data.twitch.subscribedChannels.forEach(async id => {
@@ -190,7 +197,7 @@ class Server {
             //     this.subbedChannels.push(user.id);
             // }
         });
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[SERVER] Loaded ${this.guild.name}`);
+        Logger.log(`[SERVER] Loaded ${this.guild.name}`);
     }
 
     async setPrefix(prefix) { 
@@ -307,7 +314,11 @@ class Server {
         const advancedAttendanceData = [];
         this.getAttendanceManager().getAdvancedEvents().forEach(attendance => {
             advancedAttendanceData.push(attendance.toJSON());
-        })
+        });
+        const openAttendanceData = [];
+        this.getAttendanceManager().getOpenEvents().forEach(attendance => {
+            openAttendanceData.push(attendance.toJSON());
+        });
         const openTicketData = [];
         this.getTicketManager().opentickets.forEach(ticket => {
             openTicketData.push(ticket.toJSON());
@@ -340,6 +351,7 @@ class Server {
             tiers: tiersData,
             attendances: attendanceData,
             advancedAttendances: advancedAttendanceData,
+            openAttendances: openAttendanceData,
         };
     }
 

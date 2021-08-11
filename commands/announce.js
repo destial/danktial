@@ -57,14 +57,15 @@ module.exports = {
                 }
                 server.serverManager.servers.forEach(sv => {
                     try {
-                        if (sv.guild.publicUpdatesChannel) {
-                            const locale = formatDiscordRegion(sv.guild.region);
-                            const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-                            const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
-                            embed.setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${sv.guild.region.toLocaleUpperCase()}`);
+                        const locale = formatDiscordRegion(sv.guild.region);
+                        const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                        const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
+                        embed.setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${sv.guild.region.toLocaleUpperCase()}`);
+                        if (sv.guild.publicUpdatesChannel && sv.guild.publicUpdatesChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES')) {
                             sv.guild.publicUpdatesChannel.send(embed);
-                            console.log(`[ANNOUNCEMENT] Sent announcement to ${sv.guild.name}`);
                         }
+                        sv.modlog.send(embed);
+                        console.log(`[ANNOUNCEMENT] Sent announcement to ${sv.guild.name}`);
                     } catch (err) {
                         message.channel.send(`Error sending announcement to ${sv.guild.name}`);
                         console.err(err);
