@@ -4,10 +4,9 @@ const Attendance = require('../items/Attendance');
 const AdvancedAttendance = require('../items/AdvancedAttendance');
 const Server = require('../items/Server');
 const formatDate = require('../utils/formatDate');
-const formatFormalTime = require('../utils/formatFormatTime');
 const Tier = require('../items/Tier');
 const formatTrack = require('../utils/formatTrack');
-const { timezones, timezoneNames } = require('../utils/timezones');
+const { timezones } = require('../utils/timezones');
 const { Logger } = require('../utils/Utils');
 const { MessageActionRow, MessageButton } = require('discord-buttons');
 const formatDateURL = require('../utils/formatDateURL');
@@ -144,7 +143,6 @@ class AttendanceManager {
                         member.user.send(replyEmbed);
                         return resolve();
                     }
-                    const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(date.substring(date.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
                     attendanceembed.setTitle(title);
                     attendanceembed.setDescription(description);
                     if (formatTrack(title)) {
@@ -152,8 +150,10 @@ class AttendanceManager {
                     } else if (formatTrack(description)) {
                         attendanceembed.setThumbnail(formatTrack(description));
                     }
+                    var time = `${dateObject.getTime()}`;
+                    time = time.substring(0, 10);
                     attendanceembed.addFields(
-                        { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false }
+                        { name: "Date & Time", value: `[<t:${time}:F>](${formatDateURL(dateObject)})`, inline: false }
                     );
                     var i = 0;
                     t.teams.forEach(team => {
@@ -293,7 +293,6 @@ class AttendanceManager {
                             member.user.send(replyEmbed);
                             resolve();
                         } else {
-                            const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(date.substring(date.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
                             attendanceembed.setTitle(title);
                             attendanceembed.setDescription(description);
                             if (formatTrack(title)) {
@@ -301,8 +300,10 @@ class AttendanceManager {
                             } else if (formatTrack(description)) {
                                 attendanceembed.setThumbnail(formatTrack(description));
                             }
+                            var time = `${dateObject.getTime()}`;
+                            time = time.substring(0, 10);
                             attendanceembed.addFields(
-                                { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false }
+                                { name: "Date & Time", value: `[<t:${time}:F>](${formatDateURL(dateObject)})`, inline: false }
                             );
                             t.teams.forEach(team => {
                                 const driverNames = [];
@@ -356,6 +357,9 @@ class AttendanceManager {
                                 try {
                                     attendance.save();
                                     this.server.update();
+                                    const key = timezones.keyArray().find(t => date.toUpperCase().trim().endsWith(t.substring(0, 4).trim()));
+                                    const diff = timezones.get(key);
+                                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Created attendance from timezone UTC ${diff}`);
                                     resolve(attendance);
                                 } catch (err) {
                                     this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
@@ -385,7 +389,6 @@ class AttendanceManager {
      */
     async createAdvanced(title, description, date, timezone, t, channel, resolve) {
         const attendanceembed = new Discord.MessageEmbed();
-        const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, timezone)}`;
         attendanceembed.setTitle(title);
         attendanceembed.setDescription(description);
         if (formatTrack(title)) {
@@ -393,8 +396,10 @@ class AttendanceManager {
         } else if (formatTrack(description)) {
             attendanceembed.setThumbnail(formatTrack(description));
         }
+        var time = `${date.getTime()}`;
+        time = time.substring(0, 10);
         attendanceembed.addFields(
-            { name: "Date & Time", value: `[${dateString}](${formatDateURL(date)})`, inline: false }
+            { name: "Date & Time", value: `[<t:${time}:F>](${formatDateURL(date)})`, inline: false }
         );
         t.teams.forEach(team => {
             const driverNames = [];
@@ -459,7 +464,6 @@ class AttendanceManager {
         if (attendance.next) {
             if (attendance.attendanceType === 'advanced') {
                 const dateObject = new Date(attendance.next.date);
-                const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(attendance.timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, attendance.timezone)}`;
                 const attendanceembed = new Discord.MessageEmbed();
                 attendanceembed.setTitle(attendance.next.title);
                 attendanceembed.setDescription(attendance.next.description);
@@ -468,8 +472,10 @@ class AttendanceManager {
                 } else if (formatTrack(description)) {
                     attendanceembed.setThumbnail(formatTrack(attendance.next.description));
                 }
+                var time = `${dateObject.getTime()}`;
+                time = time.substring(0, 10);
                 attendanceembed.addFields(
-                    { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false }
+                    { name: "Date & Time", value: `[<t:${time}:F>](${formatDateURL(dateObject)})`, inline: false }
                 );
                 attendance.tier.teams.forEach(team => {
                     const driverNames = [];
@@ -512,7 +518,6 @@ class AttendanceManager {
                 }
             } else if (attendance.attendanceType === 'normal') {
                 const dateObject = new Date(attendance.next.date);
-                const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timezoneNames.get(attendance.timezone), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, attendance.timezone)}`;
                 const attendanceembed = new Discord.MessageEmbed();
                 attendanceembed.setTitle(attendance.next.title);
                 attendanceembed.setDescription(attendance.next.description);
@@ -521,8 +526,10 @@ class AttendanceManager {
                 } else if (formatTrack(attendance.next.description)) {
                     attendanceembed.setThumbnail(formatTrack(attendance.next.description));
                 }
+                var time = `${dateObject.getTime()}`;
+                time = time.substring(0, 10);
                 attendanceembed.addFields(
-                    { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false },
+                    { name: "Date & Time", value: `[<t:${time}:F>](${formatDateURL(dateObject)})`, inline: false },
                     { name: `${AttendanceManager.accept} Accepted (0)`, value: ">>> -", inline: true },
                     { name: `${AttendanceManager.reject} Rejected (0)`, value: ">>> -", inline: true },
                     { name: `${AttendanceManager.tentative} Tentative (0)`, value: ">>> -", inline: true }
@@ -623,8 +630,6 @@ class AttendanceManager {
                                 member.user.send(embed);
                                 resolve();
                             } else {
-                                const timeZoneName = timezoneNames.get(date.substring(date.length-4).trim().toUpperCase());
-                                const dateString = `${dateObject.toLocaleDateString('en-US', { timeZone: timeZoneName, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(dateObject, date.substring(date.length-4).trim().toUpperCase())}`;
                                 attendanceembed.setTitle(title);
                                 attendanceembed.setDescription(description);
                                 if (formatTrack(title)) {
@@ -632,8 +637,9 @@ class AttendanceManager {
                                 } else if (formatTrack(description)) {
                                     attendanceembed.setThumbnail(formatTrack(description));
                                 }
+                                const time = `${dateObject.getTime()}`.substring(0,10);
                                 attendanceembed.addFields(
-                                    { name: "Date & Time", value: `[${dateString}](${formatDateURL(dateObject)})`, inline: false },
+                                    { name: "Date & Time", value: `[<t:${time}:F>](${formatDateURL(dateObject)})`, inline: false },
                                     { name: `${AttendanceManager.accept} Accepted (0)`, value: ">>> -", inline: true },
                                     { name: `${AttendanceManager.reject} Rejected (0)`, value: ">>> -", inline: true },
                                     { name: `${AttendanceManager.tentative} Tentative (0)`, value: ">>> -", inline: true }
@@ -777,9 +783,9 @@ class AttendanceManager {
                                                     embed.setDescription(`Your input date was ${difference} milliseconds in the past!\n(${difference/3600000} hours in the past)`);
                                                     member.user.send(embed);
                                                 } else {
-                                                    const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(edit.substring(edit.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
+                                                    const time = `${date.getTime()}`.substring(0,10);
                                                     mcollector.stop();
-                                                    attendanceevent.updateDate(date, dateString);
+                                                    attendanceevent.updateDate(date, `<t:${time}:F>`);
                                                     attendanceevent.edit();
                                                 }
                                             }).catch((err) => {
@@ -911,8 +917,8 @@ class AttendanceManager {
                                             member.user.send(embed);
                                             return;
                                         } else {
-                                            const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(edit.substring(edit.length-4).trim().toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, edit.substring(edit.length-4, edit.length).trim())}`;
-                                            attendanceevent.updateDate(date, dateString);
+                                            const time = `${date.getTime()}`.substring(0,10);
+                                            attendanceevent.updateDate(date, `<t:${time}:F>`);
                                         }
                                         attendanceevent.message.edit(attendanceevent.embed).then(async (m5) => {
                                             try {

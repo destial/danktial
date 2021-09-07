@@ -5,6 +5,7 @@ const TicketManager = require('../managers/TicketManager');
 const Discord = require('discord.js');
 const { Logger } = require('../utils/Utils');
 const formatTicket = require('../utils/formatTicket');
+const { User } = require('discord.js');
 
 class Ticket {
     /**
@@ -193,14 +194,18 @@ class Ticket {
         messages.sort((a, b) => {
             return a.createdTimestamp - b.createdTimestamp
         });
+        /**
+         * @type {Discord.Collection<User,number>}
+         */
         const users = new Discord.Collection();
         const messageJson = []
         for (const m of messages.values()) {
-            var u = users.get(m.member);
+            if (!m.author) continue;
+            var u = users.get(m.author);
             if (u) {
-                users.set(m.member, ++u);
+                users.set(m.author, ++u);
             } else {
-                users.set(m.member, 1);
+                users.set(m.author, 1);
             }
             const attachments = [];
             for (const a of m.attachments.values()) {
@@ -277,7 +282,7 @@ class Ticket {
 <users> 
 `;
         users.forEach((amt, mem) => {
-            format += `    ${amt} - ${mem.user.tag} (${mem.id})\n`;
+            format += `    ${amt} - ${mem.tag} (${mem.id})\n`;
         })
         const channelExport = `let channel = ${JSON.stringify({
             name: this.channel.name,

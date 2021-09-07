@@ -62,7 +62,7 @@ class Race {
         if (!this.attendanceChannel || this.attendance) return;
         const channel = this.tier.server.guild.channels.cache.get(this.attendanceChannel);
         if (!channel || !channel.isText()) return;
-        this.tier.server.getAttendanceManager().createAdvanced(this.name, `Automagically Created!`, this.date, this.timezone, this.tier, channel, (attendance) => {
+        this.tier.server.getAttendanceManager().createAdvanced(this.name, `Reminder to check in for this race!`, this.date, this.timezone, this.tier, channel, (attendance) => {
             if (attendance) {
                 this.attendance = attendance.id;
                 Logger.log(`[RACE SCHEDULE] Created attendance for ${this.name}`);
@@ -95,7 +95,7 @@ class Race {
         }
     }
 
-    updateDate(date) {
+    updateDate(date, timezone) {
         if (date) {
             if (this.schedule) {
                 this.schedule.cancel();
@@ -104,8 +104,9 @@ class Race {
             if (this.attendance) {
                 const attendance = this.tier.server.getAttendanceManager().fetchAdvanced(this.attendance);
                 if (attendance) {
-                    const dateString = `${date.toLocaleDateString('en-US', { timeZone: timezoneNames.get(this.timezone.toUpperCase()), weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} ${formatFormalTime(date, this.timezone.toUpperCase())}`;
-                    attendance.updateDate(date, dateString);
+                    var time = `${date.getTime()}`.substring(0, 10);
+                    time = `<t:${time}:F>`
+                    attendance.updateDate(date, time);
                 }
             } else {
                 const today = new Date();
@@ -125,6 +126,16 @@ class Race {
                 }
             }
         }
+    }
+
+    updateName(name) {
+        if (this.attendance) {
+            const attendance = this.tier.server.getAttendanceManager().fetchAdvanced(this.attendance);
+            attendance.embed.setTitle(name);
+            attendance.edit();
+        }
+        this.name = name;
+        this.tier.server.update();
     }
 
     toJSON() {

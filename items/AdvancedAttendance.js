@@ -120,7 +120,7 @@ class AdvancedAttendance {
             this.schedule = schedule.scheduleJob(`reminderchecked${this.id}`, new Date(fiveMinBefore), () => {
                 this.accepted.forEach((participant) => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!`);
+                    embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!\n[Click here for the attendance](${this.message.url})`);
                     embed.setColor('RED');
                     embed.setDescription(this.embed.title);
                     try {
@@ -139,7 +139,7 @@ class AdvancedAttendance {
                 this.unknown.forEach(participant => {
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(`You have not responded in ${this.server.guild.name} yet!`);
-                    embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
+                    embed.setDescription(`Reminder to respond to the [attendance](${this.message.url})!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
                         participant.member.user.send(embed);
@@ -148,7 +148,7 @@ class AdvancedAttendance {
                 this.tentative.forEach(participant => {
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(`Are you racing in ${this.server.guild.name}?`);
-                    embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
+                    embed.setDescription(`Reminder to check-in for the [attendance](${this.message.url})!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
                         participant.member.user.send(embed);
@@ -316,6 +316,12 @@ class AdvancedAttendance {
     async fix(remove_R) {
         var hasReserves = false;
         for (const field of this.embed.fields) {
+            if (field.name === "Date & Time") {
+                var time = `${this.date.getTime()}`;
+                time = time.substring(0, 10);
+                field.value = `[<t:${time}:F>](${formatDateURL(this.date)})`;
+                continue;
+            }
             const team = this.tier.getTeam(field.name);
             if (team) {
                 const driverArray = field.value.split('\n');
@@ -481,7 +487,7 @@ class AdvancedAttendance {
             this.schedule = schedule.scheduleJob(`reminderchecked${this.id}`, new Date(fiveMinBefore), () => {
                 this.accepted.forEach((participant) => {
                     const embed = new Discord.MessageEmbed();
-                    embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!`);
+                    embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!\n[Click here for the attendance](${this.message.url})`);
                     embed.setColor('RED');
                     embed.setDescription(this.embed.title);
                     try {
@@ -502,7 +508,7 @@ class AdvancedAttendance {
                 this.unknown.forEach(participant => {
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(`You have not responded in ${this.server.guild.name} yet!`);
-                    embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
+                    embed.setDescription(`Reminder to respond to the [attendance](${this.message.url})!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
                         participant.member.user.send(embed);
@@ -511,7 +517,7 @@ class AdvancedAttendance {
                 this.tentative.forEach(participant => {
                     const embed = new Discord.MessageEmbed();
                     embed.setAuthor(`Are you racing in ${this.server.guild.name}?`);
-                    embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
+                    embed.setDescription(`Reminder to check-in for the [attendance](${this.message.url})!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
                         participant.member.user.send(embed);
@@ -522,7 +528,7 @@ class AdvancedAttendance {
         }
         this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Edited schedule for ${this.schedule.name} to ${new Date(fiveMinBefore).toString()}`);
         this.embed.spliceFields(0, 1, {
-            name: "Date & Time", value: `[${dateString}]${formatDateURL(date)}`, inline: false
+            name: "Date & Time", value: `[${dateString}](${formatDateURL(date)})`, inline: false
         });
         this.edit();
         this.update();
@@ -566,7 +572,7 @@ class AdvancedAttendance {
                         this.schedule = schedule.scheduleJob(`reminderchecked${this.id}`, new Date(fiveMinBefore), () => {
                             this.accepted.forEach((participant) => {
                                 const embed = new Discord.MessageEmbed();
-                                embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!`);
+                                embed.setAuthor(`You have an upcoming race in ${this.server.guild.name} in 10 minutes!\n[Click here for the attendance](${this.message.url})`);
                                 embed.setColor('RED');
                                 embed.setDescription(this.embed.title);
                                 try {
@@ -587,7 +593,7 @@ class AdvancedAttendance {
                             this.unknown.forEach(participant => {
                                 const embed = new Discord.MessageEmbed();
                                 embed.setAuthor(`You have not responded in ${this.server.guild.name} yet!`);
-                                embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
+                                embed.setDescription(`Reminder to respond to the [attendance](${this.message.url})!\n${this.embed.title}`);
                                 embed.setColor('RED');
                                 try {
                                     participant.member.user.send(embed);
@@ -596,7 +602,7 @@ class AdvancedAttendance {
                             this.tentative.forEach(participant => {
                                 const embed = new Discord.MessageEmbed();
                                 embed.setAuthor(`Are you racing in ${this.server.guild.name}?`);
-                                embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
+                                embed.setDescription(`Reminder to check-in for the [attendance](${this.message.url})!\n${this.embed.title}`);
                                 embed.setColor('RED');
                                 try {
                                     participant.member.user.send(embed);

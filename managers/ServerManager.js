@@ -428,14 +428,17 @@ class ServerManager {
                 const race = tier.races[req.body.index];
                 if (!race) return;
                 race.link = req.body.link;
-                race.name = req.body.new_name;
                 race.attendanceChannel = req.body.channel;
-                race.update();
+                if (req.body.new_name !== race.name) {
+                    race.updateName(req.body.new_name);
+                }
                 if (req.body.date) {
                     const date = new Date(req.body.date);
-                    race.updateDate(date);
+                    if (date.getTime() !== race.date.getTime()) {
+                        race.updateDate(date, req.body.timezone);
+                        tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
+                    }
                 }
-                tier.races.sort((a, b) => a.date.getTime() - b.date.getTime());
                 server.log(`Updated race ${race.name} in tier ${tier.name}`);
                 break;
             }
@@ -496,9 +499,8 @@ class ServerManager {
                     }
                     tier.addDriver(driver);
                     for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
-                        if (attendance.tier === tier) {
-                            attendance.fix();
-                        }
+                        if (attendance.tier !== tier) continue;
+                        attendance.fix();
                     }
                     server.log(`Created new driver ${driver.name} in tier ${tier.name}`);
                 } catch (e) {
@@ -518,9 +520,8 @@ class ServerManager {
                     }
                     tier.removeDriver(req.body.driver);
                     for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
-                        if (attendance.tier === tier) {
-                            attendance.fix();
-                        }
+                        if (attendance.tier !== tier) continue;
+                        attendance.fix();
                     }
                     server.log(`Removed driver ${driver.name} in tier ${tier.name}`);
                 } catch (e) {
@@ -542,12 +543,12 @@ class ServerManager {
                 if (tier.reserves.size !== 0) return;
                 var hasDrivers = false;
                 for (const team of tier.teams.values()) {
-                    if (team.drivers.size !== 0) {
-                        hasDrivers = true;
-                        break;
-                    }
+                    if (team.drivers.size === 0) continue;
+                    hasDrivers = true;
+                    break;
                 }
                 if (hasDrivers) return;
+                server.getTierManager().removeTier(tier);
                 server.log(`Deleted tier ${tier.name}`);
                 break;
             }
@@ -566,9 +567,8 @@ class ServerManager {
                 const team = new Team(this.client, server, req.body.team, tier);
                 tier.addTeam(team);
                 for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
-                    if (attendance.tier === tier) {
-                        attendance.fix();
-                    }
+                    if (attendance.tier !== tier) continue;
+                    attendance.fix();
                 }
                 server.log(`Added team ${team.name} to tier ${tier.name}`);
                 break;
@@ -576,17 +576,18 @@ class ServerManager {
             case 'new_f1_teams': {
                 const tier = server.getTierManager().getTier(req.body.tier);
                 if (!tier) return;
-                const teamNames = [];
-                teamNames.push('Mercedes-AMG Petronas');
-                teamNames.push('Scuderia Ferrari');
-                teamNames.push('Redbull Racing');
-                teamNames.push('Aston Martin F1');
-                teamNames.push('Alpine F1');
-                teamNames.push('McLaren F1');
-                teamNames.push('Haas F1 Team');
-                teamNames.push('Scuderia Alpha Tauri');
-                teamNames.push('Alfa Romeo F1');
-                teamNames.push('Williams Racing');
+                const teamNames = [
+                    'Redbull Racing',
+                    'Mercedes-AMG Petronas',
+                    'Ferrari',
+                    'McLaren F1',
+                    'Alpine F1',
+                    'Alpha Tauri',
+                    'Aston Martin F1',
+                    'Alfa Romeo F1',
+                    'Williams Racing',
+                    'Haas F1 Team'
+                ];
                 for (const teamName of teamNames) {
                     if (tier.getTeam(teamName)) continue;
                     const team = new Team(this.client, server, teamName, tier);
@@ -602,9 +603,8 @@ class ServerManager {
                 if (!team) return;
                 tier.removeTeam(team.name);
                 for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
-                    if (attendance.tier === tier) {
-                        attendance.fix();
-                    }
+                    if (attendance.tier !== tier) continue;
+                    attendance.fix();
                 }
                 server.log(`Removed team ${team.name} from tier ${tier.name}`);
                 break;
@@ -617,9 +617,8 @@ class ServerManager {
                 if (!team) return;
                 team.setName(req.body.new_name);
                 for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
-                    if (attendance.tier === tier) {
-                        attendance.fixTeams(teamName, team.name);
-                    }
+                    if (attendance.tier !== tier) continue;
+                    attendance.fixTeams(teamName, team.name);
                 }
                 server.log(`Updated team ${teamName} to ${team.name} in tier ${tier.name}`);
                 break;
@@ -629,6 +628,7 @@ class ServerManager {
             }
         }
         server.save();
+        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Saved server ${server.guild.name}`);
     }
 
     attendanceMark(userID, attendance, tier, server, req) {
@@ -638,18 +638,15 @@ class ServerManager {
         }
         if (driver) {
             switch (req.headers.type) {
-                case 'mark_in': {
+                case 'mark_in': 
                     attendance.accept(driver);
                     break;
-                }
-                case 'mark_out': {
+                case 'mark_out': 
                     attendance.reject(driver);
                     break;
-                }
-                default: {
+                default: 
                     attendance.maybe(driver);
                     break;
-                }
             }
         }
     }
