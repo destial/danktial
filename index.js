@@ -38,19 +38,17 @@ client.once('ready', () => {
         });
 
         loadServer.then(async () => {
+            var size = 0;
             const loadServerData = new Promise(async (resolve, reject) => {
                 const rows = await Database.allNewDB('SELECT * FROM servers')
-                var size = 0;
                 for (const row of rows) {
                     try {
                         const guild = await client.guilds.fetch(row.id);
                         const server = await client.manager.fetch(guild.id)
                         if (guild && server) {
-                            await server.loadData(JSON.parse(row.data));
+                            server.loadData(JSON.parse(row.data));
                         }
-                    } catch(err) {
-                        //console.log(`[BOOT] Error loading server ${row.id}`);
-                    }
+                    } catch(err) {}
                     size++;
                 }
                 if (size === rows.length) {
@@ -58,38 +56,24 @@ client.once('ready', () => {
                 }
             });
             loadServerData.then(() => {
-                client.user.setActivity(`destial.xyz | ${client.manager.servers.size} leagues`);
+                client.user.setActivity(`destial.xyz | ${size} leagues`);
                 Logger.log('danktial is now online!');
-                client.manager.servers.forEach(async server => {
+                client.manager.servers.forEach(server => {
                     if (server.modlog) {
                         const locale = formatDiscordRegion(server.guild.region);
                         const date = new Date().toLocaleDateString('en-US', { timeZone: locale, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
                         const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
                         try {
-                            await server.modlog.setTopic(`danktial has been online since ${date} ${(time.startsWith('0') ? time.substring(1) : time)} ${server.guild.region.toLocaleUpperCase()}`);
+                            server.modlog.setTopic(`danktial has been online since ${date} ${(time.startsWith('0') ? time.substring(1) : time)} ${server.guild.region.toLocaleUpperCase()}`);
                         } catch(err) {}
                     }
                 });
-                // client.guilds.cache.forEach(async (guild, id) => {
-                //     // guild.channels.cache.forEach(async (channel) => {
-                //     //     if (channel.isText() && channel.manageable && channel.viewable) {
-                //     //         try {
-                //     //             //await channel.messages.fetch({limit: 100});
-                //     //         } catch(err) {
-                //     //             Logger.warn(`Error loading channel messages of ${channel.name} under ${channel.guild.name}`);
-                //     //         }
-                //     //     }
-                //     // });
-                //     // if (id === client.guilds.cache.last().id) {
-                //     //     Logger.boot(`Cached all messages!`);
-                //     // }
-                // });
             });
             
             const listenerFiles = fs.readdirSync('./listeners').filter(file => file.endsWith('.js'));
             for (const file of listenerFiles) {
                 const listener = require(`./listeners/${file}`);
-                await listener.run(client, client.manager);
+                listener.run(client, client.manager);
                 Logger.boot(`[LISTENER] Registered ${file.replace('.js', '')}`);
             }
         });
@@ -100,10 +84,10 @@ client.once('ready', () => {
 
 process.on('uncaughtException', (err) => {
     console.log(err);
-    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message ? err.message : `Uncaught exception! ${err}`);
+    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err ? err.message : `Uncaught exception! ${err}`);
 });
 
 process.on('unhandledRejection', (err) => {
     console.log(err);
-    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message ? err.message : `Uncaught rejection! ${err}`);
+    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err ? err.message : `Uncaught rejection! ${err}`);
 })

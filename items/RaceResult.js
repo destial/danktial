@@ -13,7 +13,7 @@ class RaceResult {
      * @param {number} penalties 
      * @param {number} position
      */
-    constructor(tier, driver, position, gap, points, stops, penalties) {
+    constructor(tier, driver, position, gap, points, stops, penalties, scoringteam) {
         this.position = position;
         this.tier = tier;
         this.driver = undefined;
@@ -30,6 +30,7 @@ class RaceResult {
         this.points = points;
         this.stops = stops;
         this.penalties = penalties;
+        this.scoringteam = scoringteam;
     }
 
     /**
@@ -52,6 +53,7 @@ class RaceResult {
             this.penalties = object.penalties;
             this.points = object.points;
             this.position = object.position;
+            this.scoringteam = !object.scoringteam ? this.driver.team.name : object.scoringteam;
         } catch(err) {
             console.log(err);
         }
@@ -70,6 +72,7 @@ class RaceResult {
             points: this.points,
             stops: this.stops,
             penalties: this.penalties,
+            scoringteam: this.scoringteam,
         }
     }
 };

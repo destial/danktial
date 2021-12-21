@@ -1,8 +1,6 @@
 const QualiResult = require("./QualiResult");
 const RaceResult = require("./RaceResult");
 const schedule = require('node-schedule');
-const formatFormalTime = require("../utils/formatFormatTime");
-const { timezoneNames } = require("../utils/timezones");
 const { Logger } = require("../utils/Utils");
 
 class Race {
@@ -62,7 +60,7 @@ class Race {
         if (!this.attendanceChannel || this.attendance) return;
         const channel = this.tier.server.guild.channels.cache.get(this.attendanceChannel);
         if (!channel || !channel.isText()) return;
-        this.tier.server.getAttendanceManager().createAdvanced(this.name, `Reminder to check in for this race!`, this.date, this.timezone, this.tier, channel, (attendance) => {
+        this.tier.server.getAttendanceManager().createAdvanced(this.name, `Reminder to check in for this event!`, this.date, this.timezone, this.tier, channel, (attendance) => {
             if (attendance) {
                 this.attendance = attendance.id;
                 Logger.log(`[RACE SCHEDULE] Created attendance for ${this.name}`);
@@ -83,7 +81,7 @@ class Race {
                 days6.setTime(this.date.getTime() - (1000 * 60 * 60 * 24 * 6));
                 if (days6.getTime() > today.getTime()) {
                     this.schedule = schedule.scheduleJob(days6, () => {
-                        Logger.log(`[RACE SCHEDULE] Scheduling attendance for race ${this.name}`);
+                        Logger.log(`[RACE SCHEDULE] Scheduling attendance for event ${this.name}`);
                         this.createAttendance();
                         this.schedule.cancel();
                     });
@@ -95,7 +93,7 @@ class Race {
         }
     }
 
-    updateDate(date, timezone) {
+    updateDate(date, tz) {
         if (date) {
             if (this.schedule) {
                 this.schedule.cancel();

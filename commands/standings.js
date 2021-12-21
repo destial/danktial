@@ -92,7 +92,7 @@ module.exports = {
                 }
                 for (const race of tier.races) {
                     for (const result of race.results) {
-                        const object = teams.find(t => t.team.drivers.find(d => d.id === result.driver.id));
+                        const object = teams.find(t => t.team.name === result.scoringteam);
                         if (!object) continue;
                         object.points += result.points;
                     }

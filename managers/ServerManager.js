@@ -260,8 +260,9 @@ class ServerManager {
                         if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
                             const array = [];
                             for (const channel of server.guild.channels.cache.values()) {
-                                if (!channel.manageable) continue;
                                 if (channel.type === 'voice' || channel.type === 'store') continue;
+                                const perms = channel.permissionsFor(member);
+                                if (!perms.has('SEND_MESSAGES') || !perms.has('ADD_REACTIONS')) continue;
                                 array.push({
                                     id: channel.id,
                                     name: channel.name,
@@ -362,7 +363,8 @@ class ServerManager {
                 const driver = tier.getDriver(req.body.driver);
                 if (!driver) return;
                 if (race.results.find(r => r.driver.id === driver.id)) return;
-                const result = new RaceResult(tier, driver, Number(req.body.position), req.body.gap, Number(req.body.points), Number(req.body.stops), Number(req.body.penalties));
+                const scoringteam = req.body.scoringteam && req.body.scoringteam !== "Reserves" && req.body.scoringteam !== "Default" ? tier.getTeam(req.body.scoringteam.split('_').join(' ')).name : driver.team ? driver.team.name : "Reserves";
+                const result = new RaceResult(tier, driver, Number(req.body.position), req.body.gap, Number(req.body.points), Number(req.body.stops), Number(req.body.penalties), scoringteam);
                 race.results.push(result);
                 race.results.sort((a, b) => a.position - b.position);
                 server.log(`Created new race result for ${result.driver.name} in race ${race.name} in tier ${tier.name}`);
