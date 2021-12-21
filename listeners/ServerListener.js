@@ -14,6 +14,7 @@ module.exports = {
                     if (rows.length) {
                         await server.loadData(rows[0].data);
                     } else {
+                        client.manager.all.push(guild.id);
                         const guildMember = await guild.members.fetch(client.user.id);
                         if (!guildMember.hasPermission('ADMINISTRATOR') || !guildMember.hasPermission('MANAGE_GUILD')) {
                             if (guild.systemChannel) {
@@ -42,7 +43,7 @@ module.exports = {
                             }
                         }
                     }
-                    client.user.setActivity(`destial.xyz | ${client.manager.servers.size} leagues`);
+                    client.user.setActivity(`destial.xyz | ${client.manager.all.length} leagues`);
                 }
             } catch (err) {
                 client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);

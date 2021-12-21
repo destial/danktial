@@ -14,6 +14,7 @@ class ServerManager {
     constructor(client) {
         ServerManager.instance = this;
         this.servers = new Discord.Collection();
+        this.all = [];
 
         this.queueWorker = new QueueWorker(this);
         this.client = client;

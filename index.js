@@ -28,7 +28,7 @@ client.once('ready', () => {
     try {
         const loadServer = new Promise((resolve, reject) => {
             client.guilds.cache.forEach((guild, id) => {
-                const server = client.manager.servers.get(guild.id)
+                const server = client.manager.servers.get(guild.id);
                 if (!server) {
                     const server = new Server(client, guild, undefined, '-', 0, client.manager);
                     client.manager.servers.set(server.id, server);
@@ -38,25 +38,24 @@ client.once('ready', () => {
         });
 
         loadServer.then(async () => {
-            var size = 0;
             const loadServerData = new Promise(async (resolve, reject) => {
                 const rows = await Database.allNewDB('SELECT * FROM servers')
                 for (const row of rows) {
                     try {
+                        client.manager.all.push(row.id);
                         const guild = await client.guilds.fetch(row.id);
                         const server = await client.manager.fetch(guild.id)
                         if (guild && server) {
                             server.loadData(JSON.parse(row.data));
                         }
                     } catch(err) {}
-                    size++;
                 }
-                if (size === rows.length) {
+                if (client.manager.all.length === rows.length) {
                     resolve();
                 }
             });
             loadServerData.then(() => {
-                client.user.setActivity(`destial.xyz | ${size} leagues`);
+                client.user.setActivity(`destial.xyz | ${client.manager.all.length} leagues`);
                 Logger.log('danktial is now online!');
                 client.manager.servers.forEach(server => {
                     if (server.modlog) {
