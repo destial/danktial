@@ -97,6 +97,7 @@ class Team {
     toJSON() {
         const driverArray = [];
         this.drivers.forEach(driver => {
+            console.log(driver);
             driverArray.push(driver.toJSON());
         }); 
         return {

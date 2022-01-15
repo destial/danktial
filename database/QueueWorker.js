@@ -1,18 +1,8 @@
-const ServerManager = require('../managers/ServerManager');
 const Database = require('./Database');
-const Query = require('./Query');
-
 
 class QueueWorker {
-    /**
-     * 
-     * @param {ServerManager} serverManager 
-     */
     constructor(serverManager) {
         this.serverManager = serverManager;
-        /**
-         * @type {Query[]}
-         */
         this.queue = [];
 
         setInterval(() => {
@@ -26,10 +16,6 @@ class QueueWorker {
         }, 1000 * 60 * 60 * 3);
     }
 
-    /**
-     * 
-     * @param {Query} query 
-     */
     addToQueue(query) {
         this.queue.push(query);
     }

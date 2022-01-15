@@ -13,14 +13,7 @@ class Race {
         this.link = undefined;
         this.attendance = undefined;
         this.attendanceChannel = undefined;
-        /**
-         * @type {RaceResult[]}
-         */
         this.results = [];
-
-        /**
-         * @type {QualiResult[]}
-         */
         this.qualifying = [];
         this.schedule = undefined;
     }

@@ -1,18 +1,4 @@
-const Driver = require("./Driver");
-const Tier = require("./Tier");
-
 class RaceResult {
-
-    /**
-     * 
-     * @param {Tier} tier 
-     * @param {Driver} driver 
-     * @param {number} gap 
-     * @param {number} points 
-     * @param {number} stops 
-     * @param {number} penalties 
-     * @param {number} position
-     */
     constructor(tier, driver, position, gap, points, stops, penalties, scoringteam) {
         this.position = position;
         this.tier = tier;
@@ -33,11 +19,6 @@ class RaceResult {
         this.scoringteam = scoringteam;
     }
 
-    /**
-     * 
-     * @param {Tier} tier 
-     * @param {any} object 
-     */
     load(tier, object) {
         try {
             this.tier = tier;

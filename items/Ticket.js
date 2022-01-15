@@ -1,21 +1,11 @@
 const Database = require('../database/Database');
 const AttendanceManager= require('../managers/AttendanceManager');
-const TicketManager = require('../managers/TicketManager');
 
 const Discord = require('discord.js');
 const { Logger } = require('../utils/Utils');
 const formatTicket = require('../utils/formatTicket');
-const { User } = require('discord.js');
 
 class Ticket {
-    /**
-     * 
-     * @param {Discord.GuildMember} member 
-     * @param {number} number 
-     * @param {Discord.TextChannel} channel 
-     * @param {Discord.Message} base
-     * @param {TicketManager} ticketManager
-     */
     constructor(member, number, channel, base, ticketManager) {
         this.ticketManager = ticketManager;
         this.id = channel.id;
@@ -26,10 +16,6 @@ class Ticket {
         this.base = base;
     }
 
-    /**
-     * 
-     * @param {Discord.GuildMember} member 
-     */
     async addUser(member) {
         await this.channel.createOverwrite(member, {
             VIEW_CHANNEL: true,
@@ -43,10 +29,6 @@ class Ticket {
         this.ticketManager.server.log(`Added ${member.user.tag} to ticket ${this.channel.name}`);
     }
 
-    /**
-     * @param {Discord.MessageReaction} reaction
-     * @param {Discord.GuildMember} member 
-     */
     async awaitCloseR(reaction, member) {
         return new Promise(async (resolve, reject) => {
             if (reaction.message.id === this.base.id) {
@@ -86,10 +68,6 @@ class Ticket {
         });
     }
 
-    /**
-     * @param {Discord.Message} message
-     * @param {Discord.GuildMember} member 
-     */
     async awaitCloseC(message, member) {
         return new Promise(async (resolve, reject) => {
             if (message.channel.id === this.channel.id) {
@@ -129,11 +107,6 @@ class Ticket {
         });
     }
 
-    /**
-     * 
-     * @param {Discord.GuildMember} member
-     * @returns {Promise<boolean>}
-     */
     async close(member) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -194,9 +167,6 @@ class Ticket {
         messages.sort((a, b) => {
             return a.createdTimestamp - b.createdTimestamp
         });
-        /**
-         * @type {Discord.Collection<User,number>}
-         */
         const users = new Discord.Collection();
         const messageJson = []
         for (const m of messages.values()) {

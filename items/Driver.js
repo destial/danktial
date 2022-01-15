@@ -1,20 +1,7 @@
-const Discord = require('discord.js');
 const Database = require('../database/Database');
 const { Logger } = require('../utils/Utils');
-const Server = require('./Server');
-const Team = require('./Team');
-const Tier = require('./Tier');
 
 class Driver {
-    /**
-     * 
-     * @param {Discord.Client} client 
-     * @param {Discord.GuildMember} member 
-     * @param {Server} server
-     * @param {Team} team
-     * @param {string} number
-     * @param {Tier} tier
-     */
     constructor(client, member, server, team, number, tier) {
         this.client = client;
         this.member = member;
@@ -61,26 +48,14 @@ class Driver {
         Logger.warn(`[DRIVER] Deleted driver ${this.name} from ${this.guild.name}`);
     }
 
-    /**
-     * 
-     * @param {Team} team 
-     */
     setTeam(team) {
         this.team = team;
     }
 
-    /**
-     * 
-     * @param {string} number 
-     */
     setNumber(number) {
         this.number = number;
     }
 
-    /**
-     * 
-     * @param {Tier} tier 
-     */
     setTier(tier) {
         this.tier = tier;
     }
@@ -89,9 +64,6 @@ class Driver {
         return `#${this.number} - ${this.member}`;
     }
 
-    /**
-     * @returns {Driver}
-     */
     async toReserve() {
         this.tier.removeDriver(this.id);
         this.team = undefined;
@@ -99,10 +71,6 @@ class Driver {
         return this;
     }
 
-    /**
-     * @param {Team} team
-     * @returns {Driver}
-     */
     async toDriver(team) {
         this.team = team;
         this.tier.removeReserve(this.id);
