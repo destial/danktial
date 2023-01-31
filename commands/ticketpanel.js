@@ -23,7 +23,7 @@ module.exports = {
                     embed.setAuthor(`Usage is:`);
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     embed.setFooter(this.description);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
                 server.getTicketManager().addTicketPanel(client, message.channel, args.join(' '));

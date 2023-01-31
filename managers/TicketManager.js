@@ -42,7 +42,7 @@ class TicketManager {
         embed.setColor('RED');
         embed.setDescription(`To create a report, react with ${TicketManager.emoji}`);
         try {
-            const panelMessage = await channel.send(embed);
+            const panelMessage = await channel.send({ embeds: [embed] });
             panelMessage.react(TicketManager.emoji);
             const ticketPanel = new TicketPanel(client, this, panelMessage.id, embed, channel);
             this.ticketpanels.set(ticketPanel.id, ticketPanel);

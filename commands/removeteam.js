@@ -23,7 +23,7 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             var str = args.join(' ');
@@ -32,14 +32,14 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const tier = server.getTierManager().getTier(arguments[1]);
             if (!tier) {
                 embed.setAuthor('Invalid tier name!');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const teamCol = tier.searchTeam(arguments[0]);
@@ -50,14 +50,14 @@ module.exports = {
                     teamList += `- ${team.name}\n`;
                 });
                 embed.setDescription(teamList);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const team = teamCol.first();
             if (!team) {
                 embed.setAuthor('Invalid team name!');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             team.delete();
@@ -81,7 +81,7 @@ module.exports = {
             });
             embed.setAuthor(`Successfully removed team ${team.name} from tier ${tier.name}`);
             server.log(`${message.member.displayName} has removed team ${team.name} from tier ${tier.name}`);
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
         }
     }
 };

@@ -2,10 +2,8 @@ const Discord = require('discord.js');
 const Server = require('./Server');
 const Tier = require('./Tier');
 const Driver = require('./Driver');
-const Database = require('../database/Database');
 const schedule = require('node-schedule');
 const { Logger } = require('../utils/Utils');
-const { MessageButton, MessageActionRow } = require('discord-buttons');
 const formatDateURL = require('../utils/formatDateURL');
 
 class OpenAttendance {
@@ -124,7 +122,7 @@ class OpenAttendance {
                     embed.setColor('RED');
                     embed.setDescription(this.embed.title);
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.setLocked(true);
@@ -142,7 +140,7 @@ class OpenAttendance {
                     embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.tentative.forEach(participant => {
@@ -151,7 +149,7 @@ class OpenAttendance {
                     embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.reminder.cancel();
@@ -429,7 +427,7 @@ class OpenAttendance {
                     embed.setColor('RED');
                     embed.setDescription(this.embed.title);
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.setLocked(true);
@@ -449,7 +447,7 @@ class OpenAttendance {
                     embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.tentative.forEach(participant => {
@@ -458,7 +456,7 @@ class OpenAttendance {
                     embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.reminder.cancel();
@@ -514,7 +512,7 @@ class OpenAttendance {
                                 embed.setColor('RED');
                                 embed.setDescription(this.embed.title);
                                 try {
-                                    participant.member.user.send(embed);
+                                    participant.member.user.send({ embeds: [embed] });
                                 } catch(err) {}
                             });
                             this.setLocked(true);
@@ -534,7 +532,7 @@ class OpenAttendance {
                                 embed.setDescription(`Reminder to respond to the attendance!\n${this.embed.title}`);
                                 embed.setColor('RED');
                                 try {
-                                    participant.member.user.send(embed);
+                                    participant.member.user.send({ embeds: [embed] });
                                 } catch(err) {}
                             });
                             this.tentative.forEach(participant => {
@@ -543,7 +541,7 @@ class OpenAttendance {
                                 embed.setDescription(`Reminder to check-in for the attendance!\n${this.embed.title}`);
                                 embed.setColor('RED');
                                 try {
-                                    participant.member.user.send(embed);
+                                    participant.member.user.send({ embeds: [embed] });
                                 } catch(err) {}
                             });
                             this.reminder.cancel();

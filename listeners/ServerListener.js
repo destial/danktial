@@ -22,7 +22,7 @@ module.exports = {
                                 embed.setColor('RED');
                                 embed.setAuthor('I do not have enough permissions to function normally! Please allow me to manage the server and/or set me as administrator!');
                                 try {
-                                    guild.systemChannel.send(embed);
+                                    guild.systemChannel.send({ embeds: [embed] });
                                 } catch(err) {
                                     client.manager.debug(err.message);
                                 }
@@ -37,7 +37,7 @@ module.exports = {
                             embed.setFooter(`Built by destiall#9640`);
                             embed.setColor('RED');
                             try {
-                                guild.systemChannel.send(embed);
+                                guild.systemChannel.send({ embeds: [embed] });
                             } catch(err) {
                                 client.manager.debug(err.message);
                             }

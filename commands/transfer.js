@@ -23,14 +23,14 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             if (message.mentions.members.size === 0) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             args.shift();
@@ -41,7 +41,7 @@ module.exports = {
                 if (arguments.length !== 2) {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
                 const tier = server.getTierManager().getTier(arguments[1]);
@@ -56,7 +56,7 @@ module.exports = {
                             teamList += `- ${team.name}\n`;
                         });
                         embed5.setDescription(teamList);
-                        message.channel.send(embed5);
+                        message.channel.send({ embeds: [embed5] });
                         return;
                     }
                     const team = teamCol.first();
@@ -76,11 +76,11 @@ module.exports = {
                         } else {
                             embed.setAuthor('Unknown driver / reserve! Usage is:');
                             embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                            message.channel.send(embed);
+                            message.channel.send({ embeds: [embed] });
                             return;
                         }
                         embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
-                        message.channel.send(embed);
+                        message.channel.send({ embeds: [embed] });
                         server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                             if (advanced.tier === tier) {
@@ -96,7 +96,7 @@ module.exports = {
                             driver.toReserve();
                         }
                         embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
-                        message.channel.send(embed);
+                        message.channel.send({ embeds: [embed] });
                         server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
                         server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                             if (advanced.tier === tier) {
@@ -107,19 +107,19 @@ module.exports = {
                     } else {
                         embed.setAuthor('No team were matched! Usage is:');
                         embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                        message.channel.send(embed);
+                        message.channel.send({ embeds: [embed] });
                         return;
                     }
                 } else {
                     embed.setAuthor('Unknown tier! Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
             } else {
                 embed.setAuthor('Unknown member! Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
         }

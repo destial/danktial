@@ -33,11 +33,11 @@ module.exports = {
                 exampleEmbed.setThumbnail('https://media.discordapp.net/attachments/406814017743486978/809648422176948224/thumbnailexample.png');
                 exampleEmbed.setFooter('This is an example footer');
                 const createdEmbed = new Discord.MessageEmbed();
-                await message.member.user.send(embed);
-                await message.member.user.send(exampleEmbed);
+                await message.member.user.send({ embeds: [embed] });
+                await message.member.user.send({ embeds: [exampleEmbed] });
                 embed.setAuthor(`Now, what would you like the title to be?`);
                 embed.setDescription(`You can't skip this part!`);
-                const dm = await message.member.user.send(embed);
+                const dm = await message.member.user.send({ embeds: [embed] });
                 let filter = (m) => m.author.id === message.member.id;
                 const titleCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                 titleCollector.once('end', async (titleCollection) => {
@@ -45,7 +45,7 @@ module.exports = {
                         createdEmbed.setTitle(titleCollection.first().content.length > 256 ? `${titleCollection.first().content.substring(0, 2052)}...` : titleCollection.first().content);
                         embed.setAuthor(`What would you like the description to be?`);
                         embed.setDescription('Type `skip` to skip this');
-                        await message.member.user.send(embed);
+                        await message.member.user.send({ embeds: [embed] });
                         const descCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                         descCollector.once('end', async (descCollection) => {
                             if (descCollection.size !== 0 && descCollection.first().content) {
@@ -54,7 +54,7 @@ module.exports = {
                                 }
                                 embed.setAuthor(`How many fields to you want?`);
                                 embed.setDescription('Type `skip` to skip this');
-                                await message.member.user.send(embed);
+                                await message.member.user.send({ embeds: [embed] });
                                 const fieldAmount = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                                 fieldAmount.once('end', async (fieldAmountCollection) => {
                                     if (fieldAmountCollection.size !== 0 && fieldAmountCollection.first().content) {
@@ -69,7 +69,7 @@ module.exports = {
                                         }
                                         embed.setAuthor('What would you like the thumbnail to be?');
                                         embed.setDescription('You can enter in a valid URL or send an attachment image. Type `skip` to skip this');
-                                        await message.member.user.send(embed);
+                                        await message.member.user.send({ embeds: [embed] });
                                         const thumbnailCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                                         thumbnailCollector.once('end', async (thumbnailCollection) => {
                                             if (thumbnailCollection.size !== 0 && thumbnailCollection.first()) {
@@ -82,7 +82,7 @@ module.exports = {
                                                 }
                                                 embed.setAuthor('What would you like the footer to say?');
                                                 embed.setDescription('Type `skip` to skip this');
-                                                await message.member.user.send(embed);
+                                                await message.member.user.send({ embeds: [embed] });
                                                 const footerCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                                                 footerCollector.once('end', async (footerCollection) => {
                                                     if (footerCollection.size !== 0 && footerCollection.first().content) {
@@ -105,7 +105,7 @@ module.exports = {
                                                         });
                                                         embed.setAuthor('You are almost done! The last one is the color! Choose what color should the embed be (Enter the number not the color!):');
                                                         embed.setDescription(colorList);
-                                                        await message.member.user.send(embed);
+                                                        await message.member.user.send({ embeds: [embed] });
                                                         const colorCollector = dm.channel.createMessageCollector(filter, { max: 1, time: 60000 });
                                                         colorCollector.once('end', async (colorCollection) => {
                                                             if (colorCollection.size !== 0 && colorCollection.first().content) {
@@ -115,7 +115,7 @@ module.exports = {
                                                                 }
                                                                 embed.setAuthor('All done!');
                                                                 embed.setDescription('This is what it looks like:');
-                                                                message.member.user.send(embed);
+                                                                message.member.user.send({ embeds: [embed] });
                                                                 message.member.user.send(createdEmbed);
                                                                 server.loadEmbed(createdEmbed);
                                                                 Database.run(Database.serverEmbedSaveQuery, [message.guild.id, JSON.stringify(createdEmbed.toJSON())]);
@@ -139,7 +139,7 @@ module.exports = {
                     const embed = new Discord.MessageEmbed();
                     embed.setColor('RED');
                     embed.setAuthor(`You don't have a join embed set!`);
-                    message.member.user.send(embed);
+                    message.member.user.send({ embeds: [embed] });
                 }
             }
         }
@@ -173,7 +173,7 @@ async function askFields(member, channel, amount) {
         embed.setAuthor(questions[qCounter++]);
         embed.setDescription(`You can't skip this part!`);
         embed.setColor('RED');
-        await channel.send(embed);
+        await channel.send({ embeds: [embed] });
 
         var embedFieldData = [];
 
@@ -185,7 +185,7 @@ async function askFields(member, channel, amount) {
             }
             if (qCounter < questions.length) {
                 embed.setAuthor(questions[qCounter++]);
-                await channel.send(embed);
+                await channel.send({ embeds: [embed] });
             }
         });
         fieldCollector.once('end', async () => {

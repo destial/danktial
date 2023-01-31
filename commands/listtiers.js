@@ -28,7 +28,7 @@ module.exports = {
                 });
                 embed.setDescription(tierList);
                 embed.setFooter(`For more details on a tier, use ${server.prefix}${command} [name]`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
             } else {
                 const tierName = args.join(' ');
                 const tier = server.getTierManager().getTier(tierName.toLowerCase());
@@ -51,10 +51,10 @@ module.exports = {
                         });
                         embed.addField('Reserves', reserveNames, false);
                     }
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                 } else {
                     embed.setAuthor('Tier does not exist!');
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                 }
             }
         } catch (err) {

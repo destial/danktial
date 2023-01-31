@@ -1,8 +1,6 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 
-require('../utils/ExtendedMessage');
-
 module.exports = {
     async run(client, servers) {
         const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -16,7 +14,7 @@ module.exports = {
                 });
             }
         }
-        client.on('message', async (message) => {
+        client.on('messageCreate', async (message) => {
             if (!message.author) return;
             if (message.author.bot) return;
             if (!message.guild) return;
@@ -27,12 +25,16 @@ module.exports = {
                     const args = msg.slice(server.prefix.length).split(' ');
                     const command = args.shift().toLowerCase();
                     try {
-                        if (client.commands.get(command)) {
+                        if (client.commands.has(command)) {
                             client.commands.get(command).run(client, server, command, args, message);
                         }
                     } catch (err) {}
                 }
             }
+        });
+
+        client.on('interactionCreate', async (interaction) => {
+
         });
     }
 };

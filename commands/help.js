@@ -26,7 +26,7 @@ module.exports = {
                 }
             } 
         });
-        const commands = list.keyArray();
+        const commands = [...list.keys()];
         if (!args.length) {
             embed.setAuthor('Here are the available commands:');
             var help = "";
@@ -34,7 +34,7 @@ module.exports = {
                 help += ("`" + server.prefix+commands[i] + "` => " + desc[i] + '\n');
             }
             embed.setDescription(help);
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
         } else {
             const command = list.get(args[0].toLowerCase());
             if (command) {
@@ -46,7 +46,7 @@ module.exports = {
                 if (command.example) {
                     embed.addField('Example', `${server.prefix}${command.name} ${command.example}`, false);
                 }
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
             }
         }
     }

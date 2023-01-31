@@ -25,18 +25,18 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             if (server.getTierManager().tiers.size === 0) {
                 embed.setAuthor(`There are no tiers available! Create a new tier using ${server.prefix}addtier`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const name = args.join(' ');
             if (name.length >= 256) {
                 embed.setAuthor(`Team name cannot be longer than 256 characters!`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             let counter = 0;
@@ -45,19 +45,19 @@ module.exports = {
                 'Tag/Mention all the drivers who are in this team'
             ];
             embed.setAuthor(questions[counter++]);
-            await message.channel.send(embed);
+            await message.channel.send({ embeds: [embed] });
             const filter = m => m.author.id === message.author.id;
             const collector = message.channel.createMessageCollector(filter, {
                 max: 2, time: 60000
             });
             collector.on('collect', async m => {
                 embed.setAuthor(questions[counter++]);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
             });
             collector.on('end', async (col) => {
                 if (!col.first()) {
                     embed.setAuthor('No response! Exiting add mode!');
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
                 const tierName = col.first().content;
@@ -65,13 +65,13 @@ module.exports = {
                 const tier = server.getTierManager().getTier(tierName.toLowerCase());
                 if (!tier) {
                     embed.setAuthor('Invalid tier name! Did not match any tier. Please try again!');
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 } else {
                     const existingTeam = tier.getTeam(name.toLowerCase());
                     if (existingTeam) {
                         embed.setAuthor('Team name already exists in that tier! Please use a different name!');
-                        message.channel.send(embed);
+                        message.channel.send({ embeds: [embed] });
                         return;
                     } else {
                         const mentions = reply.mentions.members;
@@ -116,7 +116,7 @@ module.exports = {
                                 }
                             });
                             promise.then(async () => {
-                                message.channel.send(embed);
+                                message.channel.send({ embeds: [embed] });
                                 team.save();
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async event => {
                                     if (event.tier === tier) {

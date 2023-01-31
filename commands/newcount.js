@@ -68,7 +68,7 @@ module.exports = {
                                         const embed = new Discord.MessageEmbed()
                                             .setAuthor('Created All Counts!')
                                             .setColor('RED');
-                                        message.channel.send(embed);
+                                        message.channel.send({ embeds: [embed] });
                                     });
                                 });
                             });
@@ -114,7 +114,7 @@ module.exports = {
                                     const embed = new Discord.MessageEmbed()
                                         .setAuthor('Created All Counts!')
                                         .setColor('RED');
-                                    message.channel.send(embed);
+                                    message.channel.send({ embeds: [embed] });
                                 });
                             });
                         });
@@ -145,7 +145,7 @@ module.exports = {
                                     const embed = new Discord.MessageEmbed()
                                         .setAuthor('Created Member Count!')
                                         .setColor('RED');
-                                    message.channel.send(embed);
+                                    message.channel.send({ embeds: [embed] });
                                     server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                                 });
                             });
@@ -164,7 +164,7 @@ module.exports = {
                                 const embed = new Discord.MessageEmbed()
                                     .setAuthor('Created Member Count!')
                                     .setColor('RED');
-                                message.channel.send(embed);
+                                message.channel.send({ embeds: [embed] });
                                 server.log(`${message.member.user.tag} has set the membercount channel`, `${membercount} (ID=${membercount.id})`);
                             });
                         }
@@ -195,7 +195,7 @@ module.exports = {
                                     const embed = new Discord.MessageEmbed()
                                         .setAuthor('Created Role Count!')
                                         .setColor('RED');
-                                    message.channel.send(embed);
+                                    message.channel.send({ embeds: [embed] });
                                     server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                                 });
                             });
@@ -214,7 +214,7 @@ module.exports = {
                                 const embed = new Discord.MessageEmbed()
                                     .setAuthor('Created Role Count!')
                                     .setColor('RED');
-                                message.channel.send(embed);
+                                message.channel.send({ embeds: [embed] });
                                 server.log(`${message.member.user.tag} has set the rolecount channel`, `${rolecount} (ID=${rolecount.id})`);
                             });
                         }
@@ -245,7 +245,7 @@ module.exports = {
                                     const embed = new Discord.MessageEmbed()
                                         .setAuthor('Created Channel Count!')
                                         .setColor('RED');
-                                    message.channel.send(embed);
+                                    message.channel.send({ embeds: [embed] });
                                     server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                                 });
                             });
@@ -264,7 +264,7 @@ module.exports = {
                                 const embed = new Discord.MessageEmbed()
                                     .setAuthor('Created Channel Count!')
                                     .setColor('RED');
-                                message.channel.send(embed);
+                                message.channel.send({ embeds: [embed] });
                                 server.log(`${message.member.user.tag} has set the channelcount channel`, `${channelcount} (ID=${channelcount.id})`);
                             });
                         }
@@ -274,7 +274,7 @@ module.exports = {
                             .setDescription(`${server.prefix}${this.name} ${this.usage}`)
                             .setColor('RED')
                             .setFooter(this.description);
-                        message.channel.send(embed);
+                        message.channel.send({ embeds: [embed] });
                     }
                 }
             } catch (err) {

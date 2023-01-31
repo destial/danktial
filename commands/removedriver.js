@@ -22,7 +22,7 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             args.shift();
@@ -32,7 +32,7 @@ module.exports = {
                 if (!tierName) {
                     embed.setAuthor('No tier was supplied! Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
                 const tier = server.getTierManager().getTier(tierName.toLowerCase());
@@ -63,7 +63,7 @@ module.exports = {
                     } else {
                         embed2.setAuthor(`Unknown driver / reserve ${member.user.username}`);
                     }
-                    message.channel.send(embed2);
+                    message.channel.send({ embeds: [embed] });
                     server.save();
                     return;
                 }
@@ -71,7 +71,7 @@ module.exports = {
                 embed.setAuthor('No user was tagged! Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
         }

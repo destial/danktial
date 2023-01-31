@@ -23,7 +23,7 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const name = args.join(' ');
@@ -42,7 +42,7 @@ module.exports = {
                     server.getTierManager().removeTier(tier);
                     embed.setAuthor(`Deleted tier ${tier.name}`);
                     server.log(`${message.member.user.tag} has deleted tier ${tier.name}`);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     console.log(`[TIER] Deleted tier ${tier.name} from server ${server.guild.name}`);
                     server.save();
                 } catch(err) {
@@ -50,7 +50,7 @@ module.exports = {
                 }
             } else {
                 embed.setAuthor('Tier does not exist!');
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
         }

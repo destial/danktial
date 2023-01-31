@@ -21,7 +21,7 @@ module.exports = {
             embed.setColor('RED');
             embed.setAuthor('Do you want to purge this channel of messages?');
             embed.setFooter('Maximum of 100 messages will be purged');
-            const reply = await message.channel.send(embed);
+            const reply = await message.channel.send({ embeds: [embed] });
             await reply.react(Attendance.accept);
             await reply.react(Attendance.reject);
             let filter = (r) => r.message.id === reply.id;
@@ -45,12 +45,12 @@ module.exports = {
                     });
                     promise.then(async () => {
                         embed.setAuthor(`Purged ${size} messages`)
-                        const reply = await message.channel.send(embed);
+                        const reply = await message.channel.send({ embeds: [embed] });
                         reply.delete({ timeout: 5000 });
                     });
                 } else {
                     embed.setAuthor('Did not purge this channel.');
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                 }
             });
         }

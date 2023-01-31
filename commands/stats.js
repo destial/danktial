@@ -43,7 +43,7 @@ module.exports = {
             const servers = client.manager.servers.size;
                 embed.setFooter(`Competing in ${servers} leagues! • https://www.destial.xyz • Built by destiall#9640`)
                 .setColor('RED');
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
         }
     }
 };

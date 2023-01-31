@@ -23,7 +23,7 @@ module.exports = {
                 embed.setColor('RED');
                 embed.setAuthor(`Usage is:`);
                 embed.setDescription(`${server.prefix}issue <issue>`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const issue = args.join(' ');
@@ -62,21 +62,21 @@ module.exports = {
                         const time = new Date().toLocaleTimeString('en-US', { timeZone: locale, hour12: true, hour: '2-digit', minute: '2-digit' }).replace(' ', '').toLowerCase();
                         embed.setFooter(`${date} • ${(time.startsWith('0') ? time.substring(1) : time)} • ${sv.guild.region.toLocaleUpperCase()}`);
                         if (sv.guild.publicUpdatesChannel && sv.guild.publicUpdatesChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES')) {
-                            sv.guild.publicUpdatesChannel.send(embed);
+                            sv.guild.publicUpdatesChannel.send({ embeds: [embed] });
                         }
-                        sv.modlog.send(embed);
+                        sv.modlog.send({ embeds: [embed] });
                         console.log(`[ANNOUNCEMENT] Sent announcement to ${sv.guild.name}`);
                     } catch (err) {
                         message.channel.send(`Error sending announcement to ${sv.guild.name}`);
                         console.log(err);
                     }
                 });
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
             } else if (command === 'backup') {
                 const embed = new Discord.MessageEmbed();
                 embed.setAuthor('Backing up data now!');
                 embed.setColor('RED');
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 const queries = [];
                 server.serverManager.servers.forEach(server => {
                     const query = new Query('REPLACE INTO servers (id,data) VALUES (?,?)', [server.id, JSON.stringify(server.toJSON())]);
@@ -85,9 +85,9 @@ module.exports = {
                 const d = Database.multipleRunNewDB(queries);
                 d.then(() => { 
                     embed.setAuthor('Successfully backed up data!');
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                 }).catch((err) => {
-                    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                    client.manager.debug(err.message);
                 })
             }
         }

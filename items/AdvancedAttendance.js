@@ -5,7 +5,6 @@ const Driver = require('./Driver');
 const Database = require('../database/Database');
 const schedule = require('node-schedule');
 const { Logger } = require('../utils/Utils');
-const { MessageButton, MessageActionRow } = require('discord-buttons');
 const formatDateURL = require('../utils/formatDateURL');
 
 class AdvancedAttendance {
@@ -124,7 +123,7 @@ class AdvancedAttendance {
                     embed.setColor('RED');
                     embed.setDescription(`${this.embed.title}\n[Click here for the attendance](${this.message.url})`);
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.setLocked(true);
@@ -142,7 +141,7 @@ class AdvancedAttendance {
                     embed.setDescription(`Reminder to respond to the [attendance](${this.message.url})!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.tentative.forEach(participant => {
@@ -151,7 +150,7 @@ class AdvancedAttendance {
                     embed.setDescription(`Reminder to check-in for the [attendance](${this.message.url})!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.reminder.cancel();
@@ -429,19 +428,19 @@ class AdvancedAttendance {
 
     async edit() {
         if (!this.locked) {
-            const acceptButton = new MessageButton()
+            const acceptButton = new Discord.MessageButton()
                 .setStyle('green')
-                .setID('advanced_accept')
+                .setCustomId('advanced_accept')
                 .setLabel('Accept');
-            const rejectButton = new MessageButton()
+            const rejectButton = new Discord.MessageButton()
                 .setStyle('red')
-                .setID('advanced_reject')
+                .setCustomId('advanced_reject')
                 .setLabel('Reject');
-            const tentativeButton = new MessageButton()
+            const tentativeButton = new Discord.MessageButton()
                 .setStyle('blurple')
-                .setID('advanced_tentative')
+                .setCustomId('advanced_tentative')
                 .setLabel('Tentative');
-            const row = new MessageActionRow().addComponents(acceptButton, rejectButton, tentativeButton);
+            const row = new Discord.MessageActionRow().addComponents(acceptButton, rejectButton, tentativeButton);
             return await this.message.edit({ embed: this.embed, component: row });
         }
         return await this.message.edit({ embed: this.embed, component: null });
@@ -491,7 +490,7 @@ class AdvancedAttendance {
                     embed.setColor('RED');
                     embed.setDescription(`${this.embed.title}\n[Click here for the attendance](${this.message.url})`);
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.setLocked(true);
@@ -511,7 +510,7 @@ class AdvancedAttendance {
                     embed.setDescription(`Reminder to respond to the [attendance](${this.message.url})!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.tentative.forEach(participant => {
@@ -520,7 +519,7 @@ class AdvancedAttendance {
                     embed.setDescription(`Reminder to check-in for the [attendance](${this.message.url})!\n${this.embed.title}`);
                     embed.setColor('RED');
                     try {
-                        participant.member.user.send(embed);
+                        participant.member.user.send({ embeds: [embed] });
                     } catch(err) {}
                 });
                 this.reminder.cancel();
@@ -576,7 +575,7 @@ class AdvancedAttendance {
                                 embed.setColor('RED');
                                 embed.setDescription(`${this.embed.title}\n[Click here for the attendance](${this.message.url})`);
                                 try {
-                                    participant.member.user.send(embed);
+                                    participant.member.user.send({ embeds: [embed] });
                                 } catch(err) {}
                             });
                             this.setLocked(true);
@@ -596,7 +595,7 @@ class AdvancedAttendance {
                                 embed.setDescription(`Reminder to respond to the [attendance](${this.message.url})!\n${this.embed.title}`);
                                 embed.setColor('RED');
                                 try {
-                                    participant.member.user.send(embed);
+                                    participant.member.user.send({ embeds: [embed] });
                                 } catch(err) {}
                             });
                             this.tentative.forEach(participant => {
@@ -605,7 +604,7 @@ class AdvancedAttendance {
                                 embed.setDescription(`Reminder to check-in for the [attendance](${this.message.url})!\n${this.embed.title}`);
                                 embed.setColor('RED');
                                 try {
-                                    participant.member.user.send(embed);
+                                    participant.member.user.send({ embeds: [embed] });
                                 } catch(err) {}
                             });
                             this.reminder.cancel();

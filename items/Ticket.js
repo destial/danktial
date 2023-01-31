@@ -1,5 +1,5 @@
 const Database = require('../database/Database');
-const AttendanceManager= require('../managers/AttendanceManager');
+const { accept, reject } = require('../managers/AttendanceManager');
 
 const Discord = require('discord.js');
 const { Logger } = require('../utils/Utils');
@@ -30,20 +30,20 @@ class Ticket {
     }
 
     async awaitCloseR(reaction, member) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve, rej) => {
             if (reaction.message.id === this.base.id) {
                 try {
-                    const a = await this.base.react(AttendanceManager.accept);
-                    const b = await this.base.react(AttendanceManager.reject);
+                    const a = await this.base.react(accept);
+                    const b = await this.base.react(reject);
                     reaction.users.remove(member.user);
                     let filter = (r, u) => (u.id === member.id && 
                                             r.message.id === this.base.id && 
-                                            (r.emoji.name === AttendanceManager.accept || r.emoji.name === AttendanceManager.reject));
+                                            (r.emoji.name === accept || r.emoji.name === reject));
 
                     const collector = this.base.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
                     collector.once('collect', async (r, u) => {
-                        if (r.emoji.name === AttendanceManager.accept) {
+                        if (r.emoji.name === accept) {
                             yesdelete = true;
                         }
                         collector.stop();
@@ -59,7 +59,7 @@ class Ticket {
                         }
                     });
                 } catch (err) {
-                    this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                    this.ticketManager.client.manager.debug(err.message);
                     resolve(false);
                 }
             } else {
@@ -69,19 +69,19 @@ class Ticket {
     }
 
     async awaitCloseC(message, member) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve, rej) => {
             if (message.channel.id === this.channel.id) {
                 try {
-                    const a = await message.react(AttendanceManager.accept);
-                    const b = await message.react(AttendanceManager.reject);
+                    const a = await message.react(accept);
+                    const b = await message.react(reject);
                     let filter = (r, u) => (u.id === member.id && 
                                             r.message.id === message.id && 
-                                            (r.emoji.name === AttendanceManager.accept || r.emoji.name === AttendanceManager.reject));
+                                            (r.emoji.name === accept || r.emoji.name === reject));
 
                     const collector = message.createReactionCollector(filter, { time: 60000 });
                     var yesdelete = false;
                     collector.once('collect', async (r, u) => {
-                        if (r.emoji.name === AttendanceManager.accept) {
+                        if (r.emoji.name === accept) {
                             yesdelete = true;
                         }
                         collector.stop();
@@ -108,12 +108,12 @@ class Ticket {
     }
 
     async close(member) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve, rej) => {
             try {
                 const embed = new Discord.MessageEmbed()
                     .setAuthor('This ticket will close in 5 seconds!')
                     .setColor('RED');
-                await this.channel.send(embed);
+                await this.channel.send({ embeds: [embed] });
                 await this.export();
                 setTimeout(async () => {
                     this.channel.delete();

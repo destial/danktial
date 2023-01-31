@@ -24,14 +24,14 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const name = args.join(' ');
             const existingTier = server.getTierManager().getTier(name.toLowerCase());
             if (existingTier) {
                 embed.setAuthor('What would you like to name this duplicate tier?');
-                await message.channel.send(embed);
+                await message.channel.send({ embeds: [embed] });
                 let filter = m => m.author.id === message.author.id;
                 const collector = message.channel.createMessageCollector(filter, {
                     max: 1, time: 5*60000
@@ -45,7 +45,7 @@ module.exports = {
                         const newName = reply.content;
                         if (newName.length >= 256) {
                             const embed6 = new Discord.MessageEmbed().setAuthor(`Tier name cannot be longer than 256 characters!`);
-                            message.channel.send(embed6);
+                            message.channel.send({ embeds: [embed6] });
                             return;
                         }
                         const newTier = new Tier(client, server, newName);
@@ -67,12 +67,12 @@ module.exports = {
                                 teamList += `- ${team.name}\n`;
                             });
                             embed.setDescription(teamList);
-                            message.channel.send(embed);
+                            message.channel.send({ embeds: [embed] });
                             server.log(`${message.member.user.tag} has duplicated tier duplicated tier ${newTier.name} from ${existingTier.name}`);
                         });
                     } else {
                         embed.setAuthor('Ran out of time!');
-                        message.channel.send(embed);
+                        message.channel.send({ embeds: [embed] });
                     }
                 });
             }

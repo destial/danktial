@@ -27,7 +27,7 @@ module.exports = {
             if (!args.length) {
                 embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${command} ${this.usage}\n**Yes / No**\n${server.prefix}${command} "Do you like this bot?"`);
                 embed.setFooter(this.description);
-                channel.send(embed);
+                channel.send({ embeds: [embed] });
                 reject();
             } else {
                 const reactions = ["🇦", "🇧","🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯"];
@@ -36,7 +36,7 @@ module.exports = {
                 if (!arguments.length) {
                     embed.setDescription(`**Usage:**\n\n**Multi answers (1-20)**\n${server.prefix}${command} "What's Your Favorite Color?" "Blue" "Red" "Yellow"\n**Yes / No**\n${server.prefix}poll "Do you like this bot?"`);
                     embed.setFooter(this.description);
-                    channel.send(embed);
+                    channel.send({ embeds: [embed] });
                     reject();
                 } else {
                     const question = arguments.shift().trim();
@@ -54,7 +54,7 @@ module.exports = {
                     } else {
                         if (arguments.length > 20) {
                             embed.setDescription('You cannot have more than 20 options!');
-                            channel.send(embed);
+                            channel.send({ embeds: [embed] });
                             resolve();
                         } else if (arguments.length <= 10) {
                             for (var counter = 0; counter < arguments.length; counter++) {

@@ -87,7 +87,7 @@ class Attendance {
                         embed.setColor('RED');
                         embed.setDescription(this.title);
                         try {
-                        mem.user.send(embed);
+                        mem.user.send({ embeds: [embed] });
                         } catch(err) {}
                     }
                 });
@@ -266,7 +266,7 @@ class Attendance {
                     embed.setColor('RED');
                     embed.setDescription(this.title);
                     try {
-                    mem.user.send(embed);
+                    mem.user.send({ embeds: [embed] });
                     } catch(err) {}
                 }
             });
@@ -359,7 +359,7 @@ class Attendance {
                                 embed.setColor('RED');
                                 embed.setDescription(this.title);
                                 try {
-                                mem.user.send(embed);
+                                mem.user.send({ embeds: [embed] });
                                 } catch(err) {}
                             }
                         });

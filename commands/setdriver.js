@@ -27,7 +27,7 @@ module.exports = {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                     embed.setFooter(this.description);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
                 args.shift();
@@ -39,7 +39,7 @@ module.exports = {
                         embed.setAuthor('Usage is:');
                         embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
                         embed.setFooter(this.description);
-                        message.channel.send(embed);
+                        message.channel.send({ embeds: [embed] });
                         return;
                     }
                     const tierName = arguments[1];
@@ -82,7 +82,7 @@ module.exports = {
                                     newDriver.save();
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as part of team ${team.name} in tier ${tier.name}`);
-                                message.channel.send(embed);
+                                message.channel.send({ embeds: [embed] });
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as part of ${team.name} in tier ${tier.name}`);
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                                     advanced.fix();
@@ -97,7 +97,7 @@ module.exports = {
                                     teamList += `- ${team.name}\n`;
                                 });
                                 embed5.setDescription(teamList);
-                                message.channel.send(embed5);
+                                message.channel.send({ embeds: [embed5] });
                             } else if (teamName.toLowerCase().includes('reserve')) {
                                 if (reserve) {
                                     if (reserve.number != String(driverNumber)) {
@@ -121,7 +121,7 @@ module.exports = {
                                     newReserve.save();
                                 }
                                 embed.setAuthor(`Successfully set ${member.user.tag} as a reserve in tier ${tier.name}`);
-                                message.channel.send(embed);
+                                message.channel.send({ embeds: [embed] });
                                 server.log(`${message.member.user.tag} has set ${member.user.tag} as a reserve in tier ${tier.name}`);
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async advanced => {
                                     if (advanced.tier.name === tier.name)
@@ -131,25 +131,25 @@ module.exports = {
                             } else {
                                 embed.setAuthor(`${teamName} is not a valid team! Usage is:`);
                                 embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                                message.channel.send(embed);
+                                message.channel.send({ embeds: [embed] });
                                 return;
                             }
                         } else {
                             embed.setAuthor(`${driverNumber} is not a valid number! Usage is:`);
                             embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                            message.channel.send(embed);
+                            message.channel.send({ embeds: [embed] });
                             return;
                         }
                     } else {
                         embed.setAuthor(`${tierName} is not a valid tier! Usage is:`);
                         embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                        message.channel.send(embed);
+                        message.channel.send({ embeds: [embed] });
                         return;
                     }
                 } else {
                     embed.setAuthor(`No user was tagged! Usage is:`);
                     embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
             } catch(err) {
@@ -158,7 +158,7 @@ module.exports = {
                 embed.setAuthor(`Error, ${err}! Usage is:`);
                 embed.setColor('RED');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}\nE.g. ${server.prefix}${command} ${this.example}`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
         }

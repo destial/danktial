@@ -22,18 +22,18 @@ module.exports = {
             embed.setAuthor('Usage is:');
             embed.setDescription(`${server.prefix}${command} ${this.usage}`);
             embed.setFooter(this.description);
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
             return;
         }
         const tier = server.getTierManager().getTier(args.join(" "));
         if (!tier) {
             embed.setAuthor(`Invalid tier name of ${args.join(" ")}`);
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
             return;
         }
         if (tier.races.length === 0) {
             embed.setAuthor(`This tier does not have a calendar set!`);
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
             return;
         }
         embed.setAuthor(`Calendar of ${tier.name}`);
@@ -48,6 +48,6 @@ module.exports = {
         if (tier.races.length > 24) {
             embed.setFooter('More races not shown');
         }
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     }
 };

@@ -23,39 +23,39 @@ module.exports = {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     embed.setFooter(this.description);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
                 const attendance = server.getAttendanceManager().fetchAdvanced(args[0]);
                 if (attendance) {
                     attendance.reset();
                     embed.setAuthor(`Attendance ${attendance.embed.title} has been reset!`);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     server.log(`${message.member.user.tag} has reset attendance ${attendance.embed.title}`);
                 } else {
                     embed.setAuthor('Attendance does not exist! Perhaps using the wrong message id?');
                     embed.setDescription('If you are in developer mode, right click the attendance and copy the message id');
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                 }
             } else if (command === this.aliases[0]) {
                 if (!args.length) {
                     embed.setAuthor('Usage is:');
                     embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                     embed.setFooter(this.description);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
                 const attendance = server.getAttendanceManager().fetchAdvanced(args[0]);
                 if (attendance) {
                     attendance.fix(true);
                     embed.setAuthor(`Attendance ${attendance.embed.title} has been fixed and updated!`);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     server.log(`${message.member.user.tag} has fixed attendance ${attendance.embed.title}`);
                     return;
                 } else {
                     embed.setAuthor('Attendance does not exist! Perhaps using the wrong message id?');
                     embed.setDescription('If you are in developer mode, right click the attendance and copy the message id');
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
             }

@@ -22,7 +22,7 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const tierName = args.join(' ');
@@ -31,11 +31,11 @@ module.exports = {
                 tier.clear();
                 embed.setAuthor(`Tier ${tier.name} has been cleared of all drivers and reserves!`);
                 server.log(`Cleared tier ${tier.name} from all drivers and reserves`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             } else {
                 embed.setAuthor(`Unknown tier "${tierName}"`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
         }

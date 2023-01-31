@@ -20,19 +20,19 @@ module.exports = {
             embed.setAuthor('Usage is:');
             embed.setDescription(`${server.prefix}${command} ${this.usage}`);
             embed.setFooter(this.description);
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
             return;
         }
         const s = args.shift().toLowerCase();
         const tier = server.getTierManager().getTier(args.join(" "));
         if (!tier) {
             embed.setAuthor(`Invalid tier name of ${args.join(" ")}`);
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
             return;
         }
         if (tier.races.length === 0) {
             embed.setAuthor(`This tier does not have a calendar set!`);
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
             return;
         }
         switch (s) {
@@ -116,6 +116,6 @@ module.exports = {
                 break;
             }
         }
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     }
 };

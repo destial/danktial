@@ -28,6 +28,6 @@ module.exports = {
             embed.setDescription(`${server.prefix}${command} ${this.usage}`); 
             embed.setFooter(this.description);
         }
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     }
 };

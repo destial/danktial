@@ -87,7 +87,7 @@ class Server {
         //         embed.setColor('DARK_PURPLE');
         //         embed.setThumbnail(stream.profile);
         //         embed.setTimestamp(stream.startedAt);
-        //         this.alertChannel.send(embed);
+        //         this.alertChannel.send({ embeds: [embed] });
         //     }
         // });
     }
@@ -108,7 +108,7 @@ class Server {
                 if (fields) {
                     embed.addFields(fields);
                 }
-                return await this.modlog.send(embed);
+                return await this.modlog.send({ embeds: [embed] });
             } catch (err) {
                 this.client.manager.debug(err.message);
             }

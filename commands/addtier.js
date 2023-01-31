@@ -25,18 +25,18 @@ module.exports = {
             if (!args.length) {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const name = args.join(' ');
             if (name.length >= 256) {
                 const embed6 = new Discord.MessageEmbed().setAuthor(`Tier name cannot be longer than 256 characters!`);
-                message.channel.send(embed6);
+                message.channel.send({ embeds: [embed6] });
                 return;
             }
             const tier = new Tier(client, server, name);
             embed.setAuthor('Tag/Mention all the drivers who are in this tier, including reserves');
-            await message.channel.send(embed);
+            await message.channel.send({ embeds: [embed] });
             const filter = m => m.author.id === message.author.id;
             const collector = message.channel.createMessageCollector(filter, {
                 max: 1, time: 60000
@@ -45,7 +45,7 @@ module.exports = {
                 const reply = col.first();
                 if (!reply) {
                     embed.setAuthor('No response! Exiting add mode!');
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                     return;
                 }
                 const mentions = reply.mentions.members;
@@ -62,7 +62,7 @@ module.exports = {
                     reserve.save();
                 });
                 embed.setDescription(`${driverList}\nNext step is using ` + server.prefix + `setdriver`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 server.log(`${message.member.user.tag} has added tier ${tier.name}`);
                 Database.run(Database.tierSaveQuery, [server.id, name]);
             });

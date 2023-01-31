@@ -22,12 +22,12 @@ module.exports = {
                 embed.setAuthor('Usage is:');
                 embed.setDescription(`${server.prefix}${command} ${this.usage}`);
                 embed.setFooter(this.description);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             if (message.mentions.members.size !== 1) {
                 embed.setAuthor(`Please only mention 1 driver!`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
                 return;
             }
             const member = message.mentions.members.first();
@@ -53,7 +53,7 @@ module.exports = {
                             embed.setAuthor(`Unknown mark ${args[1]}! Use 'in' / 'out' / 'maybe'`);
                             break;
                     }
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                 } else if (reserve) {
                     switch (args[1].toLowerCase()) {
                         case 'in':
@@ -72,14 +72,14 @@ module.exports = {
                             embed.setAuthor(`Unknown mark ${args[1]}! Use 'in' / 'out' / 'maybe'`);
                             break;
                     }
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                 } else {
                     embed.setAuthor(`Unknown driver/reserve ${member.user.username}!`);
-                    message.channel.send(embed);
+                    message.channel.send({ embeds: [embed] });
                 }
             } else {
                 embed.setAuthor(`Unknown attendance of id ${args[2]}!`);
-                message.channel.send(embed);
+                message.channel.send({ embeds: [embed] });
             }
         }
     }

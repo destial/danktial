@@ -25,7 +25,7 @@ module.exports = {
                             embed.setColor('RED');
                             embed.setAuthor('Please mention a user to add them to this ticket!');
                             embed.setDescription(`Usage: ${server.prefix}ticket add @user1 @user2`);
-                            message.channel.send(embed);
+                            message.channel.send({ embeds: [embed] });
                             break;
                         }
                         for (const mention of message.mentions.members.values()) {
