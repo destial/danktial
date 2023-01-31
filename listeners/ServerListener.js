@@ -24,12 +24,12 @@ module.exports = {
                                 try {
                                     guild.systemChannel.send(embed);
                                 } catch(err) {
-                                    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                                    client.manager.debug(err.message);
                                 }
                             }
                         }
                         console.log(`[SERVER] Joined server ${guild.name}`);
-                        client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Joined server ${guild.name}`);
+                        client.manager.debug(`[SERVER] Joined server ${guild.name}`);
                         if (guild.systemChannel) {
                             const embed = new Discord.MessageEmbed();
                             embed.setAuthor(`Thank you for inviting me!`);
@@ -39,14 +39,14 @@ module.exports = {
                             try {
                                 guild.systemChannel.send(embed);
                             } catch(err) {
-                                client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                                client.manager.debug(err.message);
                             }
                         }
                     }
                     client.user.setActivity(`destial.xyz | ${client.manager.all.length} leagues`);
                 }
             } catch (err) {
-                client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                client.manager.debug(err.message);
             }
         });
 
@@ -55,11 +55,11 @@ module.exports = {
                 const server = await servers.fetch(guild.id);
                 if (server) {
                     servers.removeServer(server);
-                    client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Left server ${guild.name}`);
+                    client.manager.debug(`[SERVER] Left server ${guild.name}`);
                     console.log(`[SERVER] Left server ${guild.name}`);
                 }
             } catch (err) {
-                client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                client.manager.debug(err.message);
             }
         });
     }

@@ -7,6 +7,7 @@ const Tier = require('../items/Tier');
 const RaceResult = require('../items/RaceResult');
 const Driver = require('../items/Driver');
 const QualiResult = require('../items/QualiResult');
+const schedule = require('node-schedule');
 
 class ServerManager {
     static instance;
@@ -18,6 +19,11 @@ class ServerManager {
 
         this.queueWorker = new QueueWorker(this);
         this.client = client;
+        this.last_debug = new Date().getTime();
+        this.previous_debug = new Date().getTime();
+        this.current_debug_message = '';
+        this.current_timeout = null;
+        this.last_debug_message = null;
 
         setInterval(() => {
             this.servers.forEach(server => {
@@ -34,7 +40,7 @@ class ServerManager {
                     if (server && req.headers.id) {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && (member.hasPermission('MANAGE_GUILD') || client.user.id === member.id)) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             this.editServer(server, req);
                             return res.status(200).send({
                                 success: 'Success!',
@@ -48,6 +54,7 @@ class ServerManager {
                         });
                     }
                 }
+                console.log(`${req.headers.id} restricted access to modify ${guildID}!`);
                 return res.status(403).send({
                     error: 'Unauthorized access',
                     code: 403,
@@ -60,7 +67,7 @@ class ServerManager {
                 if (server && req.headers.id) {
                     const members = await server.guild.members.fetch();
                     const member = members.get(req.headers.id);
-                    if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
+                    if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                         return res.send(server.toJSON());
                     }
                     return res.status(403).send({
@@ -81,7 +88,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const array = [];
                             for (const member of server.guild.members.cache.values()) {
                                 if (member.id === client.user.id) continue;
@@ -115,7 +122,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const array = [];
                             for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
                                 array.push(attendance.toJSON());
@@ -148,7 +155,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const attendance = server.getAttendanceManager().fetchAdvanced(attendanceID);
                             if (attendance) {
                                 return res.send(attendance.toJSON());
@@ -170,7 +177,7 @@ class ServerManager {
                         code: 404,
                     });
                 }
-                client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`${req.user.id} trying to access ${server.guild.name}`);
+                this.debug(`${req.user.id} trying to access ${server.guild.name}`);
                 return res.status(403).send({
                     error: 'Unauthorized access',
                     code: 403,
@@ -223,7 +230,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const requestMember = members.get(memberID);
                             if (requestMember) {
                                 return res.send(requestMember.toJSON());
@@ -258,7 +265,7 @@ class ServerManager {
                     try {
                         const members = await server.guild.members.fetch();
                         const member = members.get(req.headers.id);
-                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id)) {
+                        if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const array = [];
                             for (const channel of server.guild.channels.cache.values()) {
                                 if (channel.type === 'voice' || channel.type === 'store') continue;
@@ -298,7 +305,7 @@ class ServerManager {
                     this.servers.forEach(server => {
                         serverArray.push(server.toJSON());
                     });
-                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Sending ${serverArray.length} servers via GET request.`);
+                    this.debug(`Sending ${serverArray.length} servers via GET request.`);
                     return res.send(serverArray);
                 }
                 return res.status(403).send({
@@ -317,7 +324,7 @@ class ServerManager {
             if (!s) {
                 this.servers.set(server.id, server);
                 console.log(`[SERVER] Added server ${server.guild.name} of id ${server.id}`);
-                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[SERVER] Added server ${server.guild.name} of id ${server.id}`);
+                this.debug(`[SERVER] Added server ${server.guild.name} of id ${server.id}`);
                 resolve(server);
             } else {
                 reject();
@@ -342,7 +349,7 @@ class ServerManager {
 
     async editServer(server, req) {
         console.log(`${req.headers.type} ${JSON.stringify(req.body)}`);
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`${req.headers.type} ${JSON.stringify(req.body)}`);
+        this.debug(`${req.headers.type} ${JSON.stringify(req.body)}`);
         switch (req.headers.type) {
             case 'set_prefix': {
                 const oldPrefix = server.prefix;
@@ -466,6 +473,12 @@ class ServerManager {
                 if (race.schedule) race.schedule.cancel();
                 tier.races.splice(req.body.index, 1);
                 server.log(`Deleted race ${race.name} in tier ${tier.name}`);
+                break;
+            }
+            case 'delete_attendance': {
+                const attendance = server.getAttendanceManager().fetchAny(req.body.attendance);
+                server.getAttendanceManager().delete(attendance);
+                server.log(`Deleted attendance ${attendance.id}`);
                 break;
             }
             case 'clear_season': {
@@ -631,7 +644,7 @@ class ServerManager {
             }
         }
         server.save();
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`Saved server ${server.guild.name}`);
+        this.debug(`Saved server ${server.guild.name}`);
     }
 
     attendanceMark(userID, attendance, tier, server, req) {
@@ -652,6 +665,37 @@ class ServerManager {
                     break;
             }
         }
+    }
+
+    async send_debug(content) {
+        if (!content || !content.length) return;
+        const debug_channel = this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036');
+        return await debug_channel.send(content);
+    }
+
+    async debug(msg) {
+        const m = `${this.current_debug_message}\n${msg}`.trim();
+
+        if (m.length < 1750) {
+            this.current_debug_message = m;
+            if (this.current_timeout) {
+                this.current_timeout.reschedule(new Date().getTime() + 3000);
+            } else {
+                this.current_timeout = schedule.scheduleJob('serverdebug', new Date().getTime() + 3000, async () => {
+                    await this.send_debug(this.current_debug_message);
+                    this.current_debug_message = '';
+                    this.current_timeout = null;
+                });
+            }
+            return;
+        }
+        if (this.current_timeout) {
+            this.current_timeout.cancel();
+            this.current_timeout = null;
+            await this.send_debug(m);
+        }
+        this.current_debug_message = '';
+        return this.debug(msg);
     }
 }
 

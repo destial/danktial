@@ -98,7 +98,7 @@ class Ticket {
                         }
                     });
                 } catch (err) {
-                    this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                    this.ticketManager.client.manager.debug(err.message);
                     resolve(false);
                 }
             } else {
@@ -129,10 +129,10 @@ class Ticket {
                     this.ticketManager.opentickets.delete(this.id);
                     Logger.log(`[TICKET] Deleted ticket ${this.channel.name} from ${this.channel.guild.name} by ${this.member.user.username}`);
                     this.ticketManager.server.update();
-                    this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TICKET] ${member.displayName} has closed ${this.channel.name} by ${this.member.displayName}`);
+                    this.ticketManager.client.manager.debug(`[TICKET] ${member.displayName} has closed ${this.channel.name} by ${this.member.displayName}`);
                 }, 5000);
             } catch (err) {
-                this.ticketManager.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                this.ticketManager.client.manager.debug(err.message);
                 resolve(false);
             }
         });

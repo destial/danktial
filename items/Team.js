@@ -1,11 +1,11 @@
-const Discord = require('discord.js');
+const { Collection } = require('discord.js');
 const Database = require("../database/Database");
 
 class Team {
     constructor(client, server, name, tier) {
         this.client = client;
         this.server = server;
-        this.drivers = new Discord.Collection();
+        this.drivers = new Collection();
         this.name = name;
         this.tier = tier;
         this.logo = undefined;
@@ -29,25 +29,25 @@ class Team {
     async save() {
         Database.run(Database.teamSaveQuery, [this.server.id, this.name, this.tier.name]);
         this.server.update();
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Saved team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+        this.client.manager.debug(`[TEAM] Saved team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async delete() {
         Database.run(Database.teamDeleteQuery, [this.server.id, this.name, this.tier.name]);
         this.server.update();
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Deleted team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+        this.client.manager.debug(`[TEAM] Deleted team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async update() {
         Database.run(Database.teamUpdateQuery, [this.server.id, this.name, this.tier.name, this.server.id, this.name, this.tier.name]);
         this.server.update();
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Updated team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+        this.client.manager.debug(`[TEAM] Updated team ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async updateName(oldName) {
         Database.run(Database.teamUpdateNameQuery, [this.name, this.server.id, oldName, this.tier.name]);
         this.server.update();
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
+        this.client.manager.debug(`[TEAM] Updated team name ${this.name} from ${this.server.guild.name} in ${this.tier.name}`);
     }
 
     async setName(newName) {
@@ -97,7 +97,6 @@ class Team {
     toJSON() {
         const driverArray = [];
         this.drivers.forEach(driver => {
-            console.log(driver);
             driverArray.push(driver.toJSON());
         }); 
         return {

@@ -2,6 +2,7 @@ const QualiResult = require("./QualiResult");
 const RaceResult = require("./RaceResult");
 const schedule = require('node-schedule');
 const { Logger } = require("../utils/Utils");
+const formatTrack = require("../utils/formatTrack");
 
 class Race {
     constructor(client, tier, name, date, timezone) {
@@ -123,6 +124,9 @@ class Race {
         if (this.attendance) {
             const attendance = this.tier.server.getAttendanceManager().fetchAdvanced(this.attendance);
             attendance.embed.setTitle(name);
+            if (formatTrack(name)) {
+                attendance.embed.setThumbnail(formatTrack(name));
+            }
             attendance.edit();
         }
         this.name = name;

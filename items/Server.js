@@ -110,7 +110,7 @@ class Server {
                 }
                 return await this.modlog.send(embed);
             } catch (err) {
-                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                this.client.manager.debug(err.message);
             }
         }
     }
@@ -134,7 +134,7 @@ class Server {
                 }
             } catch(err) {
                 Logger.warn(`[TICKET] Missing ticket member ${ticket.member} or channel ${ticket.id} under ${this.guild.name}`);
-                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TICKET] Missing ticket member ${ticket.member} or channel ${ticket.id} under ${this.guild.name}`);
+                this.client.manager.debug(`[TICKET] Missing ticket member ${ticket.member} or channel ${ticket.id} under ${this.guild.name}`);
             }
         });
         data.tickets.panels.forEach(async panel => {
@@ -148,7 +148,7 @@ class Server {
                     }
                 } catch(err) {
                     Logger.warn(`[TICKETPANEL] Missing ticket panel ${panel.id} under ${this.guild.name}`);
-                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[TICKETPANEL] Missing ticket panel ${panel.id} under ${this.guild.name}`);
+                    this.client.manager.debug(`[TICKETPANEL] Missing ticket panel ${panel.id} under ${this.guild.name}`);
                 }
             }
         });
@@ -205,7 +205,7 @@ class Server {
         try {
             this.update();
         } catch (err) {
-            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+            this.client.manager.debug(err.message);
         }
     }
 
@@ -214,7 +214,7 @@ class Server {
         try {
             this.update();
         } catch (err) {
-            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+            this.client.manager.debug(err.message);
         }
     }
 
@@ -300,9 +300,6 @@ class Server {
     }
 
     toJSON() {
-        // this.alerts.allChannels().forEach(tc => {
-        //     channels.push(tc.user.id);
-        // });
         const tiersData = [];
         this.getTierManager().tiers.forEach(tier => {
             tiersData.push(tier.toJSON());

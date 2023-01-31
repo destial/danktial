@@ -366,7 +366,7 @@ class Attendance {
                         this.schedule.cancel();
                     });
                     Logger.boot(`[ATTENDANCE] Loaded ${this.embed.title} from ${this.guild.name}`);
-                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ATTENDANCE] Loaded ${this.embed.title} from ${this.guild.name}`);
+                    this.client.manager.debug(`[ATTENDANCE] Loaded ${this.embed.title} from ${this.guild.name}`);
                 }
             }
         }

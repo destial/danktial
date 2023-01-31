@@ -68,7 +68,7 @@ module.exports = {
                         console.log(`[ANNOUNCEMENT] Sent announcement to ${sv.guild.name}`);
                     } catch (err) {
                         message.channel.send(`Error sending announcement to ${sv.guild.name}`);
-                        console.err(err);
+                        console.log(err);
                     }
                 });
                 message.channel.send(embed);

@@ -6,8 +6,8 @@ const { Collection } = require('discord.js');
  */
 function formatTrack(string) {
     const countries = ['australia', 'bahrain', 'portugal', 'china', 'azerbaijan', 'vietnam', 'spain', 'netherlands', 'monaco', 'canada', 
-                        'france', 'austria', 'great britain', 'hungary', 'belgium', 'italy', 'singapore', 
-                        'russia', 'japan', 'mexico', 'united states', 'brazil', 'abu dhabi', 'saudi arabia'];
+                        'france', 'austria', 'great britain', 'hungary', 'belgium', 'italy', 'singapore', 'qatar',
+                        'russia', 'japan', 'mexico', 'united states', 'brazil', 'abu dhabi', 'saudi arabia', 'germany'];
 
     /**
      * @type {Collection<string, string>}
@@ -25,11 +25,17 @@ function formatTrack(string) {
     countryAlias.set('canadian', 'canada');
     countryAlias.set('montreal', 'canada');
     countryAlias.set('zandvoort', 'netherlands');
+    countryAlias.set('nurburgring', 'germany');
+    countryAlias.set('nürburgring', 'germany');
+    countryAlias.set('hockenheim', 'germany');
     countryAlias.set('dutch', 'netherlands');
     countryAlias.set('french', 'france');
     countryAlias.set('paul ricard', 'france');
+    countryAlias.set('magny cours', 'france');
+    countryAlias.set('magny-cours', 'france');
     countryAlias.set('styria', 'austria');
     countryAlias.set('redbull ring', 'austria');
+    countryAlias.set('red bull ring', 'austria');
     countryAlias.set('british', 'great britain');
     countryAlias.set('britain', 'great britain');
     countryAlias.set('hungarian', 'hungary');
@@ -44,20 +50,25 @@ function formatTrack(string) {
     countryAlias.set('italian', 'italy');
     countryAlias.set('imola', 'italy');
     countryAlias.set('suzuka', 'japan');
+    countryAlias.set('fuji', 'japan');
     countryAlias.set('mexican', 'mexico');
     countryAlias.set('usa g', 'united states');
+    countryAlias.set('cota', 'united states');
     countryAlias.set('america', 'united states');
+    countryAlias.set('miami', 'united states');
+    countryAlias.set('vegas', 'united states');
     countryAlias.set('sao paolo', 'brazil');
     countryAlias.set('yas marina', 'abu dhabi');
     countryAlias.set('arabian', 'saudi arabia');
     countryAlias.set('saudi', 'saudi arabia');
+    countryAlias.set('jeddah', 'saudi arabia');
     countryAlias.set('portuguese', 'portugal');
     countryAlias.set('algarve', 'portugal');
     countryAlias.set('portimao', 'portugal');
-    countryAlias.set('emilia romagna', 'italy');
     countryAlias.set('emilia', 'italy');
+    countryAlias.set('lusail', 'qatar');
 
-    const thumbnailUrl = 'https://www.formula1.com/content/dam/fom-website/2018-redesign-assets/Flags%2016x9/{COUNTRY}-flag.png.transform/2col/image.png';
+    const thumbnailUrl = 'https://www.formula1.com/content/dam/fom-website/2018-redesign-assets/Flags%2016x9/{COUNTRY}-flag.png';
 
     const country = countries.find(c => string.toLowerCase().includes(c));
     if (country) {

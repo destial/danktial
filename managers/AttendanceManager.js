@@ -185,7 +185,7 @@ class AttendanceManager {
                         this.server.update();
                         resolve(attendance);
                     } catch (err) {
-                        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                        this.client.manager.debug(err.message);
                         resolve(attendance);
                     }
                 } catch(err) {
@@ -359,10 +359,10 @@ class AttendanceManager {
                                     this.server.update();
                                     const key = timezones.keyArray().find(t => date.toUpperCase().trim().endsWith(t.substring(0, 4).trim()));
                                     const diff = timezones.get(key);
-                                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Created attendance from timezone UTC ${diff}`);
+                                    this.client.manager.debug(`[ADATTENDANCE] Created attendance from timezone UTC ${diff}`);
                                     resolve(attendance);
                                 } catch (err) {
-                                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                                    this.client.manager.debug(err.message);
                                     resolve(attendance);
                                 }
                             });
@@ -451,7 +451,7 @@ class AttendanceManager {
                 this.server.update();
                 resolve(attendance);
             } catch (err) {
-                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                this.client.manager.debug(err.message);
                 resolve(attendance);
             }
         });
@@ -514,7 +514,7 @@ class AttendanceManager {
                     a.save();
                     return a;
                 } catch (err) {
-                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                    this.client.manager.debug(err.message);
                 }
             } else if (attendance.attendanceType === 'normal') {
                 const dateObject = new Date(attendance.next.date);
@@ -553,7 +553,7 @@ class AttendanceManager {
                     Logger.info(`[ATTENDANCE] Saved attendance ${attendance.title} of id ${attendance.id}`);
                     return attendance;
                 } catch (err) {
-                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                    this.client.manager.debug(err.message);
                 }
             }
         }
@@ -676,7 +676,7 @@ class AttendanceManager {
                         }).catch((err) => {
                             embed.setAuthor(`There was an error while making an attendance!`);
                             member.user.send(embed);
-                            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                            this.client.manager.debug(err.message);
                             resolve(undefined);
                         });
                     }
@@ -806,7 +806,7 @@ class AttendanceManager {
                                                 member.user.send(embed3);
                                                 this.server.log(`${member.user.tag} has edited attendance ${attendanceevent.title}`);
                                             } catch (err) {
-                                                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                                                this.client.manager.debug(err.message);
                                             }
                                         });
                                     });
@@ -888,7 +888,7 @@ class AttendanceManager {
                                             this.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
-                                            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                                            this.client.manager.debug(err.message);
                                         }
                                     });
                                 } else if (emojiname === "🇩") {
@@ -904,7 +904,7 @@ class AttendanceManager {
                                             this.server.log(`${member.user.tag} has edited attendance ${attendanceevent.embed.title}`);
                                             return;
                                         } catch (err) {
-                                            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                                            this.client.manager.debug(err.message);
                                         }
                                     });
                                 } else if (emojiname === "📆") {
@@ -954,7 +954,7 @@ class AttendanceManager {
         const attendance = new Attendance(message.embeds[0], message.id, date, this.server.guild, message, this.client);
         this.events.set(attendance.id, attendance);
         Logger.boot(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
+        this.client.manager.debug(`[ATTENDANCE] Loaded attendance ${attendance.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -967,7 +967,7 @@ class AttendanceManager {
         const attendance = new AdvancedAttendance(this.client, message, this.server, tier, date, this);
         this.advancedEvents.set(attendance.id, attendance);
         Logger.boot(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
+        this.client.manager.debug(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -980,7 +980,7 @@ class AttendanceManager {
         const attendance = new OpenAttendance(this.client, message, this.server, tier, date, this);
         this.openEvents.set(attendance.id, attendance);
         Logger.boot(`[ADATTENDANCE] Loaded openattendance ${attendance.embed.title} from ${this.server.guild.name}`);
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
+        this.client.manager.debug(`[ADATTENDANCE] Loaded advancedattendance ${attendance.embed.title} from ${this.server.guild.name}`);
     }
 
     /**
@@ -1125,7 +1125,7 @@ class AttendanceManager {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
             } catch (err) {
-                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                this.client.manager.debug(err.message);
             }
         }
     }
@@ -1147,7 +1147,7 @@ class AttendanceManager {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
             } catch (err) {
-                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                this.client.manager.debug(err.message);
             }
         }
     }
@@ -1169,9 +1169,16 @@ class AttendanceManager {
                     this.server.modlog.send(`Here is the deleted attendance!`, attendanceevent.embed);
                 }
             } catch (err) {
-                this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(err.message);
+                this.client.manager.debug(err.message);
             }
         }
+    }
+
+    delete(attendance) {
+        if (!attendance.message) return;
+        this.deleteAttendance(attendance.message);
+        this.deleteAdvancedAttendance(attendance.message);
+        this.deleteOpenAttendance(attendance.message);
     }
 
     /**
@@ -1196,6 +1203,19 @@ class AttendanceManager {
      */
     fetchOpen(id) {
         return this.openEvents.get(id);
+    }
+
+    /**
+     * 
+     * @param {string} id 
+    */
+    fetchAny(id) {
+        var att = this.fetch(id);
+        if (att) return att;
+        att = this.fetchAdvanced(id);
+        if (att) return att;
+        att = this.fetchOpen(id);
+        return att;
     }
 
     getEvents() {

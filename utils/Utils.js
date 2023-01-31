@@ -1,4 +1,4 @@
-const { MessageEmbed, EmbedFieldData } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const formatFormalTime = require('./formatFormatTime');
 
 /**
@@ -9,7 +9,6 @@ class Embed {
     /**
      * @param {string} title 
      * @param {string} description 
-     * @param {EmbedFieldData[]} fields
      */
     static setInfo(title, description, fields) {
         const embed = new MessageEmbed();
@@ -17,7 +16,7 @@ class Embed {
         if (description) {
             embed.setDescription(description);
         }
-        if (fields || fields.length) {
+        if (fields && fields.length) {
             embed.addFields(fields);
         }
         console.log(embed);

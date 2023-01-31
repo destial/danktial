@@ -308,7 +308,7 @@ class AdvancedAttendance {
         });
 
         promise.then(() => {
-            this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Reset attendance ${this.embed.title}`);
+            this.client.manager.debug(`[ADATTENDANCE] Reset attendance ${this.embed.title}`);
             this.edit();
         });
     }
@@ -526,7 +526,7 @@ class AdvancedAttendance {
                 this.reminder.cancel();
             });
         }
-        this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Edited schedule for ${this.schedule.name} to ${new Date(fiveMinBefore).toString()}`);
+        this.client.manager.debug(`[ADATTENDANCE] Edited schedule for ${this.schedule.name} to ${new Date(fiveMinBefore).toString()}`);
         this.embed.spliceFields(0, 1, {
             name: "Date & Time", value: `[${dateString}](${formatDateURL(date)})`, inline: false
         });
@@ -613,7 +613,7 @@ class AdvancedAttendance {
                     }
                     this.server.getAttendanceManager().getAdvancedEvents().set(this.id, this);
                     Logger.boot(`[ADATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
-                    this.client.guilds.cache.get('406814017743486976').channels.cache.get('646237812051542036').send(`[ADATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
+                    this.client.manager.debug(`[ADATTENDANCE] Loaded ${this.embed.title} from ${this.server.guild.name}`);
                 }
             }
         }
