@@ -19,6 +19,7 @@ module.exports = {
             message.delete({ timeout: 1000 });
             const attendance = await server.getAttendanceManager().newAdvancedAttendance(client, server, message.member, message.channel);
             if (attendance) {
+                client.emit('serverUpdate', server);
                 server.log(`${message.member.user.tag} has created advancedattendance ${attendance.embed.title}`);
             }
         }

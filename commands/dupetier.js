@@ -7,7 +7,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'dupetier',
     aliases: ['copytier', 'duplicate-tier'],
-    usage: '[ existing tier name ]',
+    usage: '[tier]',
     description: 'Duplicates an existing tier with the same teams but without drivers',
     /**
      * @param {Discord.Client} client 
@@ -61,6 +61,7 @@ module.exports = {
                             newTier.saveTeams();
                             server.getTierManager().addTier(newTier);
                             server.getTierManager().tiers.sort((a, b) => a.name.localeCompare(b.name));
+                            client.emit('serverUpdate', server);
                             embed.setAuthor(`Successfully duplicated tier ${newTier.name} from ${existingTier.name}. Here are the teams:`);
                             var teamList = '';
                             newTier.teams.forEach(team => {

@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'cleartier',
     aliases: ['tierclear'],
-    usage: '[ tier name ]',
+    usage: '[tier]',
     description: 'Clears the drivers in a tier',
     /**
      * @param {Discord.Client} client 

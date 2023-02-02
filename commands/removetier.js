@@ -6,7 +6,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'removetier',
     aliases: ['deltier', 'deletetier'],
-    usage: '[ name ]',
+    usage: '[tier]',
     description: 'Deletes an existing tier',
     /**
      * @param {Discord.Client} client 

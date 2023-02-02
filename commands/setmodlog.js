@@ -4,7 +4,7 @@ const Server = require('../items/Server');
 module.exports = {
     name: 'setmodlog',
     aliases: ['modlogset'],
-    usage: '[ #mod-log ]',
+    usage: '[#mod-log]',
     description: 'Sets the mod-log channel',
     /**
      * @param {Discord.Client} client 

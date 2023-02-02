@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'resetattendance',
     aliases: ['fixattendance'],
-    usage: '[ id ]',
+    usage: '[attendance-id]',
     description: 'Resets an advancedattendance to all drivers having an unknown mark',
     /**
      * @param {Discord.Client} client 

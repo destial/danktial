@@ -4,6 +4,7 @@ const { Router } = require('express');
 const Team = require('../items/Team');
 const Race = require('../items/Race');
 const Tier = require('../items/Tier');
+const Server = require('../items/Server');
 const RaceResult = require('../items/RaceResult');
 const Driver = require('../items/Driver');
 const QualiResult = require('../items/QualiResult');
@@ -39,7 +40,10 @@ class ServerManager {
                     const server = this.servers.get(guildID);
                     if (server && req.headers.id) {
                         const members = await server.guild.members.fetch();
-                        const member = members.get(req.headers.id);
+                        var member = members.get(req.headers.id);
+                        if (req.headers.id === client.user.id) {
+                            if (!member) member = members.get(client.client2.user.id);
+                        }
                         if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             this.editServer(server, req);
                             return res.status(200).send({
@@ -66,7 +70,10 @@ class ServerManager {
                 const server = this.servers.get(guildID);
                 if (server && req.headers.id) {
                     const members = await server.guild.members.fetch();
-                    const member = members.get(req.headers.id);
+                    var member = members.get(req.headers.id);
+                    if (req.headers.id === client.user.id) {
+                        if (!member) member = members.get(client.client2.user.id);
+                    }
                     if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                         return res.send(server.toJSON());
                     }
@@ -87,7 +94,10 @@ class ServerManager {
                 if (server && req.headers.id) {
                     try {
                         const members = await server.guild.members.fetch();
-                        const member = members.get(req.headers.id);
+                        var member = members.get(req.headers.id);
+                        if (req.headers.id === client.user.id) {
+                            if (!member) member = members.get(client.client2.user.id);
+                        }
                         if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const array = [];
                             for (const member of server.guild.members.cache.values()) {
@@ -121,7 +131,10 @@ class ServerManager {
                 if (server && req.headers.id) {
                     try {
                         const members = await server.guild.members.fetch();
-                        const member = members.get(req.headers.id);
+                        var member = members.get(req.headers.id);
+                        if (req.headers.id === client.user.id) {
+                            if (!member) member = members.get(client.client2.user.id);
+                        }
                         if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const array = [];
                             for (const attendance of server.getAttendanceManager().getAdvancedEvents().values()) {
@@ -154,7 +167,10 @@ class ServerManager {
                 if (server && req.headers.id) {
                     try {
                         const members = await server.guild.members.fetch();
-                        const member = members.get(req.headers.id);
+                        var member = members.get(req.headers.id);
+                        if (req.headers.id === client.user.id) {
+                            if (!member) member = members.get(client.client2.user.id);
+                        }
                         if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const attendance = server.getAttendanceManager().fetchAdvanced(attendanceID);
                             if (attendance) {
@@ -190,7 +206,10 @@ class ServerManager {
                 if (server && req.headers.id) {
                     try {
                         const members = await server.guild.members.fetch();
-                        const member = members.get(req.headers.id);
+                        var member = members.get(req.headers.id);
+                        if (req.headers.id === client.user.id) {
+                            if (!member) member = members.get(client.client2.user.id);
+                        }
                         if (member) {
                             const attendance = server.getAttendanceManager().fetchAdvanced(attendanceID);
                             if (attendance) {
@@ -229,7 +248,10 @@ class ServerManager {
                 if (server && req.headers.id) {
                     try {
                         const members = await server.guild.members.fetch();
-                        const member = members.get(req.headers.id);
+                        var member = members.get(req.headers.id);
+                        if (req.headers.id === client.user.id) {
+                            if (!member) member = members.get(client.client2.user.id);
+                        }
                         if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const requestMember = members.get(memberID);
                             if (requestMember) {
@@ -264,7 +286,10 @@ class ServerManager {
                 if (server && req.headers.id) {
                     try {
                         const members = await server.guild.members.fetch();
-                        const member = members.get(req.headers.id);
+                        var member = members.get(req.headers.id);
+                        if (req.headers.id === client.user.id) {
+                            if (!member) member = members.get(client.client2.user.id);
+                        }
                         if (member && (member.hasPermission('MANAGE_CHANNELS') || client.user.id === member.id || client.client2.user.id === member.id)) {
                             const array = [];
                             for (const channel of server.guild.channels.cache.values()) {
@@ -340,6 +365,11 @@ class ServerManager {
         //}
     }
 
+    /**
+     * 
+     * @param {string} id 
+     * @returns {Promise<Server>}
+     */
     fetch(id) {
         return new Promise((resolve, reject) => {
             const server = this.servers.get(id);

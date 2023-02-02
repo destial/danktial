@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 
 module.exports = {
     name: 'settings',
-    usage: '[ ticket ] [ true/false ] ',
+    usage: '[ticket] [true/false] ',
     example: 'settings ticket false',
     description: 'Sets the server settings',
     /**

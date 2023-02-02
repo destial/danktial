@@ -6,7 +6,7 @@ const { timezoneNames } = require('../utils/timezones');
 module.exports = {
     name: 'calendar',
     aliases: [],
-    usage: '[ tier ]',
+    usage: '[tier]',
     description: 'Shows the race calendar for that tier',
     /**
      * @param {Discord.Client} client 

@@ -8,7 +8,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'addtier',
     aliases: ['newtier', 'createtier'],
-    usage: '[ name ]',
+    usage: '[name]',
     description: 'Creates a new tier',
     /**
      * @param {Discord.Client} client 
@@ -55,6 +55,7 @@ module.exports = {
                 });
                 server.getTierManager().addTier(tier);
                 server.getTierManager().tiers.sort((a, b) => a.name.localeCompare(b.name));
+                client.emit('serverUpdate', server);
                 embed.setAuthor(`Created tier ${name} with drivers:`);
                 var driverList = "";
                 tier.reserves.forEach(reserve => {

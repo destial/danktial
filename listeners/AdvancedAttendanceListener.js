@@ -5,16 +5,18 @@ const AdvancedAttendance = require('../items/AdvancedAttendance');
 module.exports = {
     async run(client, servers) {
         
-        client.on('clickButton', async(button) => {
+        client.on('interaction', async(button) => {
             try {
-                if (button.id.startsWith('advanced_') && button.clicker.member) {
-                    button.reply.defer();
-                    const server = await servers.fetch(button.clicker.member.guild.id);
+                if (!button.isButton()) return;
+
+                if (button.customId.startsWith('advanced_') && button.member) {
+                    button.deferReply();
+                    const server = await servers.fetch(button.member.guild.id);
                     if (!server) return;
                     const attendance = server.getAttendanceManager().fetchAdvanced(button.message.id);
                     if (attendance && !attendance.locked) {
-                        const type = button.id.substring('advanced_'.length);
-                        const driver = attendance.tier.getDriver(button.clicker.member.id);
+                        const type = button.customId.substring('advanced_'.length);
+                        const driver = attendance.tier.getDriver(button.member.id);
                         if (!driver) return;
                         switch(type) {
                             case 'accept': {

@@ -6,7 +6,7 @@ const parseQuotations = require('../utils/parseQuotations');
 module.exports = {
     name: 'removeteam',
     aliases: ['delteam', 'deleteteam'],
-    usage: '[ "team name" ] [ "tier name" ]',
+    usage: '["team"] ["tier"]',
     description: 'Deletes an existing team in a specific tier',
     /**
      * @param {Discord.Client} client 

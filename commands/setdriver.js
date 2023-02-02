@@ -8,7 +8,7 @@ const parseQuotations = require('../utils/parseQuotations');
 module.exports = {
     name: 'setdriver',
     aliases: ['set-driver', 'setupdriver'],
-    usage: '[ @driver "driver number" "tier name" "team name" ]',
+    usage: '<@driver> <"number"> <"tier"> <"team">',
     example: '@destiall "81" "Tier 1" "Alfa Romeo Sauber F1"',
     description: 'Adds a driver/reserve to an existing tier',
     /**

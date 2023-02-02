@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'setprefix',
     aliases: ['prefix'],
-    usage: '[ prefix ]',
+    usage: '[prefix]',
     description: 'Sets the command prefix',
     /**
      * @param {Discord.Client} client 

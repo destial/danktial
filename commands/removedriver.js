@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'removedriver',
     aliases: ['deldriver', 'deletedriver'],
-    usage: '[ @name ] [ tier name ]',
+    usage: '[@driver] [tier]',
     description: 'Deletes an existing driver in a specific tier',
     /**
      * @param {Discord.Client} client 

@@ -4,7 +4,7 @@ const isStaff = require('../utils/isStaff');
 
 module.exports = {
     name: 'driver',
-    usage: '[ set | remove | transfer ]',
+    usage: '[set|remove|transfer ]',
     description: `The main command for all driver setup`,
     /**
      * @param {Discord.Client} client 

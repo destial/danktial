@@ -8,6 +8,7 @@ const { Logger } = require('./utils/Utils');
 const formatDiscordRegion = require('./utils/formatDiscordRegion');
 const express = require('express');
 const { scheduleJob, RecurrenceRule } = require('node-schedule');
+
 const client = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
     intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MEMBERS', 'DIRECT_MESSAGES' ,'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'DIRECT_MESSAGE_REACTIONS', 'GUILD_BANS']
@@ -16,7 +17,6 @@ const client2 = new Discord.Client({
     partials: ["MESSAGE", "REACTION", "GUILD_MEMBER", "CHANNEL", "USER"],
     intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MEMBERS', 'DIRECT_MESSAGES' ,'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'DIRECT_MESSAGE_REACTIONS', 'GUILD_BANS']
 });
-// require('discord-buttons')(client, client2);
 
 client.client2 = client2;
 

@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'editteam',
     aliases: ['editt'],
-    usage: '[ team ]',
+    usage: '[team]',
     description: 'Edits an existing team',
     /**
      * @param {Discord.Client} client 
@@ -118,6 +118,7 @@ module.exports = {
                                     }
                                     const oldName = team.name;
                                     team.setName(updateName);
+                                    client.emit('serverUpdate', server);
                                     embed.setAuthor(`Edited team ${team.name} under tier ${tier.name} with drivers:`);
                                     var driverList1 = "";
                                     team.drivers.forEach(async driver => {

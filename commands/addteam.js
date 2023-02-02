@@ -8,7 +8,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'addteam',
     aliases: ['newteam', 'createteam'],
-    usage: '[ name ]',
+    usage: '[name]',
     description: 'Creates a new team',
     /**
      * @param {Discord.Client} client 
@@ -118,6 +118,7 @@ module.exports = {
                             promise.then(async () => {
                                 message.channel.send({ embeds: [embed] });
                                 team.save();
+                                client.emit('serverUpdate', server);
                                 server.getAttendanceManager().getAdvancedEvents().forEach(async event => {
                                     if (event.tier === tier) {
                                         const lastField = event.embed.fields[event.embed.fields.length - 1];

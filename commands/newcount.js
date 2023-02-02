@@ -5,7 +5,7 @@ const isStaff = require('../utils/isStaff');
 module.exports = {
     name: 'newcount',
     aliases: ['count', 'setcount'],
-    usage: '[ member | channel | role | all ]',
+    usage: '[member|channel|role|all]',
     description: 'Creates count channels',
     /**
      * @param {Discord.Client} client 

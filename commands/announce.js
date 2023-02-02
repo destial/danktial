@@ -7,7 +7,7 @@ const formatDiscordRegion = require('../utils/formatDiscordRegion');
 module.exports = {
     name: 'announce',
     aliases: ['backup', 'issue'],
-    usage: '[ title | description ]',
+    usage: '[title|description]',
     description: '*ONLY FOR BOT OWNER*',
     /**
      * @param {Discord.Client} client 

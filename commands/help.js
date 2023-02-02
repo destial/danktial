@@ -3,7 +3,7 @@ const Server = require('../items/Server');
 
 module.exports = {
     name: 'help',
-    usage: '< command >',
+    usage: '<command>',
     description: 'Displays the help command',
     /**
      * @param {Discord.Client} client 
@@ -46,8 +46,59 @@ module.exports = {
                 if (command.example) {
                     embed.addField('Example', `${server.prefix}${command.name} ${command.example}`, false);
                 }
-                message.channel.send({ embeds: [embed] });
+            } else {
+                embed.setAuthor('Command not found!');
             }
+            message.channel.send({ embeds: [embed] });
+        }
+    },
+
+    ephemeral: true,
+    /**
+     * 
+     * @param {Discord.Client} client 
+     * @param {Server} server 
+     * @param {Discord.CommandInteraction} interaction 
+     */
+    async interaction(client, server, interaction) {
+        const embed = new Discord.MessageEmbed();
+        embed.setColor('RED');
+        const desc = [];
+        const list = new Discord.Collection();
+        client.commands.forEach(k => {
+            const has = list.find(c => c === k);
+            if (!has) {
+                if (k.name !== 'announce') {
+                    list.set(k.name, k);
+                    desc.push(k.description);
+                }
+            } 
+        });
+        const commands = [...list.keys()];
+        const args = interaction.options.getString("command", false);
+        if (!args) {
+            embed.setAuthor('Here are the available commands:');
+            var help = "";
+            for (var i = 0; i < commands.length; i++) {
+                help += ("`" + server.prefix+commands[i] + "` => " + desc[i] + '\n');
+            }
+            embed.setDescription(help);
+            interaction.editReply({ embeds: [embed] });
+        } else {
+            const command = list.get(args.toLowerCase());
+            if (command) {
+                embed.setAuthor('Usage for this command is:');
+                embed.setDescription(`${server.prefix}${command.name} ${command.usage}`);
+                if (command.aliases && command.aliases.length) {
+                    embed.addField('Aliases', command.aliases.join(', '), false);
+                }
+                if (command.example) {
+                    embed.addField('Example', `${server.prefix}${command.name} ${command.example}`, false);
+                } 
+            } else {
+                embed.setAuthor('Command not found!');
+            }
+            await interaction.editReply({ embeds: [embed] });
         }
     }
 };

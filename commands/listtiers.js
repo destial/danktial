@@ -4,7 +4,7 @@ const Server = require('../items/Server');
 module.exports = {
     name: 'tiers',
     aliases: ['listtier', 'alltiers', 'listtiers'],
-    usage: '< name >',
+    usage: '<name>',
     description: 'Lists all the tiers',
     /**
      * @param {Discord.Client} client 

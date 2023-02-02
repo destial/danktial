@@ -7,7 +7,7 @@ const parseQuotations = require('../utils/parseQuotations');
 module.exports = {
     name: 'poll',
     aliases: ['vote'],
-    usage: `"What's Your Favorite Color?" "Blue" "Red" "Yellow"`,
+    usage: '["question"] ["choice"] <"choice">...',
     description: 'Creates a poll',
     /**
      * @param {Discord.Client} client 
